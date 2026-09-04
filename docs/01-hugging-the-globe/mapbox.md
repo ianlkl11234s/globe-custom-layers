@@ -73,6 +73,29 @@ hEcef = mercatorZ * 8192 * cos(latitude)
 
 Store the resulting ECEF position as a vertex attribute at buffer-build time. Doing it per frame means running `sin`/`cos`/`exp`/`atan` for every vertex, every frame, which is exactly the cost you are trying to avoid.
 
+### Unless your geometry moves — then do it in the shader
+
+Precomputing only works when a vertex stays at the same place on Earth. Particles in a flow field, or a trail whose points advance every frame, have no fixed position to precompute. For those, derive ECEF inside the vertex shader from the mercator coordinate you already have:
+
+```glsl
+// merc: mercator unit coordinates, x and y in [0,1] — the position you just moved
+float lngRad = (merc.x - 0.5) * 2.0 * PI;
+float latRad = 2.0 * atan(exp(PI * (1.0 - 2.0 * merc.y))) - PI * 0.5;  // inverse Mercator
+float cosLat = cos(latRad);
+vec3 dir  = vec3(cosLat * sin(lngRad), -sin(latRad), cosLat * cos(lngRad));
+vec3 ecef = dir * GLOBE_RADIUS;   // surface-bound; add a radial factor if you need altitude
+```
+
+Everything downstream is identical — same `uGlobeToMerc` multiply, same blend, same ECEF-space cull using `dir` as the normal, same early-out.
+
+|  | Static geometry | Moving geometry |
+|---|---|---|
+| Where ECEF comes from | CPU, once, as a vertex attribute | Vertex shader, every frame |
+| Cost | Paid at buffer build | Four transcendentals per vertex per frame |
+| Examples | Airports, fixed routes, station markers | Flow-field particles, advancing trails |
+
+The per-frame cost is real but bounded, and the early-out means you pay none of it once the map is flat. A production ocean-current layer runs this path in raw WebGL2 — no Three.js — which is worth noting on its own: **the recipe is not Three.js-specific.** Anything that can write a vertex shader and read the render arguments can hug the globe.
+
 ## Step 2: blend in the vertex shader
 
 The whole projection change is four lines, and it leaves your CPU-side geometry untouched:
