@@ -19,7 +19,7 @@ You need your own token. None is committed here, and none will be.
 
 | Example | Recipe | Status |
 |---|---|---|
-| [`globe-hugging-points`](globe-hugging-points/) | [1.1 Hugging the globe: Mapbox](../docs/01-hugging-the-globe/mapbox.md) | Builds clean, 13/13 unit tests on the projection maths; **visual verification pending** |
+| [`globe-hugging-points`](globe-hugging-points/) | [1.1 Hugging the globe: Mapbox](../docs/01-hugging-the-globe/mapbox.md) | 🔬 Builds clean · 13/13 unit tests · visually verified at `transition` 0.00 / 0.24 / 1.00 |
 
 ## Sample data
 

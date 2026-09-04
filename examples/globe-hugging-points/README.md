@@ -1,6 +1,18 @@
 # globe-hugging-points
 
-> Status: builds and unit-tested; **visual verification pending** — run it with your own token.
+> Status: 🔬 **Reproduced** — builds clean, 13/13 unit tests on the projection maths, and visually verified end to end (screenshots below, taken from this example at `mapbox-gl` 3.18.1).
+
+![Airports hugging the globe at zoom 1.3](screenshots/globe.png)
+
+The whole recipe in three states, captured from the running example:
+
+| Zoom | `projection` | `transition` | What it shows |
+|---|---|---|---|
+| 1.30 | `globe` | `0.00` | Points sit **on** the sphere. The far side is culled — no ghost light bleeding through the planet's core. Coastal chains compress into bright arcs at the limb, which is the geometry being correct, not a bug. |
+| 5.32 | `globe` | `0.24` | Mid-blend. Points stay registered on Niamey, Kano, Kaduna, Maiduguri, N'Djamena, Abuja while the projection is still partly spherical — this is what the `mix()` in the vertex shader is for. |
+| 7.33 | `mercator` | `1.00` | Fully flat. The early-out kicks in and the layer costs exactly what a non-globe layer costs. |
+
+<img src="screenshots/transition.png" alt="Mid-transition at zoom 5.32, transition 0.24" width="49%"> <img src="screenshots/mercator.png" alt="Flat mercator at zoom 7.33" width="49%">
 
 Glowing airport points on a Mapbox GL JS globe, using a Three.js `CustomLayerInterface`. Points hug the sphere at low zoom and blend smoothly back to flat Web Mercator as you zoom in past z5–z6. This is the runnable companion to [1.1 Hugging the globe: Mapbox GL JS](../../docs/01-hugging-the-globe/mapbox.md) — the code here follows that document step for step; if you find a place where they disagree, the doc is what's wrong (please open an issue).
 

@@ -1,6 +1,6 @@
 # 1.1 Hugging the globe: Mapbox GL JS
 
-> **Status:** 📋 Reported — running in production. The projection maths is unit-tested in [`examples/globe-hugging-points`](../../examples/globe-hugging-points/); visual confirmation of that example is still pending, so this page is not yet marked ✅.
+> **Status:** ✅ Verified — running in production, and reproduced in [`examples/globe-hugging-points`](../../examples/globe-hugging-points/): 13/13 unit tests on the projection maths, plus visual confirmation of all three states (sphere at `transition` 0.00, mid-blend at 0.24 with points still correctly registered, flat mercator at 1.00).
 > **Applies to:** `mapbox-gl` 3.x. The source projects declare `^3.9.0`; the behaviour described here was observed at **3.18.1**. None of it is part of a public API contract, so pin a version and re-check on upgrade.
 
 ## The symptom
