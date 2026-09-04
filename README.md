@@ -95,4 +95,6 @@ Nothing here is marked higher than it has earned. If you hit something that cont
 
 ## Provenance
 
-These recipes were extracted from four production visualisation projects: a global flight-trajectory explorer, a multi-modal live map of Taiwan, a satellite orbit tracker, and a rail transit simulator. The bugs were expensive the first time. They should be cheap for you.
+These recipes were extracted from two production visualisation projects: a global flight-trajectory explorer rendering tens of thousands of arcs on a globe, and a multi-modal live map of Taiwan running several dozen data layers. Each page's **Source** section names the files it came from.
+
+The bugs were expensive the first time. They should be cheap for you.
