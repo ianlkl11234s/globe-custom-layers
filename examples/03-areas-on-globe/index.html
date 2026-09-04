@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Areas on the globe</title>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.18.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body,
+      #map {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        background: #0b0d12;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      #hud {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 1;
+        background: rgba(10, 12, 18, 0.78);
+        color: #eee;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        min-width: 240px;
+        backdrop-filter: blur(4px);
+      }
+      #hud h1 {
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0 0 8px;
+        color: #fff;
+      }
+      #hud .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 4px 0;
+      }
+      #hud label {
+        display: block;
+        margin-top: 10px;
+        color: #9aa4b2;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      #hud input[type="range"] {
+        width: 100%;
+      }
+      #hud select {
+        width: 100%;
+        margin-top: 4px;
+        background: #1c2230;
+        color: #eee;
+        border: 1px solid #2c3446;
+        border-radius: 4px;
+        padding: 4px 6px;
+        font-size: 12px;
+      }
+      #hud .legend {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #9aa4b2;
+      }
+      #hud .legend .swatch {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 6px;
+      }
+
+      #token-warning {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: #0b0d12;
+        color: #eee;
+        text-align: center;
+        padding: 24px;
+      }
+      #token-warning.visible {
+        display: flex;
+      }
+      #token-warning .box {
+        max-width: 480px;
+      }
+      #token-warning code {
+        background: #1c2230;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      #token-warning a {
+        color: #6cb6ff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div id="hud">
+      <h1>Areas on the globe</h1>
+      <div class="row"><span>zoom</span><span id="zoom-value">--</span></div>
+      <div class="row"><span>projection</span><span id="projection-value">--</span></div>
+      <div class="row"><span>transition</span><span id="transition-value">--</span></div>
+
+      <label for="segments">segments per edge <span id="segments-value"></span></label>
+      <input id="segments" type="range" min="1" max="64" step="1" value="32" />
+
+      <label for="radius-km">circle radius (km) <span id="radius-km-value"></span></label>
+      <input id="radius-km" type="range" min="100" max="3000" step="50" value="500" />
+
+      <label for="shape-mode">shapes shown</label>
+      <select id="shape-mode">
+        <option value="both" selected>circles + bbox</option>
+        <option value="circles">circles only</option>
+        <option value="bbox">bbox only</option>
+      </select>
+
+      <div class="legend">
+        <div><span class="swatch" style="background:#4fc3f7"></span>circle, equator (lat 0)</div>
+        <div><span class="swatch" style="background:#ffb74d"></span>circle, mid-latitude (lat 45)</div>
+        <div><span class="swatch" style="background:#ef5350"></span>circle, near-polar (lat 85)</div>
+        <div><span class="swatch" style="background:#ab47bc"></span>lat/lon bbox (40&deg;&times;25&deg;)</div>
+      </div>
+    </div>
+
+    <div id="token-warning">
+      <div class="box">
+        <p>
+          No Mapbox access token found. Copy <code>.env.example</code> to <code>.env</code>,
+          set <code>VITE_MAPBOX_TOKEN</code> to a token from your
+          <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noreferrer"
+            >Mapbox account</a
+          >, then restart <code>npm run dev</code>.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

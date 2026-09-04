@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Native vs custom layers</title>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.18.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body,
+      #map {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        background: #0b0d12;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      #panel {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 1;
+        background: rgba(10, 12, 18, 0.82);
+        color: #eee;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        width: 320px;
+        backdrop-filter: blur(4px);
+      }
+      #panel h1 {
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0 0 8px;
+        color: #fff;
+      }
+      #panel .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 4px 0;
+      }
+      #panel .row .value {
+        font-variant-numeric: tabular-nums;
+        color: #9fd3ff;
+      }
+
+      #mode-switch {
+        display: flex;
+        gap: 4px;
+        margin: 10px 0 4px;
+      }
+      #mode-switch button {
+        flex: 1;
+        background: #1c2230;
+        border: 1px solid #2c3547;
+        color: #cdd6e4;
+        padding: 6px 4px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      #mode-switch button:hover {
+        background: #242c3d;
+      }
+      #mode-switch button.active {
+        background: #3a6fd1;
+        border-color: #4d82e6;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      #loc-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0 4px;
+        font-size: 12px;
+      }
+      #loc-table th,
+      #loc-table td {
+        text-align: left;
+        padding: 3px 4px;
+        border-bottom: 1px solid #232a38;
+      }
+      #loc-table th {
+        color: #9aa4b2;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        font-size: 10px;
+      }
+      #loc-table td.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        color: #9fd3ff;
+      }
+
+      #click-info {
+        margin-top: 10px;
+        padding: 8px 9px;
+        background: #151a24;
+        border: 1px solid #232a38;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #cdd6e4;
+        min-height: 34px;
+      }
+      #click-info.custom-blind {
+        border-color: #6b3a3a;
+        color: #ffb4b4;
+      }
+      #click-info.native-hit {
+        border-color: #3a6b47;
+        color: #b4ffcb;
+      }
+
+      #token-warning {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: #0b0d12;
+        color: #eee;
+        text-align: center;
+        padding: 24px;
+      }
+      #token-warning.visible {
+        display: flex;
+      }
+      #token-warning .box {
+        max-width: 480px;
+      }
+      #token-warning code {
+        background: #1c2230;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      #token-warning a {
+        color: #6cb6ff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div id="panel">
+      <h1>Native vs custom layers</h1>
+      <div class="row"><span>mode</span><span class="value" id="mode-value">--</span></div>
+      <div class="row"><span>zoom</span><span class="value" id="zoom-value">--</span></div>
+      <div class="row"><span>projection</span><span class="value" id="projection-value">--</span></div>
+      <div class="row"><span>transition</span><span class="value" id="transition-value">--</span></div>
+
+      <div id="mode-switch">
+        <button data-mode="native" id="mode-btn-native">native</button>
+        <button data-mode="custom" id="mode-btn-custom">custom</button>
+        <button data-mode="both" id="mode-btn-both">both</button>
+      </div>
+
+      <table id="loc-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>native circle</th>
+            <th>custom Three.js</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>lines of code</td>
+            <td class="num" id="native-loc"></td>
+            <td class="num" id="custom-loc"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div id="click-info">Click a point on the map to see the difference.</div>
+    </div>
+
+    <div id="token-warning">
+      <div class="box">
+        <p>
+          No Mapbox access token found. Copy <code>.env.example</code> to <code>.env</code>,
+          set <code>VITE_MAPBOX_TOKEN</code> to a token from your
+          <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noreferrer"
+            >Mapbox account</a
+          >, then restart <code>npm run dev</code>.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

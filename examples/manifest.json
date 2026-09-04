@@ -1,0 +1,174 @@
+{
+  "$comment": "Machine-readable index of the examples. Written for agents deciding which example to copy. Human version: ./README.md",
+  "version": 1,
+  "generated": "2026-09-05",
+  "checkedAgainst": {
+    "mapbox-gl": "3.18.1",
+    "three": "0.172.0",
+    "node": "23.10.0"
+  },
+  "conventions": {
+    "selfContained": "Each example has its own package.json and node_modules and imports nothing outside its own folder. Duplicated files between examples are intentional. Copy a whole folder rather than importing across.",
+    "token": "Every example reads import.meta.env.VITE_MAPBOX_TOKEN and ships a .env.example. No token is committed. A missing token shows a message rather than crashing.",
+    "acceptance": "npx tsc --noEmit && npx vitest run && npm run build passes in every example.",
+    "statusMarkers": {
+      "verified": "Runs in production and is reproduced by an example here",
+      "reproduced": "Reproduced by an example here",
+      "reported": "Runs in production, not reproduced here",
+      "unverified": "Reasoned from source or typings, never run"
+    }
+  },
+  "examples": [
+    {
+      "id": "00-native-vs-custom",
+      "path": "examples/00-native-vs-custom/",
+      "title": "Native circle layer vs custom Three.js layer",
+      "settles": "Whether you need a custom layer at all. The same airports rendered both ways, switchable, with the hit-testing difference made visible.",
+      "readFirst": "docs/00-start-here/decision-tree.md",
+      "implements": ["docs/00-start-here/decision-tree.md"],
+      "status": "reproduced",
+      "tests": 20,
+      "screenshot": "examples/00-native-vs-custom/screenshots/globe.png",
+      "usesApis": [
+        "map.addLayer({type:'circle'})",
+        "map.queryRenderedFeatures",
+        "map.setLayoutProperty(id,'visibility')",
+        "mapboxgl.Popup",
+        "CustomLayerInterface"
+      ],
+      "knobs": [
+        { "id": "mode", "type": "enum", "values": ["native", "custom", "both"], "default": "both", "effect": "Which layer is shown. 'both' proves the two render at identical positions." }
+      ],
+      "teaches": [
+        "Native layers project onto the globe by themselves; custom layers do not.",
+        "queryRenderedFeatures sees native layers only — clicking the custom layer returns nothing, by design and with no workaround.",
+        "CustomLayerInterface types source, layout, minzoom and maxzoom as never: no data-driven styling, no visibility toggle, no declarative zoom range."
+      ],
+      "data": { "source": "OurAirports", "licence": "public domain", "file": "public/airports.json", "records": 1174 }
+    },
+    {
+      "id": "01-points-on-globe",
+      "path": "examples/01-points-on-globe/",
+      "title": "Glowing points that hug the globe",
+      "settles": "The core projection recipe plus the spark/glow shader. The flagship example — start here.",
+      "readFirst": "docs/01-hugging-the-globe/mapbox.md",
+      "implements": [
+        "docs/01-hugging-the-globe/mapbox.md",
+        "docs/02-effects/spark-points.md",
+        "docs/04-discipline/zoom-adaptive-sizing.md"
+      ],
+      "status": "reproduced",
+      "tests": 13,
+      "screenshot": "examples/01-points-on-globe/screenshots/globe.png",
+      "usesApis": [
+        "CustomLayerInterface.render(gl, matrix, projection, projectionToMercatorMatrix, projectionToMercatorTransition)",
+        "mapboxgl.MercatorCoordinate.fromLngLat",
+        "map.getFreeCameraOptions",
+        "THREE.Points",
+        "THREE.ShaderMaterial"
+      ],
+      "knobs": [
+        { "id": "size-mul", "type": "number", "min": 0.2, "max": 3, "step": 0.05, "default": 1, "effect": "Global multiplier on gl_PointSize." },
+        { "id": "opacity", "type": "number", "min": 0.1, "max": 1, "step": 0.05, "default": 0.9, "effect": "Layer alpha before additive blending." },
+        { "id": "core-boost", "type": "number", "min": 0, "max": 1, "step": 0.05, "default": 0.7, "effect": "How far each point's centre is pushed toward white. 0 keeps the source colour; high values read as a light source." }
+      ],
+      "teaches": [
+        "The render arguments the public typings under-document, and what each is for.",
+        "Precomputing ECEF per vertex, and blending sphere to plane with a four-line mix() in the vertex shader.",
+        "Why every material needs depthTest:false in globe projection, and why the far side must then be culled in ECEF space.",
+        "Three-band radial halo plus additive blending as a substitute for post-process bloom."
+      ],
+      "verifiedStates": [
+        { "zoom": 1.30, "projection": "globe", "transition": 0.0, "note": "on the sphere, far side culled" },
+        { "zoom": 5.32, "projection": "globe", "transition": 0.24, "note": "mid-blend, points still registered on their cities" },
+        { "zoom": 7.33, "projection": "mercator", "transition": 1.0, "note": "flat, early-out active" }
+      ],
+      "data": { "source": "OurAirports", "licence": "public domain", "file": "public/airports.json", "records": 1174 }
+    },
+    {
+      "id": "02-arcs-on-globe",
+      "path": "examples/02-arcs-on-globe/",
+      "title": "Great-circle arcs, and why lines cut through the planet",
+      "settles": "Lines spanning long distances. Subdivision is the subject: the slider goes down to 2 so the failure is reproducible on demand.",
+      "readFirst": "docs/01-hugging-the-globe/mapbox.md",
+      "implements": ["docs/01-hugging-the-globe/mapbox.md"],
+      "status": "reproduced",
+      "tests": 35,
+      "screenshot": "examples/02-arcs-on-globe/screenshots/globe.png",
+      "usesApis": ["CustomLayerInterface", "THREE.LineSegments", "mapboxgl.MercatorCoordinate.fromLngLat"],
+      "knobs": [
+        { "id": "segments", "type": "integer", "min": 2, "max": 128, "default": 24, "effect": "Vertices per arc, not segments per arc. At 2 each arc is a chord straight through the planet — that is the bug this example exists to show." },
+        { "id": "arc-height", "type": "number", "min": 0, "max": 0.08, "step": 0.002, "default": 0.02, "effect": "Peak radial offset at the arc midpoint. Real cruising altitude is about 0.16% of Earth's radius and invisible; this is deliberate exaggeration." }
+      ],
+      "teaches": [
+        "Vertices are projected, the segments between them are not. Subdivide anything spanning distance.",
+        "Use slerp, not linear interpolation of lon/lat: linear interpolation does not jump, it smoothly goes the wrong way round.",
+        "Antipodal pairs need a separate branch (Rodrigues rotation) to avoid dividing by sin(pi).",
+        "MercatorCoordinate.fromLngLat is not periodic, so longitude must be resolved per segment, not per vertex."
+      ],
+      "counts": { "arcs": 190, "verticesAtDefault": 8740 },
+      "data": { "source": "OurAirports", "licence": "public domain", "note": "20 hand-picked hubs; the 190 O-D pairs are synthetic, not real routes." }
+    },
+    {
+      "id": "03-areas-on-globe",
+      "path": "examples/03-areas-on-globe/",
+      "title": "Filled areas and outlines on a sphere",
+      "settles": "Polygons, coverage circles and bounding boxes. Also: a fixed-radius circle is a small circle on a sphere and looks different at every latitude.",
+      "readFirst": "docs/01-hugging-the-globe/mapbox.md",
+      "implements": ["docs/01-hugging-the-globe/mapbox.md"],
+      "status": "reproduced",
+      "tests": 15,
+      "screenshot": "examples/03-areas-on-globe/screenshots/globe.png",
+      "usesApis": ["CustomLayerInterface", "THREE.Mesh", "THREE.LineLoop", "THREE.BufferGeometry"],
+      "knobs": [
+        { "id": "segments", "type": "integer", "min": 1, "max": 64, "default": 32, "effect": "Subdivision per edge. Low values turn circles into visible polygons and bbox edges into chords." },
+        { "id": "radius-km", "type": "integer", "min": 100, "max": 3000, "step": 50, "default": 500, "effect": "Geodesic radius of all three demo circles. Above the distance to the pole, the near-polar circle wraps the pole and its boundary appears on the opposite meridian." },
+        { "id": "shape-mode", "type": "enum", "values": ["circles + bbox", "circles only", "bbox only"], "default": "circles + bbox", "effect": "Which generators are drawn." }
+      ],
+      "teaches": [
+        "Polygon edges are chords too — subdivide them like any other line.",
+        "A geodesic circle is a small circle; its screen shape varies with latitude and viewing angle.",
+        "asin() needs clamping near the pole: floating point can push its argument past 1 and return NaN.",
+        "At a few hundred vertices you do not need a shader — projecting on the CPU each frame is easier to read and costs nothing measurable."
+      ],
+      "limitations": [
+        "Fan triangulation only, so concave polygons and holes are not supported (no earcut dependency).",
+        "Bounding boxes crossing the antimeridian interpolate the long way round; not detected, not split.",
+        "A circle large enough to enclose a pole will self-intersect under fan triangulation."
+      ],
+      "data": { "source": "generated at runtime", "licence": "n/a" }
+    },
+    {
+      "id": "04-moving-trajectory",
+      "path": "examples/04-moving-trajectory/",
+      "title": "Objects moving along paths, with timeline playback",
+      "settles": "Geometry whose position changes every frame — the branch where ECEF cannot be precomputed and must be derived in the vertex shader.",
+      "readFirst": "docs/01-hugging-the-globe/mapbox.md#unless-your-geometry-moves--then-do-it-in-the-shader",
+      "implements": ["docs/01-hugging-the-globe/mapbox.md", "docs/03-scaling-up/batched-trails.md"],
+      "status": "reproduced",
+      "tests": 41,
+      "screenshot": "examples/04-moving-trajectory/screenshots/globe.png",
+      "usesApis": ["CustomLayerInterface", "THREE.Points", "BufferAttribute.addUpdateRange", "map.triggerRepaint"],
+      "knobs": [
+        { "id": "objects", "type": "integer", "min": 1, "max": 50, "default": 30, "effect": "Active object count via setDrawRange. Capacity is fixed at 50; objects are never created or destroyed." },
+        { "id": "trail-length", "type": "integer", "min": 10, "max": 150, "default": 80, "effect": "Fade window in the shader, not ring-buffer capacity. Capacity is fixed at 150 samples." },
+        { "id": "speed", "type": "number", "min": 0.1, "max": 4, "step": 0.1, "default": 1, "effect": "Simulation time multiplier." },
+        { "id": "size-mul", "type": "number", "min": 0.2, "max": 3, "step": 0.05, "default": 1, "effect": "Head point size multiplier." },
+        { "id": "opacity", "type": "number", "min": 0.1, "max": 1, "step": 0.05, "default": 0.9, "effect": "Layer alpha." },
+        { "id": "scrubber", "type": "number", "min": 0, "max": 100, "step": 0.1, "default": 0, "effect": "Timeline position as a percentage. Scrubbing backwards is supported: position is a pure function of time, not accumulated state." }
+      ],
+      "teaches": [
+        "Deriving ECEF in the vertex shader with an inverse Mercator, for vertices that have no fixed position to precompute.",
+        "Six transcendental calls per vertex per frame is the cost, and the transition early-out means you pay none of it on a flat map.",
+        "Ring-buffer trails indexed by simulation tick, so scrubbing backwards is deterministic.",
+        "Uploading only the changed range of a buffer instead of rebuilding the geometry."
+      ],
+      "limitations": [
+        "Trails are point clouds rather than continuous lines, which sidesteps the guard-vertex problem in docs/03-scaling-up/batched-trails.md.",
+        "Trail vertices are frozen once written but still take the shader-derivation path every frame; the production optimisation is to precompute them on write.",
+        "No object eviction — a scenario with a changing population needs the min-heap approach in docs/03-scaling-up/batched-trails.md."
+      ],
+      "data": { "source": "generated at runtime, fixed seed", "licence": "n/a" }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+# Globe Custom Layers
+
+> A cookbook for rendering your own geometry — Three.js scenes, hand-written WebGL, particle systems, tens of thousands of animated objects — on a Mapbox or MapLibre map in globe projection, so it sits on the sphere instead of floating beside it on a flat plane. Docs plus standalone runnable examples; not a library, nothing to install.
+
+Checked against `mapbox-gl` 3.18.1, `maplibre-gl` 5.24.0, `three` 0.172.0. Several recipes rest on behaviour that is not a public API contract, so pin versions.
+
+Read [AGENTS.md](AGENTS.md) first: it carries the scope boundary, the task-to-recipe routing table, and the rules for using this code. Then [the decision tree](docs/00-start-here/decision-tree.md), which will often tell you that a native layer does what you need and that none of the rest applies.
+
+Every recipe opens with a verification marker — Verified, Reproduced, Reported, Unverified. Honour it. Do not present an Unverified page to a user as fact.
+
+## Start here
+
+- [AGENTS.md](AGENTS.md): Entry point. Scope, what is deliberately not covered and where to go instead, task routing, status markers, conventions.
+- [Decision tree](docs/00-start-here/decision-tree.md): Five ordered questions. Most importantly the first — whether a native layer already does this, in which case stop.
+
+## Hugging the globe
+
+- [Mapbox GL JS](docs/01-hugging-the-globe/mapbox.md): The render arguments the typings under-document, the ECEF maths, why every material needs depthTest:false, ECEF-space backface culling, subdivision, and the static-versus-moving fork for where ECEF comes from.
+- [MapLibre GL JS](docs/01-hugging-the-globe/maplibre.md): What MapLibre provides officially (projectTile prelude, clippingPlane, projectionTransition), what its three official examples do and do not cover, and an unverified hypothesis for porting the Three.js path.
+- [Porting between the two](docs/01-hugging-the-globe/porting.md): Measured difference table. The projection-transition coefficient runs in opposite directions; read before porting anything.
+
+## Effects
+
+- [Spark points](docs/02-effects/spark-points.md): Glowing points without post-processing — three-band radial halo, additive blending, white core, size mapping, and the point-size ceiling the driver imposes silently.
+
+## Scaling up
+
+- [Batched trails](docs/03-scaling-up/batched-trails.md): Thousands of moving polylines in one draw call — slot allocation, guard vertices, partial buffer uploads, min-heap eviction.
+- [Instanced tracks](docs/03-scaling-up/instanced-tracks.md): InstancedMesh with per-instance attributes the built-in materials do not expose, via onBeforeCompile and customProgramCacheKey.
+- [Vector field particles](docs/03-scaling-up/vector-field-particles.md): Wind and ocean currents in raw WebGL2. Opens by checking whether Mapbox's native raster-particle layer fits first.
+- [Finding the actual bottleneck](docs/03-scaling-up/debugging-performance.md): A case study in being wrong three times before measuring, and five debugging lessons that generalise.
+
+## Discipline
+
+- [Zoom-adaptive sizing](docs/04-discipline/zoom-adaptive-sizing.md): Screen-space sizes are decoupled from zoom, so glow eats the viewport when you fly out.
+- [Depth and blending](docs/04-discipline/depth-and-blending.md): Once depthTest is off you own paint order. Additive blending hides the resulting bug; normal blending exposes it.
+- [Sharing a WebGL context](docs/04-discipline/shared-gl-context.md): State save and restore, disposal, and why two renderers on one context go black with no error.
+- [GLSL gotchas](docs/04-discipline/glsl-gotchas.md): Failures that are silent — no error, no crash, just a wrong answer.
+
+## Examples
+
+- [Example manifest](examples/manifest.json): Machine-readable index — what each example settles, which recipes it implements, which APIs it uses, every knob with range/default/effect, what it teaches, known limitations, data provenance. Start here rather than opening each README.
+- [Example index](examples/README.md): The same list for humans, plus how to run them and what sample data they use.
+- [01-points-on-globe](examples/01-points-on-globe/): The flagship. Glowing airports on a globe, visually verified at transition 0.00, 0.24 and 1.00.
+- [00-native-vs-custom](examples/00-native-vs-custom/): Whether you need a custom layer at all — both approaches on the same data, including the hit-testing difference.
+- [02-arcs-on-globe](examples/02-arcs-on-globe/): Great-circle arcs, with a subdivision slider that reproduces the chord-through-the-planet failure on demand.
+- [03-areas-on-globe](examples/03-areas-on-globe/): Filled areas and outlines; a fixed-radius circle looks different at every latitude.
+- [04-moving-trajectory](examples/04-moving-trajectory/): Moving geometry — ECEF derived in the vertex shader — with timeline scrubbing.
+
+## Optional
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): The verification ladder and what earns a page. Useful if you are adding to this repo rather than building with it.
+- [README.md](README.md): The human-facing introduction. AGENTS.md covers the same ground more usefully for you.

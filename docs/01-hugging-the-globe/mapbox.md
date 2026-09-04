@@ -1,6 +1,6 @@
 # 1.1 Hugging the globe: Mapbox GL JS
 
-> **Status:** ✅ Verified — running in production, and reproduced in [`examples/globe-hugging-points`](../../examples/globe-hugging-points/): 13/13 unit tests on the projection maths, plus visual confirmation of all three states (sphere at `transition` 0.00, mid-blend at 0.24 with points still correctly registered, flat mercator at 1.00).
+> **Status:** ✅ Verified — running in production, and reproduced in [`examples/01-points-on-globe`](../../examples/01-points-on-globe/): 13/13 unit tests on the projection maths, plus visual confirmation of all three states (sphere at `transition` 0.00, mid-blend at 0.24 with points still correctly registered, flat mercator at 1.00).
 > **Applies to:** `mapbox-gl` 3.x. The source projects declare `^3.9.0`; the behaviour described here was observed at **3.18.1**. None of it is part of a public API contract, so pin a version and re-check on upgrade.
 
 ## The symptom
@@ -27,6 +27,25 @@ That is accurate as a statement about supported API surface. It is not, however,
 ### One thing to fix before you start
 
 Vertices get projected; the segments between them do not. **A straight line between two distant points is a chord, not an arc** — it will cut through the planet no matter how correct both endpoints are. If your geometry has long spans, subdivide it into enough intermediate vertices that each segment is short relative to the sphere's curvature. Nothing in the library does this for you. Dense sampled data (a flight track, a GPS trace) already satisfies this by accident; a two-point great-circle arc does not.
+
+### And a second one, if anything crosses the antimeridian
+
+`MercatorCoordinate.fromLngLat` converts longitude with `(180 + lng) / 360`. That formula **is not periodic**: −179° and +181° describe the same meridian but land at opposite edges of mercator space.
+
+So if you wrap each vertex independently into (−180, 180], any segment spanning the antimeridian gets drawn as a line straight across the entire flat map. This is a **third**, independent cause of "my line goes somewhere insane", and it looks nothing like the other two on a globe but exactly like them on a flat map.
+
+Resolve longitude **per segment, not per vertex**: unwrap the second endpoint relative to the first and let it sit outside ±180° if that is the shorter way round.
+
+```ts
+// prev is already resolved; bring next into the same continuous frame
+let lng = next.lng;
+while (lng - prev.lng >  180) lng -= 360;
+while (lng - prev.lng < -180) lng += 360;
+```
+
+Out-of-range longitudes are legitimate input here — Mapbox's own [`LngLat`](https://docs.mapbox.com/mapbox-gl-js/api/geography/#lnglat) documentation uses 286° in its examples, and `.wrap()` is an opt-in method rather than something applied for you.
+
+**Three separate causes, one family of symptoms:** geometry cutting through the planet (subdivision), geometry vanishing entirely (depth or backface culling, [steps 3–4](#step-3-turn-off-depth-testing-this-is-the-surprising-part)), and geometry streaking across the map (antimeridian wrapping). Fixing the wrong one is the default outcome if you diagnose by appearance alone.
 
 ## The undocumented render arguments
 
@@ -84,12 +103,20 @@ Store the resulting ECEF position as a vertex attribute at buffer-build time. Do
 Precomputing only works when a vertex stays at the same place on Earth. Particles in a flow field, or a trail whose points advance every frame, have no fixed position to precompute. For those, derive ECEF inside the vertex shader from the mercator coordinate you already have:
 
 ```glsl
+const float PI = 3.141592653589793;   // GLSL has no built-in PI — declare it or this won't compile
+
 // merc: mercator unit coordinates, x and y in [0,1] — the position you just moved
 float lngRad = (merc.x - 0.5) * 2.0 * PI;
 float latRad = 2.0 * atan(exp(PI * (1.0 - 2.0 * merc.y))) - PI * 0.5;  // inverse Mercator
 float cosLat = cos(latRad);
 vec3 dir  = vec3(cosLat * sin(lngRad), -sin(latRad), cosLat * cos(lngRad));
-vec3 ecef = dir * GLOBE_RADIUS;   // surface-bound; add a radial factor if you need altitude
+vec3 ecef = dir * GLOBE_RADIUS;
+```
+
+If your moving geometry has altitude, apply the same radial factor as the static path — a `mercZ` of the moving vertex, scaled the same way:
+
+```glsl
+ecef = dir * (GLOBE_RADIUS + mercZ * 8192.0 * cosLat);
 ```
 
 Everything downstream is identical — same `uGlobeToMerc` multiply, same blend, same ECEF-space cull using `dir` as the normal, same early-out.
@@ -97,7 +124,7 @@ Everything downstream is identical — same `uGlobeToMerc` multiply, same blend,
 |  | Static geometry | Moving geometry |
 |---|---|---|
 | Where ECEF comes from | CPU, once, as a vertex attribute | Vertex shader, every frame |
-| Cost | Paid at buffer build | Four transcendentals per vertex per frame |
+| Cost | Paid at buffer build | Six transcendental calls per vertex per frame — `atan`, `exp`, and `sin`/`cos` twice each, once for latitude and once for longitude |
 | Examples | Airports, fixed routes, station markers | Flow-field particles, advancing trails |
 
 The per-frame cost is real but bounded, and the early-out means you pay none of it once the map is flat. A production ocean-current layer runs this path in raw WebGL2 — no Three.js — which is worth noting on its own: **the recipe is not Three.js-specific.** Anything that can write a vertex shader and read the render arguments can hug the globe.
@@ -197,4 +224,4 @@ Extracted from `plan-art` (Flight Arc). The ECEF-space cull and the shader blend
 
 - [1.2 MapLibre GL JS](maplibre.md) — the same problem where the library helps you
 - [1.3 Porting between the two](porting.md) — the difference table
-- [3.2 Depth and blending](../03-discipline/depth-and-blending.md) — render order once depth testing is gone
+- [4.2 Depth and blending](../04-discipline/depth-and-blending.md) — render order once depth testing is gone

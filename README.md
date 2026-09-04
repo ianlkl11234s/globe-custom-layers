@@ -2,9 +2,9 @@
 
 **Rendering tens of thousands of geodata objects on a Mapbox / MapLibre globe with Three.js — the part the official docs stop at.**
 
-![1,174 airports rendered as glowing points hugging a Mapbox globe](examples/globe-hugging-points/screenshots/globe.png)
+![1,174 airports rendered as glowing points hugging a Mapbox globe](examples/01-points-on-globe/screenshots/globe.png)
 
-<sup>1,174 airports as a Three.js custom layer on a Mapbox globe. Points sit on the sphere, the far side is culled, and the whole thing blends back to flat Web Mercator as you zoom in. Runnable: [`examples/globe-hugging-points`](examples/globe-hugging-points/).</sup>
+<sup>1,174 airports as a Three.js custom layer on a Mapbox globe. Points sit on the sphere, the far side is culled, and the whole thing blends back to flat Web Mercator as you zoom in. Runnable: [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
 
 > Throughout these pages, *globe-hugging* is shorthand for geometry that sits on the sphere's surface rather than floating beside it on a flat plane. There is no official term for this, because there is no official support for it.
 
@@ -48,10 +48,10 @@ From one object to tens of thousands, without dropping frames.
 
 | | |
 |---|---|
-| [2.1 Batched trails](docs/02-scaling-up/batched-trails.md) | Thousands of moving polylines in a single draw call |
-| [2.2 Instanced tracks](docs/02-scaling-up/instanced-tracks.md) | `InstancedMesh` with per-instance attributes the built-in materials don't expose |
-| [2.3 Vector field particles](docs/02-scaling-up/vector-field-particles.md) | Ocean currents and wind, advected on the CPU and drawn as instanced fat lines |
-| [2.4 Finding the actual bottleneck](docs/02-scaling-up/debugging-performance.md) | A case study in being wrong three times before measuring |
+| [3.1 Batched trails](docs/03-scaling-up/batched-trails.md) | Thousands of moving polylines in a single draw call |
+| [3.2 Instanced tracks](docs/03-scaling-up/instanced-tracks.md) | `InstancedMesh` with per-instance attributes the built-in materials don't expose |
+| [3.3 Vector field particles](docs/03-scaling-up/vector-field-particles.md) | Ocean currents and wind, advected on the CPU and drawn as instanced fat lines |
+| [3.4 Finding the actual bottleneck](docs/03-scaling-up/debugging-performance.md) | A case study in being wrong three times before measuring |
 
 ### 3. Discipline
 
@@ -59,10 +59,10 @@ The rules that stop working code from breaking a week later.
 
 | | |
 |---|---|
-| [3.1 Zoom-adaptive sizing](docs/03-discipline/zoom-adaptive-sizing.md) | Screen-space sizes are decoupled from zoom, so glow eats the viewport when you fly out |
-| [3.2 Depth and blending](docs/03-discipline/depth-and-blending.md) | Additive blending, render order, and the depth buffer the basemap already owns |
-| [3.3 Sharing a WebGL context](docs/03-discipline/shared-gl-context.md) | State save/restore, disposal, and why two renderers on one context go black |
-| [3.4 GLSL gotchas](docs/03-discipline/glsl-gotchas.md) | Silent failures that cost hours |
+| [4.1 Zoom-adaptive sizing](docs/04-discipline/zoom-adaptive-sizing.md) | Screen-space sizes are decoupled from zoom, so glow eats the viewport when you fly out |
+| [4.2 Depth and blending](docs/04-discipline/depth-and-blending.md) | Additive blending, render order, and the depth buffer the basemap already owns |
+| [4.3 Sharing a WebGL context](docs/04-discipline/shared-gl-context.md) | State save/restore, disposal, and why two renderers on one context go black |
+| [4.4 GLSL gotchas](docs/04-discipline/glsl-gotchas.md) | Silent failures that cost hours |
 
 ## Examples
 
