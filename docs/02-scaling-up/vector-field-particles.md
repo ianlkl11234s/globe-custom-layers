@@ -3,6 +3,19 @@
 > **Status:** 📋 Reported — running in production, not yet reproduced as an example in this repo.
 > **Applies to:** raw WebGL2, no Three.js dependency. `mapbox-gl` 3.9.x for the `CustomLayerInterface` render-argument shape.
 
+## Check the native layer first
+
+**Mapbox GL JS has a built-in flow-field layer.** [`raster-particle`](https://docs.mapbox.com/style-spec/reference/layers/#raster-particle) landed in **v3.3.0** and animates particles over an underlying `raster-array` source; v3.4.0 fixed its flickering on globe view, so it is supported and maintained there. There is an [official wind example](https://docs.mapbox.com/mapbox-gl-js/example/raster-particle-layer/). If it fits your case, use it and skip this page — a native layer projects onto the globe by itself and costs you no maintenance.
+
+It fits your case unless one of these is true:
+
+- **Your data isn't in Mapbox's `raster-array` format.** Feeding it your own data means uploading and processing through [Mapbox Tiling Service](https://docs.mapbox.com/mapbox-tiling-service/examples/raster-mts-wind/) — *"you'll need to upload and process your data using Mapbox Tiling Service"*. It will not read an arbitrary GeoTIFF or a tile endpoint you host yourself.
+- **Your field updates in near-real-time**, and a tiling-service round trip per update is not viable.
+- **Your particles need physics of their own** — anything beyond advection through a fixed vector field.
+- **You're on MapLibre**, which has no equivalent layer type in its style spec.
+
+Those exclusions are why the rest of this page exists, not an argument that the native layer is inadequate.
+
 ## The symptom
 
 Wind or ocean-current visualization — a nullschool-style field of short, flowing, fading streaks — needs tens of thousands of line segments that all move every single frame, react to zoom, and still have to sit correctly on a globe. This recipe is the one page in this section that isn't Three.js. Every other technique here batches or instances geometry inside a Three scene; this one is a hand-rolled `CustomLayerInterface` talking to WebGL2 directly, and that choice is deliberate enough to explain before the technique.

@@ -1,6 +1,6 @@
 # 1.2 Hugging the globe: MapLibre GL JS
 
-> **Status:** ⚠️ **Unverified.** This page is reasoned from the `maplibre-gl@5.24.0` typings and the official example, not yet from running code. It states a hypothesis and how to falsify it. Do not treat it as a recipe until the status changes.
+> **Status:** mixed, deliberately. The survey of what MapLibre provides and what its official examples cover is 📋 **Reported** — read from the `maplibre-gl@5.24.0` typings and from the examples themselves. The Three.js porting hypothesis in the second half is ⚠️ **Unverified**: reasoned, not run. It is stated with a way to falsify it, and should not be repeated as fact until someone does.
 >
 > The mercator half of this story *is* measured — see [1.3 Porting](porting.md).
 
@@ -15,18 +15,44 @@ Unlike Mapbox, MapLibre documents custom layers under globe projection, and has 
 
 So the three hard problems from [1.1](mapbox.md) — projecting onto the sphere, hiding the far side, and following the basemap's own transition — all have library-provided answers here, rather than reverse-engineered ones.
 
-## Where the official example stops
+## What the official examples already cover
 
-The [official Three.js globe example](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-3d-model-to-globe-using-threejs/) is a useful starting point and an incomplete one. It:
+There are three, and they do not agree with each other about how to do this — which is worth knowing before you pick one to copy.
 
-- renders **one** GLTF model plus two directional lights
-- computes the model matrix **on the CPU**, branching on `projectionTransition > 0` and building a rotation from lat/lon, then scaling into unit-sphere coordinates using an Earth radius of 6,371,008.8 m
-- does **not** use `shaderData.vertexShaderPrelude`
-- does **not** use `clippingPlane`, relying on Three.js frustum culling
-- leaves backface culling at Three.js defaults
-- does not discuss the depth buffer the globe basemap has already written
+**[Simple custom layer on a globe](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-simple-custom-layer-on-a-globe/)** — raw WebGL, one magenta triangle spanning Helsinki–Berlin–Kyiv, toggling between globe and mercator. This is the one that does it *properly*: it splices in the prelude and lets MapLibre do the projection.
 
-A per-object CPU matrix is a sound approach for one building. It is the wrong shape for forty thousand moving objects, where the projection has to happen per vertex on the GPU.
+```glsl
+${shaderDescription.vertexShaderPrelude}
+${shaderDescription.define}
+...
+gl_Position = projectTile(a_pos);
+```
+
+It passes `u_projection_matrix`, `u_projection_fallback_matrix`, `u_projection_tile_mercator_coords` and `u_projection_clipping_plane` as uniforms, so horizon clipping is handled by the library rather than by hand.
+
+**[Custom layer with tiles on a globe](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-custom-layer-with-tiles-to-a-globe/)** — also raw WebGL, renders a hierarchy of subdivided tile meshes across zoom 0–7, switching behaviour on `args.shaderData.variantName === 'globe'`. This is the closest thing in any official documentation to "a lot of geometry on a globe".
+
+**[3D model on a globe using Three.js](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-3d-model-to-globe-using-threejs/)** — the only Three.js one, and the least complete. It renders one GLTF building plus two lights, computes the model matrix **on the CPU** (branching on `projectionTransition > 0`, building a rotation from lat/lon, scaling to unit-sphere with an Earth radius of 6,371,008.8 m), does **not** use the prelude, does **not** use `clippingPlane`, leaves backface culling at Three's defaults, and does not discuss the depth buffer.
+
+### So where is the gap
+
+Not in "can custom layers work on a MapLibre globe" — they can, officially, with library support. The gap is the intersection:
+
+| | Official coverage |
+|---|---|
+| Raw WebGL, small geometry, prelude-based | ✅ two examples |
+| Raw WebGL, many subdivided tiles | ✅ one example |
+| **Three.js, per-vertex GPU projection** | ❌ nothing |
+| **Tens of thousands of independently moving objects** | ❌ nothing |
+| Additive blending, depth interaction with the basemap | ❌ nothing |
+
+A per-object CPU matrix is a sound approach for one building and the wrong shape for forty thousand moving ones. Splicing MapLibre's prelude into a Three.js `ShaderMaterial` — which brings its own prelude and its own matrix conventions — is the specific unknown this page exists to resolve.
+
+### Subdivide your geometry
+
+The tile example's documentation notes that geometry subdivision is advisable under globe projection, and this generalises to anything you draw. **A straight line between two distant points is a chord, not an arc** — it will cut through the planet rather than follow its surface, which is the single most common way "my line goes behind the globe" actually happens.
+
+Vertices are projected; the segments between them are not. Two vertices give you a straight line in screen space no matter how correct each endpoint is. Subdivide long spans into enough intermediate vertices that each segment is short relative to the sphere's curvature — the same constraint applies on Mapbox, where nothing in the library will do it for you either.
 
 ## The hypothesis worth testing first
 

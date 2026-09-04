@@ -20,7 +20,13 @@ The official position is that this is simply unsupported. From the [globe guide]
 
 > Globe does not yet support `CustomLayerInterface`.
 
+The [projections guide](https://docs.mapbox.com/mapbox-gl-js/guides/projections/) puts it more broadly — *"CustomLayerInterface can only be used only with Mercator"* — and that wording has been there since v2.6.0. So this is not a globe-specific gap; **no non-Mercator projection officially supports custom layers.** Globe is just the one everybody hits.
+
 That is accurate as a statement about supported API surface. It is not, however, the end of the story.
+
+### One thing to fix before you start
+
+Vertices get projected; the segments between them do not. **A straight line between two distant points is a chord, not an arc** — it will cut through the planet no matter how correct both endpoints are. If your geometry has long spans, subdivide it into enough intermediate vertices that each segment is short relative to the sphere's curvature. Nothing in the library does this for you. Dense sampled data (a flight track, a GPS trace) already satisfies this by accident; a two-point great-circle arc does not.
 
 ## The undocumented render arguments
 
