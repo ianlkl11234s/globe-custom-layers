@@ -1,6 +1,8 @@
-# Globe Hugging
+# Globe Custom Layers
 
 **Rendering tens of thousands of geodata objects on a Mapbox / MapLibre globe with Three.js — the part the official docs stop at.**
+
+> Throughout these pages, *globe-hugging* is shorthand for geometry that sits on the sphere's surface rather than floating beside it on a flat plane. There is no official term for this, because there is no official support for it.
 
 This is a cookbook, not a library. There is nothing to `npm install`. Every recipe is a page of docs plus a standalone runnable example you can read end to end in one sitting, copy, and adapt.
 
