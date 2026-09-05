@@ -4,9 +4,9 @@
 
 **[Published demo](https://globe-custom-layers.zeabur.app/)** — choose an element, adjust it, then open its recipe, source, or Agent prompt. The published site can lag the current `main` branch; the current six-scene atlas is verified locally and awaits a separate deployment. Bring your own public Mapbox token, or explore the MapLibre preview without one.
 
-![1,174 airports rendered as glowing points hugging a Mapbox globe](examples/01-points-on-globe/screenshots/globe.png)
+![Current English atlas showing the native global-airport point layer](site/screenshots/atlas-en-light.png)
 
-<sup>1,174 airports as a Three.js custom layer on a Mapbox globe. Points sit on the sphere, the far side is culled, and the whole thing blends back to flat Web Mercator as you zoom in. Runnable: [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
+<sup>Current website entry point: six globe elements, English by default, with a token-free MapLibre preview and complete Mapbox counterparts. This screenshot shows 1,174 OurAirports locations in the native point scene; colors are presentational, not traffic or category data. The historical Mapbox shader evidence remains with [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
 
 > Throughout these pages, *globe-hugging* means geometry that sits on the sphere's surface rather than floating beside it on a flat plane. The standalone examples target Mapbox. The site also has native MapLibre point/line/fill scenes and a 🔬 locally reproduced MapLibre 5.24 prelude-based Three.js preview for scenes 01/02/05; its direct ECEF/mainMatrix path, terrain/depth behaviour, and portability to the remaining standalone examples are unverified.
 
