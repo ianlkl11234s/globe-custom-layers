@@ -104,17 +104,22 @@ vec3 paletteColor(vec3 source) {
 }
 
 void main() {
-  // Same non-linear tail fade + head glow as plan-art's trail.frag:
-  // progress 0 (tail, oldest) fades fast, progress 1 (head, newest) is
-  // brightest. vOpacity is 0 for guard vertices (see trailWriter.ts) and 1
+  // Dark mode keeps plan-art's fast tail fade and additive head glow.
+  // Light mode keeps more of the colored tail visible against pale land.
+  // vOpacity is 0 for guard vertices (see trailWriter.ts) and 1
   // for every real vertex -- the "opacity" HUD control is a separate,
   // whole-layer uniform multiplier instead, so raising/lowering it never
   // requires rewriting any slot's per-vertex data.
-  float alpha = pow(vProgress, 2.0) * vOpacity * vCull * uGlobalOpacity;
+  float fade = mix(pow(vProgress, 2.0), pow(vProgress, 0.65), uLightTheme);
+  float alpha = fade * vOpacity * vCull * uGlobalOpacity;
   float glow = smoothstep(0.85, 1.0, vProgress) * 0.5;
   vec3 base = paletteColor(vColor);
-  // Keep full hue variation on white without washing the heads to white.
-  vec3 color = mix(base + vec3(glow), base * 0.5 + vec3(glow * 0.08), uLightTheme);
+  // Saturated ink hues stay distinct on white; do not whiten their heads.
+  float low = min(base.r, min(base.g, base.b));
+  float high = max(base.r, max(base.g, base.b));
+  vec3 hue = (base - vec3(low)) / max(high - low, 0.0001);
+  vec3 ink = vec3(0.025) + hue * 0.48;
+  vec3 color = mix(base + vec3(glow), ink, uLightTheme);
   gl_FragColor = vec4(color, alpha);
 }
 `;

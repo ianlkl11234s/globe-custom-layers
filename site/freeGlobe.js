@@ -10,7 +10,7 @@ css.href = new URL('./vendor/maplibre-gl.css', import.meta.url).href;
 document.head.append(css);
 const palettes = {
   light: { space: '#fafcfb', ocean: '#eff6f5', land: '#dce9e6', border: '#a3c3bd', grid: '#bfd7d1' },
-  dark: { space: '#101c20', ocean: '#162a30', land: '#243e44', border: '#406269', grid: '#36555e' },
+  dark: { space: '#202020', ocean: '#262626', land: '#383838', border: '#626262', grid: '#484848' },
 };
 function graticule() {
   const lines = [];

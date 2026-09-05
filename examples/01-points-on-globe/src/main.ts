@@ -122,7 +122,7 @@ function startMap() {
   });
 
   map.on("load", () => {
-    map.setFog(preferences.theme === "light" ? { color: "#f4f8f7", "high-color": "#ffffff", "space-color": "#dcebea", "horizon-blend": 0.08 } : { color: "#0b0d12", "high-color": "#1c2c35", "space-color": "#080b12", "horizon-blend": 0.12 });
+    map.setFog(preferences.theme === "light" ? { color: "#f4f8f7", "high-color": "#ffffff", "space-color": "#dcebea", "horizon-blend": 0.08 } : { color: "#202020", "high-color": "#292929", "space-color": "#202020", "horizon-blend": 0.12 });
     map.addLayer(layer);
     reportEmbedMapStatus("loaded");
   });

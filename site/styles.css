@@ -48,11 +48,11 @@
   --serif:"Newsreader",serif;
 }
 body[data-theme=dark] {
-  --paper:#111b1d;
-  --panel:#182427;
-  --ink:#e7f0ee;
-  --muted:#a2b3b4;
-  --line:#34474a;
+  --paper:#202020;
+  --panel:#292929;
+  --ink:#ededed;
+  --muted:#b0b0b0;
+  --line:#444444;
   --blue:#72c3e7;
   --teal:#51c9bc;
   --accent:#f0cd5b;
@@ -283,7 +283,7 @@ h3 {
   background: #eff7f6;
 }
 body[data-theme=dark] .globe-stage {
-  background: #162729;
+  background: #202020;
 }
 #free-stage,
 .live-stage,

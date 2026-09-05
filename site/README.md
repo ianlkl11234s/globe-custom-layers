@@ -38,6 +38,21 @@ node site/scripts/build.mjs
 
 The build writes `site/dist`. It sets `VITE_MAPBOX_TOKEN` to an empty string and gives Vite a newly-created empty `envDir`; it never reads an example `.env`.
 
+## Container deployment
+
+Build from the repository root, then run the static image on port 8080:
+
+```sh
+docker build -t globe-custom-layers .
+docker run --rm -p 8080:8080 globe-custom-layers
+```
+
+The multi-stage image uses Node 22 to run `npm ci` independently for `site` and examples 01, 02, and 05, then runs the existing token-clearing site build. Its final Nginx image contains only `site/dist` and the port-8080 static-server configuration. The Docker allowlist and `.dockerignore` exclude local `.env` files, so no deployment token or runtime API is required.
+
+On Zeabur, deploy this repository's `main` branch from the repository root. Its [Dockerfile deployment](https://zeabur.com/docs/en-US/deploy/methods/dockerfile) detects the root Dockerfile and exposed port 8080. Do not configure `VITE_MAPBOX_TOKEN`: visitors supply their own public token in the browser.
+
+For Zeabur, deploy the GitHub repository with the service Root Directory left empty. Zeabur automatically detects this root `Dockerfile` and its `EXPOSE 8080`; this static site needs no service environment variables. See Zeabur's [Dockerfile deployment documentation](https://zeabur.com/docs/en-US/deploy/methods/dockerfile).
+
 ## Preview and deployment base path
 
 Serve `site/dist` as the static document root:
