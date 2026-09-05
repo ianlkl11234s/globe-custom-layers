@@ -1,6 +1,6 @@
 # 3.3 Vector field particles
 
-> **Status:** 📋 Reported — running in production, not yet reproduced as an example in this repo.
+> **Status:** ✅ Verified — running in production, and reproduced in [`examples/06-particle-field`](../../examples/06-particle-field/), which substitutes an analytic field for the raster one and therefore needs no tiling service at all.
 > **Applies to:** raw WebGL2, no Three.js dependency. `mapbox-gl` 3.9.x for the `CustomLayerInterface` render-argument shape.
 
 ## Check the native layer first
@@ -26,7 +26,7 @@ This is inferred from the shape of the code, not a recorded design note — wort
 
 ## CPU-side Euler advection
 
-Each particle keeps a short ring buffer of past normalized positions. Every frame, for every particle: sample the flow field at its current position, convert the sampled velocity (m/s) into a fractional-degree step over the frame's `dt`, and integrate one step forward — a first-order (Euler) integrator, not RK4 or similar. Frame `dt` is clamped to a low ceiling (1/20 s) specifically so a backgrounded tab returning after several real seconds doesn't fling every particle a huge distance forward in one jump before anyone notices.
+Each particle keeps a short history of past normalized positions. (The production layer shifts that history array by one every frame — O(trail length) per particle — rather than writing into a true O(1) ring index. [`examples/06-particle-field`](../../examples/06-particle-field/) uses a real ring buffer instead; both work, the ring is simply cheaper.) Every frame, for every particle: sample the flow field at its current position, convert the sampled velocity (m/s) into a step over the frame's `dt` in the field's own normalized `[0,1]` UV space (a step in degrees only when the field spans the full 360°), and integrate one step forward — a first-order (Euler) integrator, not RK4 or similar. Frame `dt` is clamped to a low ceiling (1/20 s) specifically so a backgrounded tab returning after several real seconds doesn't fling every particle a huge distance forward in one jump before anyone notices.
 
 ```ts
 const lat = latMax - y * latSpan;
@@ -35,13 +35,15 @@ const nx = x + (vec.u * flowSeconds / metersPerDegLon) / lonSpan;
 const ny = y - (vec.v * flowSeconds / EARTH_METERS_PER_DEG_LAT) / latSpan;
 ```
 
-## The field lives in a PNG, sampled bilinearly
+## One way to store the field: a PNG, sampled bilinearly
+
+This is how the production layer does it, not the only way. Everything else on this page — the CPU advection, the instanced fat lines, the globe projection, the density quantization — is independent of where the field comes from. [`examples/06-particle-field`](../../examples/06-particle-field/) samples an analytic field computed at runtime and needs no raster at all.
 
 The u/v vector field is baked into a texture ahead of time and read back as a plain `Uint8ClampedArray` (an `<img>` drawn to an offscreen canvas, not a WebGL texture) — sampling happens on the CPU, during advection, not in the fragment shader. The encoding: **R channel** holds the u component, **G channel** holds v, both linearly remapped from the field's own `[min, max]` into `[0, 255]`; the **alpha channel** — not blue — holds a binary validity mask (`>= 128` is a valid sample), with an optional erosion radius so currents don't paint over nearby coastline pixels. The blue channel exists in the PNG format but carries nothing. Each sample point is a manual 4-tap bilinear blend of the four surrounding texels before decoding back to real u/v units.
 
 ## Why per-vertex trigonometry is *correct* here, unlike almost everywhere else
 
-[1.1](../01-hugging-the-globe/mapbox.md) precomputes ECEF per vertex specifically to avoid `sin`/`cos`/`atan`/`exp` running on the GPU every frame for geometry that isn't moving. [3.1](batched-trails.md) goes further and skips per-frame recompute even for the mercator projection math, because most of a trail's history is frozen. This layer's vertex shader does exactly the trig those two pages tell you to avoid — `atan(exp(...))`, `sin`, `cos`, for every corner of every segment, every frame — and that's the right call, not an oversight: nothing here is static. Every particle's position changes every frame; that's the entire point of a flow field. There's nothing to cache in the globe-projection step, because caching it would just mean recomputing the cache every frame anyway.
+[1.1](../01-hugging-the-globe/mapbox.md) precomputes ECEF per vertex specifically to avoid `sin`/`cos`/`atan`/`exp` running on the GPU every frame for geometry that isn't moving. [3.1](batched-trails.md) goes further and skips per-frame recompute even for the mercator projection math, because most of a trail's history is frozen. This layer's vertex shader does exactly the trig those two pages tell you to avoid — `atan(exp(...))`, `sin`, `cos`, twice per segment per frame — the vertex shader reverse-projects `a_from` and `a_to` separately in order to compute a screen-space normal, so a fat-line segment's six vertices work out to twelve inverse-Mercator evaluations — and that's the right call, not an oversight: nothing here is static. Every particle's position changes every frame; that's the entire point of a flow field. There's nothing to cache in the globe-projection step, because caching it would just mean recomputing the cache every frame anyway.
 
 What *is* cached, and this is the part worth copying: each history point's mercator-space coordinate is computed exactly once, the frame it's created, then carried forward by cheap array-shift copies for the rest of its lifetime in the trail — never recomputed on the frames it merely ages through:
 

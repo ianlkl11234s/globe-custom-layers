@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Picking and popups</title>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.18.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body,
+      #map {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        background: #0b0d12;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      #panel {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 1;
+        background: rgba(10, 12, 18, 0.82);
+        color: #eee;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        width: 320px;
+        backdrop-filter: blur(4px);
+      }
+      #panel h1 {
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0 0 8px;
+        color: #fff;
+      }
+      #panel .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 4px 0;
+      }
+      #panel .row .value,
+      #panel .row span:last-child {
+        font-variant-numeric: tabular-nums;
+        color: #9fd3ff;
+      }
+
+      #strategy-switch {
+        display: flex;
+        gap: 4px;
+        margin: 10px 0 4px;
+      }
+      #strategy-switch button {
+        flex: 1;
+        background: #1c2230;
+        border: 1px solid #2c3547;
+        color: #cdd6e4;
+        padding: 6px 4px;
+        border-radius: 6px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      #strategy-switch button:hover {
+        background: #242c3d;
+      }
+      #strategy-switch button.active {
+        background: #3a6fd1;
+        border-color: #4d82e6;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      #backface-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 8px 0 4px;
+        font-size: 11px;
+        color: #9aa4b2;
+      }
+      #backface-row input {
+        margin: 0;
+      }
+
+      #click-info {
+        margin-top: 10px;
+        padding: 8px 9px;
+        background: #151a24;
+        border: 1px solid #232a38;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #cdd6e4;
+        min-height: 34px;
+      }
+      #click-info.hit {
+        border-color: #3a6b47;
+        color: #b4ffcb;
+      }
+      #click-info.no-hit {
+        border-color: #232a38;
+        color: #8b95a3;
+      }
+
+      #hint {
+        margin-top: 8px;
+        font-size: 11px;
+        color: #6b7585;
+        line-height: 1.4;
+      }
+
+      #token-warning {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: #0b0d12;
+        color: #eee;
+        text-align: center;
+        padding: 24px;
+      }
+      #token-warning.visible {
+        display: flex;
+      }
+      #token-warning .box {
+        max-width: 480px;
+      }
+      #token-warning code {
+        background: #1c2230;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      #token-warning a {
+        color: #6cb6ff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div id="panel">
+      <h1>Picking and popups</h1>
+      <div class="row"><span>zoom</span><span id="zoom-value">--</span></div>
+      <div class="row"><span>projection</span><span id="projection-value">--</span></div>
+      <div class="row"><span>transition</span><span id="transition-value">--</span></div>
+
+      <div id="strategy-switch">
+        <button data-strategy="companion" id="strategy-btn-companion">native companion</button>
+        <button data-strategy="screen-space" id="strategy-btn-screen-space">screen-space</button>
+      </div>
+
+      <label id="backface-row" for="backface-toggle">
+        <input type="checkbox" id="backface-toggle" checked />
+        backface culling in picking (screen-space only)
+      </label>
+
+      <div class="row"><span>candidates considered</span><span id="considered-value">--</span></div>
+      <div class="row"><span>hit-test time</span><span id="ms-value">--</span>&nbsp;ms</div>
+
+      <div id="click-info">Click a point on the map.</div>
+
+      <div id="hint">
+        To see why screen-space picking needs the backface toggle: rotate the
+        globe, uncheck it, then click a spot near the visible edge where
+        nothing is drawn. With it checked, the same click should report "no
+        hit" instead.
+      </div>
+    </div>
+
+    <div id="token-warning">
+      <div class="box">
+        <p>
+          No Mapbox access token found. Copy <code>.env.example</code> to <code>.env</code>,
+          set <code>VITE_MAPBOX_TOKEN</code> to a token from your
+          <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noreferrer"
+            >Mapbox account</a
+          >, then restart <code>npm run dev</code>.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

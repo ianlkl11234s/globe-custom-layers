@@ -1,6 +1,6 @@
 # 3.1 Batched trails
 
-> **Status:** 📋 Reported — running in production, not yet reproduced as an example in this repo.
+> **Status:** ✅ Verified — running in production, and reproduced in [`examples/05-mass-trajectories`](../../examples/05-mass-trajectories/): 5,000 objects against a 4,096-slot pool render in **one** draw call, and switching eviction from min-heap to linear scan on the same scene moves `ms / update` from 6.31 to 22.24.
 > **Applies to:** `three` 0.172.x. The partial-upload step depends on `BufferAttribute.addUpdateRange` / `clearUpdateRanges` (a multi-range API); older Three versions only expose a single `updateRange` pair.
 
 ## The symptom
@@ -23,7 +23,7 @@ Capacity is dynamic, not a hardcoded constant: it's derived from the peak concur
 
 A `THREE.Line` draws a single connected line strip: every vertex connects to the next, with no built-in way to say "start a new line here." Lay two trails' slots back to back in one buffer and, without anything separating them, the last point of slot *N* draws a spurious line straight to the first point of slot *N+1* — two unrelated trails visually bridged.
 
-The fix is a guard vertex at each end of a slot, positioned exactly on top of the adjacent real vertex with `opacity = 0`. That produces two invisible segments per slot boundary — one zero-length (guard sitting on its neighbor), one bridging segment whose both endpoints are transparent — so nothing renders across the seam, and no `PRIMITIVE_RESTART`-style trick is needed.
+The fix is a guard vertex at each end of a slot, positioned exactly on top of the adjacent real vertex with `opacity = 0`. **Copy every attribute, not just position** — any per-vertex attribute your shader branches on (an ECEF position, a dynamic/static flag) has to be duplicated too, or the guard will be projected differently from the vertex it is supposed to sit on top of. That produces two invisible segments per slot boundary — one zero-length (guard sitting on its neighbor), one bridging segment whose both endpoints are transparent — so nothing renders across the seam, and no `PRIMITIVE_RESTART`-style trick is needed.
 
 ## Step 3: partial buffer uploads, not a full re-upload
 
@@ -51,7 +51,7 @@ The obvious implementation scans the map of currently-occupied slots for the min
 
 The fix is a binary min-heap keyed on `endTime`, giving O(log capacity) find-and-remove instead. Two details make it correct, not just fast:
 
-- **Stale entries.** A slot can be reassigned to a new trail after its old heap entry is still sitting in the heap. Each slot carries a generation counter; a popped heap entry is only trusted if its generation still matches the slot's current one, otherwise it's discarded and the pop repeats. The heap is periodically rebuilt from scratch (when stale entries pile up past a multiple of capacity) so memory doesn't grow unbounded.
+- **Stale entries.** A slot can be reassigned to a new trail after its old heap entry is still sitting in the heap. Each slot carries a sequence number, which does double duty as both the generation counter and the eviction tie-break; a popped heap entry is only trusted if its generation still matches the slot's current one, otherwise it's discarded and the pop repeats. The heap is periodically rebuilt from scratch (when stale entries pile up past a multiple of capacity) so memory doesn't grow unbounded.
 - **Tie-breaking.** Source timestamps are quantized, so `endTime` ties are common — measured at roughly 28% of cases in one dataset. Ties break on acquisition order (earliest slot holder loses first), which is what a straightforward linear scan over a `Map`'s natural insertion order does implicitly. The heap has to replicate that tie-break explicitly, or its eviction choices diverge from the reference behavior frame to frame.
 
 ## The trap that costs the most time

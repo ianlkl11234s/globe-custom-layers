@@ -1,0 +1,2855 @@
+{
+  "$comment": "Machine-readable index of every effect in this gallery, generated from src/showcase/effects/*.js by scripts/build-effects-index.mjs. Do not hand-edit -- regenerate with `npm run build-effects-index`. Human version: README.md.",
+  "version": 1,
+  "generated": "2026-09-04",
+  "sourceProject": "Ported from mini-taiwan-pulse's public/showcase/ demo (see README 'What changed during the port').",
+  "totalEffects": 68,
+  "categories": [
+    {
+      "category": "basic",
+      "label": "Basic geometry",
+      "count": 8
+    },
+    {
+      "category": "light",
+      "label": "Light effects",
+      "count": 3
+    },
+    {
+      "category": "animation",
+      "label": "Animated events",
+      "count": 12
+    },
+    {
+      "category": "shader",
+      "label": "Shader deformation",
+      "count": 4
+    },
+    {
+      "category": "particles",
+      "label": "Particles",
+      "count": 14
+    },
+    {
+      "category": "line",
+      "label": "Lines / paths",
+      "count": 7
+    },
+    {
+      "category": "viz",
+      "label": "Data visualization",
+      "count": 8
+    },
+    {
+      "category": "atmospheric",
+      "label": "Volumetric / atmosphere",
+      "count": 3
+    },
+    {
+      "category": "scene",
+      "label": "Scene / sci-fi",
+      "count": 9
+    }
+  ],
+  "effects": [
+    {
+      "id": "orb",
+      "category": "basic",
+      "title": "Glow Orb",
+      "description": "Three stacked spheres: a white core and two colored outer shells, opacity oscillating with sin(t). This is the same pattern used for ship/flight/train blips across Mini Taiwan Pulse.",
+      "prompt": "Place a <b>[250m]</b> diameter <b>[#6cb8ff]</b> glow orb at <b>[location]</b>, three layers (white core, blue shells), breathing pulse every <b>[2s]</b>.",
+      "tech": "Layered IcosahedronGeometry + AdditiveBlending + breathing pulse",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 121.5654,
+        "lat": 25.033,
+        "city": "Taipei"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Diameter (m)",
+          "min": 50,
+          "max": 800,
+          "step": 10,
+          "default": 250
+        },
+        {
+          "id": "speed",
+          "label": "Pulse",
+          "min": 0,
+          "max": 5,
+          "step": 0.1,
+          "default": 2
+        }
+      ]
+    },
+    {
+      "id": "cylinder",
+      "category": "basic",
+      "title": "Cylinder",
+      "description": "The most basic 3D cylinder. Uniform height = signal tower; wide base, narrow top = lighthouse; base only = flat disc. Set topRadius to 0 to turn it into a cone.",
+      "prompt": "Erect a <b>[400m]</b> tall, <b>[60m]</b> radius <b>[pale green]</b> cylinder at <b>[location]</b>, semi-transparent (<b>opacity 0.5</b>), static.",
+      "tech": "CylinderGeometry + semi-transparent MeshBasicMaterial",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 121.4628,
+        "lat": 25.0125,
+        "city": "New Taipei"
+      },
+      "params": [
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 50,
+          "max": 1500,
+          "step": 10,
+          "default": 500
+        },
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 10,
+          "max": 300,
+          "step": 5,
+          "default": 80
+        },
+        {
+          "id": "opacity",
+          "label": "Opacity",
+          "min": 0.05,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.5
+        }
+      ]
+    },
+    {
+      "id": "cone",
+      "category": "basic",
+      "title": "Cone / Signal Tower",
+      "description": "ConeGeometry is CylinderGeometry with topRadius=0. Can express: a signal tower (tip up), radar coverage (tip down), or an umbrella-shaped range.",
+      "prompt": "Place an inverted (tip-down) <b>[300m]</b> tall, <b>[400m]</b> base-diameter <b>[orange-red]</b> cone at <b>[location]</b> to represent radar coverage, semi-transparent at 0.3.",
+      "tech": "ConeGeometry -- flipped, it reads as a funnel / radar coverage cone",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 121.301,
+        "lat": 24.993,
+        "city": "Taoyuan"
+      },
+      "params": [
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 20,
+          "default": 500
+        },
+        {
+          "id": "radius",
+          "label": "Base radius (m)",
+          "min": 50,
+          "max": 800,
+          "step": 10,
+          "default": 300
+        },
+        {
+          "id": "flip",
+          "label": "Tip down",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "default": 0
+        }
+      ]
+    },
+    {
+      "id": "dome",
+      "category": "basic",
+      "title": "Dome / Half-sphere",
+      "description": "Cutting a SphereGeometry's angle range in half makes a dome -- useful for stadiums, shields, or a zone of influence. Coloring the inside (BackSide) gives a planetarium-ceiling look.",
+      "prompt": "Build a <b>[700m]</b> radius <b>[purple]</b> half-dome at <b>[location]</b>, 0.25 opacity, double-sided so the inner structure is visible.",
+      "tech": "SphereGeometry with a phiStart/phiLength cutoff",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 120.6736,
+        "lat": 24.1477,
+        "city": "Taichung"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 100,
+          "max": 2000,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "opacity",
+          "label": "Opacity",
+          "min": 0.05,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.3
+        },
+        {
+          "id": "wire",
+          "label": "Wireframe",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "default": 1
+        }
+      ]
+    },
+    {
+      "id": "heart",
+      "category": "basic",
+      "title": "Heart (Custom Shape Extrude)",
+      "description": "The Shape API can draw any 2D outline (heart, star, logo, an administrative-boundary silhouette), then ExtrudeGeometry pushes it into 3D. Good fit for special locations, holidays, or brand markers.",
+      "prompt": "Float a <b>[red]</b> heart (Shape + Extrude, <b>80m</b> thick) <b>[600m]</b> above <b>[location]</b>, slowly spinning around the Z axis with a breathing pulse.",
+      "tech": "THREE.Shape + bezierCurveTo draws a 2D heart -> ExtrudeGeometry gives it depth",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 120.454,
+        "lat": 23.4793,
+        "city": "Chiayi"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Size (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 600
+        },
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 0,
+          "max": 2000,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "spin",
+          "label": "Spin",
+          "min": 0,
+          "max": 3,
+          "step": 0.1,
+          "default": 0.6
+        }
+      ]
+    },
+    {
+      "id": "star",
+      "category": "basic",
+      "title": "Five-pointed Star (Extrude)",
+      "description": "10 points alternating between an outer and inner radius make a five-pointed star. Change the point count for an eight- or twelve-pointed star; change the outer/inner ratio for skinnier or fatter points. Good for ratings, favorites, or hot POIs.",
+      "prompt": "Float a <b>[yellow]</b> five-pointed star (outer radius 700m, inner radius 280m) above <b>[location]</b>, slow spin with a breathing pulse.",
+      "tech": "10 alternating Vector2 points form a Shape, then ExtrudeGeometry",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 119.9525,
+        "lat": 26.1496,
+        "city": "Matsu"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Outer radius (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 0,
+          "max": 2000,
+          "step": 50,
+          "default": 600
+        },
+        {
+          "id": "spin",
+          "label": "Spin",
+          "min": 0,
+          "max": 3,
+          "step": 0.1,
+          "default": 0.5
+        }
+      ]
+    },
+    {
+      "id": "pin",
+      "category": "basic",
+      "title": "3D Pin Marker (Google Maps style)",
+      "description": "The classic map marker: a sphere on top, a pointed cone at the bottom, and a white dot in the center. Instantly recognizable from Google Maps / Apple Maps. Add a bounce to signal 'new notification'.",
+      "prompt": "Plant a <b>[red]</b> pin (<b>300m</b> tall) at <b>[location]</b>, pointed tip touching the ground, sphere head with a white center dot, bouncing once per second.",
+      "tech": "An inverted Cone + a Sphere (head) + a white dot, the whole thing can bounce",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 121.4406,
+        "lat": 25.1699,
+        "city": "Tamsui"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Size (m)",
+          "min": 50,
+          "max": 1000,
+          "step": 10,
+          "default": 250
+        },
+        {
+          "id": "bounce",
+          "label": "Bounce",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "default": 1
+        }
+      ]
+    },
+    {
+      "id": "crystal",
+      "category": "basic",
+      "title": "Crystal (Polyhedron)",
+      "description": "A built-in polyhedron plus a wireframe overlay reads as a crystal / gem / abstract logo. Swap `shape` to switch face count. The dual-axis rotation lets you see every face.",
+      "prompt": "Float a <b>[light blue]</b> octahedron (radius <b>300m</b>) at <b>400m</b> altitude above <b>[location]</b>, translucent white wireframe inside, slow rotation on both X and Y axes.",
+      "tech": "Octahedron / Dodecahedron / Icosahedron + a wireframe overlay + dual-axis rotation",
+      "sourceFile": "src/showcase/effects/basic.js",
+      "location": {
+        "lng": 120.75,
+        "lat": 24.3833,
+        "city": "Sanyi"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Radius (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 400
+        },
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 0,
+          "max": 2000,
+          "step": 50,
+          "default": 500
+        },
+        {
+          "id": "shape",
+          "label": "Shape",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "id": "spinX",
+          "label": "Spin X",
+          "min": 0,
+          "max": 2,
+          "step": 0.1,
+          "default": 0.5
+        },
+        {
+          "id": "spinY",
+          "label": "Spin Y",
+          "min": 0,
+          "max": 2,
+          "step": 0.1,
+          "default": 0.3
+        }
+      ]
+    },
+    {
+      "id": "beam",
+      "category": "light",
+      "title": "Light Beam / Laser",
+      "description": "A thin cylinder + a gradient that fades from bottom to top + AdditiveBlending = a cyberpunk light beam. Stack two layers (a thin core + an outer halo) for extra texture.",
+      "prompt": "Shoot a <b>[800m]</b> tall, <b>[15m]</b> radius <b>[cyan]</b> light beam up from <b>[location]</b>, fading from dense at the bottom to faint at the top, additive blending, with a wider, fainter halo layer around it.",
+      "tech": "Cylinder + custom fragment shader for a vertical gradient + additive blending",
+      "sourceFile": "src/showcase/effects/light.js",
+      "location": {
+        "lng": 120.3014,
+        "lat": 22.6273,
+        "city": "Kaohsiung"
+      },
+      "params": [
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 200,
+          "max": 3000,
+          "step": 50,
+          "default": 1200
+        },
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 5,
+          "max": 100,
+          "step": 1,
+          "default": 25
+        },
+        {
+          "id": "intensity",
+          "label": "Intensity",
+          "min": 0.1,
+          "max": 3,
+          "step": 0.1,
+          "default": 1.5
+        }
+      ]
+    },
+    {
+      "id": "lightcone",
+      "category": "light",
+      "title": "Volumetric Light Cone / God Rays",
+      "description": "Countless rays shooting down from a point in the sky to the ground + a semi-transparent cone shell = god rays, a spotlight, or a UFO beam. The rays can rotate and pulse.",
+      "prompt": "From a point <b>[1200m]</b> above <b>[location]</b>, shoot <b>[20]</b> <b>[pale yellow]</b> rays down onto a ground circle of <b>[600m]</b> radius, the whole thing rotating slowly.",
+      "tech": "Multiple LineSegments rays from an apex point to a base circle + a semi-transparent cone shell",
+      "sourceFile": "src/showcase/effects/light.js",
+      "location": {
+        "lng": 121.29,
+        "lat": 24.88,
+        "city": "Daxi"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Base radius (m)",
+          "min": 100,
+          "max": 2000,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 200,
+          "max": 3000,
+          "step": 100,
+          "default": 1200
+        },
+        {
+          "id": "spin",
+          "label": "Spin",
+          "min": 0,
+          "max": 3,
+          "step": 0.1,
+          "default": 0.4
+        }
+      ]
+    },
+    {
+      "id": "neon",
+      "category": "light",
+      "title": "Neon Path",
+      "description": "A curved tube = a neon sign, a glowing wire, or a light-beam trail. A white inner core + a pink outer halo layered together give a strong glow. Change the curve path for a different shape.",
+      "prompt": "Draw a <b>[pink]</b> neon curved tube spanning <b>[1500m]</b> at <b>[location]</b>, white inner core with a pink outer halo, pulsing once every <b>[0.3s]</b>.",
+      "tech": "TubeGeometry along a CatmullRom curve + a thin inner / wide outer dual-layer AdditiveBlending + breathing pulse",
+      "sourceFile": "src/showcase/effects/light.js",
+      "location": {
+        "lng": 121.8714,
+        "lat": 24.5839,
+        "city": "Nanfang'ao"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Extent (m)",
+          "min": 200,
+          "max": 3000,
+          "step": 100,
+          "default": 1500
+        },
+        {
+          "id": "haloR",
+          "label": "Halo radius",
+          "min": 0.02,
+          "max": 0.15,
+          "step": 0.005,
+          "default": 0.06
+        }
+      ]
+    },
+    {
+      "id": "ripple",
+      "category": "animation",
+      "title": "Ripple",
+      "description": "Four rings expand with staggered timing, each growing from small to large and fading from bright to transparent, simulating a water ripple or radar pulse. Great for expressing \"an event just happened.\"",
+      "prompt": "At <b>[location]</b>, emit a <b>[yellow]</b> ripple every <b>[1.5s]</b>, expanding to a max radius of <b>[800m]</b> while fading out.",
+      "tech": "Layered RingGeometry, radius grows over time while opacity fades",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 121.6044,
+        "lat": 23.9871,
+        "city": "Hualien"
+      },
+      "params": [
+        {
+          "id": "maxR",
+          "label": "Max (m)",
+          "min": 200,
+          "max": 3000,
+          "step": 50,
+          "default": 1000
+        },
+        {
+          "id": "period",
+          "label": "Period (s)",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 1.8
+        },
+        {
+          "id": "rings",
+          "label": "Rings",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "default": 4
+        }
+      ]
+    },
+    {
+      "id": "radar",
+      "category": "animation",
+      "title": "Radar Sweep",
+      "description": "Uses the Shape API to draw a fan/wedge shape, rotating it to simulate a radar sweep arm. Add ring gradations for a complete radar UI. Expresses \"under surveillance\" or \"scanning.\"",
+      "prompt": "Place a <b>[600m]</b> radius <b>[green]</b> radar at <b>[location]</b>, sweep arm width <b>[30°]</b>, one full sweep every <b>[3s]</b>, with three graduation rings.",
+      "tech": "Fan-shaped ShapeGeometry + rotation + gradient alpha",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 121.7572,
+        "lat": 24.7042,
+        "city": "Yilan"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 200,
+          "max": 2000,
+          "step": 50,
+          "default": 800
+        },
+        {
+          "id": "speed",
+          "label": "Speed",
+          "min": 0.1,
+          "max": 3,
+          "step": 0.1,
+          "default": 1
+        },
+        {
+          "id": "angle",
+          "label": "Arc angle (°)",
+          "min": 10,
+          "max": 90,
+          "step": 5,
+          "default": 30
+        }
+      ]
+    },
+    {
+      "id": "ring",
+      "category": "animation",
+      "title": "Rotating Ring",
+      "description": "Torus is donut-shaped geometry. Tilt + rotation = planetary rings, energy fields, Saturn's rings. Stacking three rings rotating on different axes gives a strong sci-fi feel.",
+      "prompt": "Place three <b>[400m]</b> radius <b>[gold]</b> rings at <b>[location]</b>, each rotating on a different axis simultaneously, with additive blending.",
+      "tech": "TorusGeometry + continuous rotation + layered stacking",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 120.2127,
+        "lat": 23.0011,
+        "city": "Tainan"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 500
+        },
+        {
+          "id": "thickness",
+          "label": "Thickness",
+          "min": 0.005,
+          "max": 0.1,
+          "step": 0.005,
+          "default": 0.025
+        },
+        {
+          "id": "speed",
+          "label": "Rotation speed",
+          "min": 0,
+          "max": 5,
+          "step": 0.1,
+          "default": 1.5
+        }
+      ]
+    },
+    {
+      "id": "lightning",
+      "category": "animation",
+      "title": "Lightning Strike",
+      "description": "A zigzag line from sky to ground, each segment randomly offset; brightness flashes on suddenly then fades quickly, striking again at random intervals. Expresses a lightning strike, sudden event, warning, or attack.",
+      "prompt": "Strike <b>[white]</b> lightning at <b>[location]</b> from <b>[1500m]</b> altitude down to the ground, averaging once every <b>[1.5s]</b> (randomly jittered), with a zigzag amplitude of <b>[120m]</b>.",
+      "tech": "Dynamic zigzag Line + random regeneration + brief alpha decay",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 120.8005,
+        "lat": 23.5083,
+        "city": "Alishan"
+      },
+      "params": [
+        {
+          "id": "altitude",
+          "label": "Start height (m)",
+          "min": 500,
+          "max": 3000,
+          "step": 100,
+          "default": 1500
+        },
+        {
+          "id": "interval",
+          "label": "Interval (s)",
+          "min": 0.3,
+          "max": 5,
+          "step": 0.1,
+          "default": 1.5
+        },
+        {
+          "id": "jitter",
+          "label": "Zigzag (m)",
+          "min": 20,
+          "max": 500,
+          "step": 10,
+          "default": 150
+        }
+      ]
+    },
+    {
+      "id": "countdown",
+      "category": "animation",
+      "title": "Countdown Ring",
+      "description": "The torus continuously shrinks from 360° to 0°, looking like a progress ring running in reverse. Expresses a countdown, remaining capacity, cooldown, or progress. The color gradient makes it more intuitive.",
+      "prompt": "Place a <b>[500m]</b> radius, <b>[60m]</b> thick countdown ring at <b>[location]</b>, cycling from full to empty every <b>[10s]</b>, color shifting from green through yellow to red.",
+      "tech": "TorusGeometry + dynamic thetaLength clipping + HSL color shifting from green to red",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 121.1444,
+        "lat": 22.7583,
+        "city": "Taitung"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 600
+        },
+        {
+          "id": "thickness",
+          "label": "Thickness (m)",
+          "min": 10,
+          "max": 300,
+          "step": 5,
+          "default": 80
+        },
+        {
+          "id": "period",
+          "label": "Period (s)",
+          "min": 2,
+          "max": 30,
+          "step": 1,
+          "default": 10
+        }
+      ]
+    },
+    {
+      "id": "shockwave",
+      "category": "animation",
+      "title": "Shockwave",
+      "description": "More dramatic than a ripple: a pillar shoots up instantly, then a ring bursts outward from its base. Expresses an explosion, warning, energy release, or epicenter.",
+      "prompt": "At <b>[location]</b>, burst once every <b>[3s]</b>: a <b>[500m]</b> tall pink pillar shoots up from the center, with a ring simultaneously expanding to a <b>[1500m]</b> radius.",
+      "tech": "Central vertical burst pillar + ground-spreading ring, regenerating in sync on a fixed period",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 121.37,
+        "lat": 24.93,
+        "city": "Sanxia"
+      },
+      "params": [
+        {
+          "id": "period",
+          "label": "Period (s)",
+          "min": 1,
+          "max": 8,
+          "step": 0.5,
+          "default": 3
+        },
+        {
+          "id": "radius",
+          "label": "Ring radius (m)",
+          "min": 300,
+          "max": 4000,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "height",
+          "label": "Pillar height (m)",
+          "min": 100,
+          "max": 2000,
+          "step": 50,
+          "default": 700
+        }
+      ]
+    },
+    {
+      "id": "contour",
+      "category": "animation",
+      "title": "Contour Lines",
+      "description": "8 circles expand with staggered timing, each rising as it expands, with color shifting from yellow to green. Visualizes contour maps, sound wave propagation, or radio coverage.",
+      "prompt": "At <b>[location]</b>, continuously emit <b>[8]</b> contour rings, expanding to a max radius of <b>[1500m]</b> while rising to <b>[300m]</b>, color fading from yellow to green.",
+      "tech": "Layered concentric Lines + radius expanding over time + Z-axis lift + HSL color gradient tied to height",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 121.0734,
+        "lat": 25.0367,
+        "city": "Guanyin"
+      },
+      "params": [
+        {
+          "id": "maxR",
+          "label": "Max (m)",
+          "min": 200,
+          "max": 4000,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "maxH",
+          "label": "Lift (m)",
+          "min": 0,
+          "max": 1000,
+          "step": 25,
+          "default": 350
+        },
+        {
+          "id": "period",
+          "label": "Period (s)",
+          "min": 1,
+          "max": 8,
+          "step": 0.2,
+          "default": 3
+        }
+      ]
+    },
+    {
+      "id": "highlight",
+      "category": "animation",
+      "title": "Selection Ring",
+      "description": "A breathing glow sphere at the center plus three gapped rings rotating in opposite directions = an \"I'm here!\" marker. Expresses target selection, a warning, tracking lock, or a highlighted point of interest.",
+      "prompt": "Place a <b>[300m]</b> radius selection marker at <b>[location]</b>: a <b>[white]</b> pulsing sphere at the center plus three <b>[pink]</b> gapped rings rotating in opposite directions.",
+      "tech": "Central pulsing target sphere + 3 asymmetric RingGeometry rings rotating in opposite directions",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 120.7858,
+        "lat": 23.8294,
+        "city": "Jiji"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 100,
+          "max": 2000,
+          "step": 25,
+          "default": 400
+        },
+        {
+          "id": "targetSize",
+          "label": "Target size",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 150
+        }
+      ]
+    },
+    {
+      "id": "rainbow",
+      "category": "animation",
+      "title": "Rainbow Arch",
+      "description": "A half-circle ring forms an arch. 6 layers of different colors and radii = a rainbow arch. Can be changed to a single color, thickened, or animated flying past to become a takeoff trajectory, a magpie bridge, or a ribbon streamer.",
+      "prompt": "Erect a <b>[1500m]</b> radius rainbow arch at <b>[location]</b> (six layers: red, orange, yellow, green, blue, purple), the half-circle arcing upward over the ground.",
+      "tech": "TorusGeometry with thetaLength=π (half circle) + multiple layers of different colors and radii stacked together",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 120.3712,
+        "lat": 22.3402,
+        "city": "Xiaoliuqiu"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 300,
+          "max": 4000,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "thickness",
+          "label": "Thickness",
+          "min": 0.005,
+          "max": 0.06,
+          "step": 0.005,
+          "default": 0.02
+        }
+      ]
+    },
+    {
+      "id": "hydrocycle",
+      "category": "animation",
+      "title": "Hydro Cycle",
+      "description": "Cloud -> rain -> lake -> evaporation -> cloud, a light particle loops through the 4-stage cycle. Expresses a natural cycle, life cycle, closed-loop process, or subscription renewal.",
+      "prompt": "Lay out a <b>[1500m]</b> wide water cycle at <b>[location]</b>: cloud (top) -> rain (right) -> lake (bottom) -> evaporation (left), with <b>[8]</b> light particles looping around.",
+      "tech": "4 nodes (cloud/rain/lake/evaporation) + connecting lines + a light particle looping along the path",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 120.4072,
+        "lat": 23.2186,
+        "city": "Wushantou Reservoir"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Extent (m)",
+          "min": 300,
+          "max": 4000,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "nodeSize",
+          "label": "Node size (m)",
+          "min": 50,
+          "max": 500,
+          "step": 25,
+          "default": 250
+        },
+        {
+          "id": "speed",
+          "label": "Flow speed",
+          "min": 0.05,
+          "max": 2,
+          "step": 0.05,
+          "default": 0.5
+        }
+      ]
+    },
+    {
+      "id": "flood",
+      "category": "animation",
+      "title": "Flood Spread",
+      "description": "A disc-shaped water surface expands outward and rises upward at the same time, with a bright ring at its edge. Expresses a flooded area, spreading impact, infection propagation, or coverage growth.",
+      "prompt": "At <b>[location]</b>, flood once every <b>[5s]</b>: the water surface expands from 0 to <b>[2000m]</b>, water level simultaneously rising from 0 to <b>[200m]</b>, with a bright edge ring.",
+      "tech": "Disc radius expansion + Z-axis rise + bright edge ring, regenerating on a fixed period",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 120.425,
+        "lat": 23.4181,
+        "city": "Bazhang River"
+      },
+      "params": [
+        {
+          "id": "maxR",
+          "label": "Max (m)",
+          "min": 300,
+          "max": 5000,
+          "step": 100,
+          "default": 2500
+        },
+        {
+          "id": "maxRise",
+          "label": "Water level (m)",
+          "min": 50,
+          "max": 800,
+          "step": 25,
+          "default": 250
+        },
+        {
+          "id": "period",
+          "label": "Period (s)",
+          "min": 2,
+          "max": 12,
+          "step": 0.5,
+          "default": 5
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "category": "animation",
+      "title": "Feedback Loop",
+      "description": "5 nodes linked in a ring, with a looping light particle expressing positive/negative feedback, a dependency cycle, subscription renewal, or process reflux. Change the node count to represent a different order of relationship.",
+      "prompt": "Lay out a <b>[1200m]</b> wide feedback loop at <b>[location]</b>, <b>[5]</b> nodes in a ring, <b>[6]</b> light particles looping clockwise.",
+      "tech": "5 nodes arranged in a circle + slightly curved TubeGeometry connections + a light particle looping around",
+      "sourceFile": "src/showcase/effects/animation.js",
+      "location": {
+        "lng": 120.7794,
+        "lat": 22.1989,
+        "city": "Mudan Reservoir"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Extent (m)",
+          "min": 300,
+          "max": 3000,
+          "step": 50,
+          "default": 1300
+        },
+        {
+          "id": "nodeSize",
+          "label": "Node size (m)",
+          "min": 50,
+          "max": 400,
+          "step": 10,
+          "default": 180
+        },
+        {
+          "id": "speed",
+          "label": "Flow speed",
+          "min": 0.05,
+          "max": 2,
+          "step": 0.05,
+          "default": 0.6
+        }
+      ]
+    },
+    {
+      "id": "skirt",
+      "category": "shader",
+      "title": "Skirt Sway (Vertex Wave)",
+      "description": "In the vertex shader, each vertex gets a horizontal offset based on \"height + time\" → the whole shape sways like a jellyfish / sea anemone / curtain in the wind. Displacement amplitude is adjustable.",
+      "prompt": "Erect a <b>[pink]</b> cylinder at <b>[location]</b> (400m tall, 100m radius), top stays still while the bottom sways up to 30m, like a swaying jellyfish.",
+      "tech": "Cylinder + vertex shader uses sin(z + time) for horizontal displacement",
+      "sourceFile": "src/showcase/effects/shader.js",
+      "location": {
+        "lng": 120.8214,
+        "lat": 24.5602,
+        "city": "Miaoli"
+      },
+      "params": [
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 100,
+          "max": 1200,
+          "step": 20,
+          "default": 500
+        },
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 30,
+          "max": 400,
+          "step": 10,
+          "default": 120
+        },
+        {
+          "id": "amp",
+          "label": "Sway (m)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 40
+        }
+      ]
+    },
+    {
+      "id": "flow",
+      "category": "shader",
+      "title": "Flowing Gradient",
+      "description": "Uses sin/sawtooth in the fragment shader to create color bands, with uv offset over time → looks like flowing energy. The same technique can flow horizontally to represent \"data transfer\".",
+      "prompt": "Erect a <b>[600m]</b> tall cylinder at <b>[location]</b>, with <b>[3]</b> upward-flowing <b>[blue-purple gradient]</b> color bands inside, moving one body-length per second.",
+      "tech": "Cylinder + fragment shader uses uv.y - time for upward-flowing color bands",
+      "sourceFile": "src/showcase/effects/shader.js",
+      "location": {
+        "lng": 120.53,
+        "lat": 23.7,
+        "city": "Yunlin"
+      },
+      "params": [
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 200,
+          "max": 1500,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 30,
+          "max": 300,
+          "step": 5,
+          "default": 80
+        },
+        {
+          "id": "speed",
+          "label": "Flow speed",
+          "min": 0,
+          "max": 3,
+          "step": 0.1,
+          "default": 0.6
+        },
+        {
+          "id": "bands",
+          "label": "Bands",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "default": 3
+        }
+      ]
+    },
+    {
+      "id": "aurora",
+      "category": "shader",
+      "title": "Aurora Ribbon",
+      "description": "A long plane floats high in the sky; the vertex shader makes it ripple like a curtain, while gradient color + UV scrolling in the fragment shader = aurora. Change the colors for clouds, haze fronts, or sound waves.",
+      "prompt": "Lay a <b>[green-purple]</b> ribbon <b>[3500m]</b> long and <b>[700m]</b> tall at <b>[2200m]</b> altitude above <b>[location]</b>, rippling side to side + colors scrolling vertically, additive blending.",
+      "tech": "High-altitude PlaneGeometry + vertex shader sine wave + UV-scrolling color bands",
+      "sourceFile": "src/showcase/effects/shader.js",
+      "location": {
+        "lng": 120.9577,
+        "lat": 23.4727,
+        "city": "Yushan"
+      },
+      "params": [
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 500,
+          "max": 5000,
+          "step": 100,
+          "default": 2200
+        },
+        {
+          "id": "length",
+          "label": "Length (m)",
+          "min": 500,
+          "max": 8000,
+          "step": 100,
+          "default": 3500
+        },
+        {
+          "id": "height",
+          "label": "Curtain height (m)",
+          "min": 100,
+          "max": 2000,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "amp",
+          "label": "Wave amplitude",
+          "min": 0,
+          "max": 0.5,
+          "step": 0.01,
+          "default": 0.18
+        }
+      ]
+    },
+    {
+      "id": "flag",
+      "category": "shader",
+      "title": "Flag Wave",
+      "description": "A pole plus a flag cloth that ripples in the wind. The vertex shader keeps uv.x=0 (the pole edge) still while uv.x=1 (the free edge) sways the most = a realistic waving-flag feel.",
+      "prompt": "Erect a <b>[400m]</b> tall flagpole at <b>[location]</b> with a <b>[300m×200m]</b> <b>[red]</b> flag cloth, the free edge swaying widely in the wind.",
+      "tech": "Cylinder flagpole + PlaneGeometry flag cloth + vertex shader sin displacement growing with uv.x",
+      "sourceFile": "src/showcase/effects/shader.js",
+      "location": {
+        "lng": 120.3956,
+        "lat": 23.1244,
+        "city": "Erliao"
+      },
+      "params": [
+        {
+          "id": "poleHeight",
+          "label": "Pole height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 500
+        },
+        {
+          "id": "flagW",
+          "label": "Flag width (m)",
+          "min": 100,
+          "max": 800,
+          "step": 25,
+          "default": 350
+        },
+        {
+          "id": "flagH",
+          "label": "Flag height (m)",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 220
+        },
+        {
+          "id": "wind",
+          "label": "Wind",
+          "min": 0,
+          "max": 0.5,
+          "step": 0.02,
+          "default": 0.18
+        }
+      ]
+    },
+    {
+      "id": "particles",
+      "category": "particles",
+      "title": "Particle Fountain",
+      "description": "Each particle has its own speed and lifecycle; when it reaches the top or burns out it respawns at the bottom. Change the direction and it becomes rain, or scatter it in all directions for a firework explosion.",
+      "prompt": "At <b>[location]</b>, shoot up <b>[300]</b> upward <b>[yellow-green]</b> light particles, max height <b>[400m]</b>, fading out and respawning at the top.",
+      "tech": "Points + BufferGeometry with dynamic position updates / respawn",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 120.4866,
+        "lat": 22.67,
+        "city": "Pingtung"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 50,
+          "max": 1000,
+          "step": 50,
+          "default": 300
+        },
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 20,
+          "default": 500
+        },
+        {
+          "id": "size",
+          "label": "Size",
+          "min": 1,
+          "max": 30,
+          "step": 1,
+          "default": 8
+        }
+      ]
+    },
+    {
+      "id": "firework",
+      "category": "particles",
+      "title": "Firework Burst",
+      "description": "Particles burst from a single point in all directions at once, then gravity pulls them down. The whole batch respawns every few seconds for continuous fireworks. Change the color for different festival / alert effects.",
+      "prompt": "At <b>[location]</b>, <b>[500m]</b> up in the sky, every <b>[2s]</b> burst <b>[150]</b> particles outward in all directions + fall under gravity, fading out within 1.5s, random color each time.",
+      "tech": "InstancedMesh particles + random spherical direction + gravity + synchronized batch respawn",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 120.7964,
+        "lat": 21.9466,
+        "city": "Kenting"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 30,
+          "max": 300,
+          "step": 10,
+          "default": 150
+        },
+        {
+          "id": "speed",
+          "label": "Speed",
+          "min": 100,
+          "max": 1000,
+          "step": 25,
+          "default": 350
+        },
+        {
+          "id": "altitude",
+          "label": "Center (m)",
+          "min": 100,
+          "max": 2000,
+          "step": 50,
+          "default": 600
+        },
+        {
+          "id": "interval",
+          "label": "Interval (s)",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2
+        }
+      ]
+    },
+    {
+      "id": "ballistic",
+      "category": "particles",
+      "title": "Ballistic Motion",
+      "description": "Multiple balls launch at random initial velocity and trace a parabola under gravity. Can express fountain droplets, ballistic trajectories, projectiles, or falling leaves. Reverse gravity for a buoyancy effect.",
+      "prompt": "At <b>[location]</b>, launch <b>[20]</b> balls at <b>[350m/s]</b> initial speed, random horizontal direction, 30-45 deg elevation angle, gravity <b>[200m/s2]</b>, respawning on landing.",
+      "tech": "Sphere + physics integration (v += g*dt; pos += v*dt) + respawn on landing",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 121.955,
+        "lat": 24.8329,
+        "city": "Guishan Island"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 5,
+          "max": 50,
+          "step": 1,
+          "default": 20
+        },
+        {
+          "id": "speed",
+          "label": "Initial Speed",
+          "min": 100,
+          "max": 800,
+          "step": 25,
+          "default": 400
+        },
+        {
+          "id": "size",
+          "label": "Diameter (m)",
+          "min": 30,
+          "max": 300,
+          "step": 10,
+          "default": 100
+        }
+      ]
+    },
+    {
+      "id": "tornado",
+      "category": "particles",
+      "title": "Tornado",
+      "description": "Particles are distributed on a spiral cylinder surface, rotating quickly around the center while slowly rising. The radius varying with height determines the shape (funnel / spindle / cylinder). Change the density for a sandstorm / typhoon.",
+      "prompt": "At <b>[location]</b>, spin up a <b>[250]</b>-particle tornado, <b>[1000m]</b> tall, <b>[100m]</b> base diameter and <b>[350m]</b> top diameter, <b>[1.2 rev]</b> per second.",
+      "tech": "InstancedMesh particles + (cos, sin, z) spiral coordinates + radius linearly varying with height",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 121.5394,
+        "lat": 22.0556,
+        "city": "Lanyu"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 250
+        },
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 200,
+          "max": 2000,
+          "step": 50,
+          "default": 1000
+        },
+        {
+          "id": "rBottom",
+          "label": "Base Diameter (m)",
+          "min": 30,
+          "max": 500,
+          "step": 10,
+          "default": 100
+        },
+        {
+          "id": "rTop",
+          "label": "Top Diameter (m)",
+          "min": 30,
+          "max": 800,
+          "step": 10,
+          "default": 350
+        },
+        {
+          "id": "spin",
+          "label": "Rev/s",
+          "min": 0.1,
+          "max": 4,
+          "step": 0.1,
+          "default": 1.2
+        }
+      ]
+    },
+    {
+      "id": "meteor",
+      "category": "particles",
+      "title": "Meteor Trail",
+      "description": "The head streaks diagonally while glow spheres are laid down along its history behind it. Set gravity to 0 for a bullet / missile; change the head color for a comet. An earlier version of this project's ship blips used a similar structure.",
+      "prompt": "At <b>[location]</b>, launch a <b>[white]</b> meteor from <b>[1500m]</b> altitude, <b>[25]</b> trail particles shrinking and fading, respawning on landing.",
+      "tech": "A head glow sphere + a shrinking trail of glow spheres behind it + parabolic trajectory + respawn on landing",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 121.27,
+        "lat": 24.1333,
+        "city": "Hehuanshan"
+      },
+      "params": [
+        {
+          "id": "speed",
+          "label": "Initial Speed",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "trailCount",
+          "label": "Trail Count",
+          "min": 5,
+          "max": 40,
+          "step": 1,
+          "default": 25
+        },
+        {
+          "id": "headSize",
+          "label": "Head Diameter (m)",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 180
+        }
+      ]
+    },
+    {
+      "id": "galaxy",
+      "category": "particles",
+      "title": "Spiral Galaxy",
+      "description": "Particles are distributed on spiral arms, rotating faster on the inside and slower on the outside, forming a galactic swirl. Change the arm count for different galaxy types (2, 3, 4 arms). Add a glowing center sphere for a black hole.",
+      "prompt": "At <b>[location]</b>, float a <b>[2000m]</b>-wide <b>[800]</b>-particle spiral galaxy with <b>[4]</b> spiral arms, rotating faster inside and slower outside.",
+      "tech": "InstancedMesh particles distributed across 4 logarithmic spiral arms + differential rotation (fast inside, slow outside)",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 120.4344,
+        "lat": 24.0517,
+        "city": "Lukang"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 800
+        },
+        {
+          "id": "radius",
+          "label": "Range (m)",
+          "min": 500,
+          "max": 4000,
+          "step": 100,
+          "default": 2000
+        },
+        {
+          "id": "spin",
+          "label": "Rotation Speed",
+          "min": 0,
+          "max": 2,
+          "step": 0.05,
+          "default": 0.5
+        },
+        {
+          "id": "dotSize",
+          "label": "Particle Size (m)",
+          "min": 5,
+          "max": 60,
+          "step": 1,
+          "default": 20
+        }
+      ]
+    },
+    {
+      "id": "snow",
+      "category": "particles",
+      "title": "Falling Particles (Snow / Rain)",
+      "description": "Particles fall continuously from above and respawn at the top once they hit the ground. Change the color for rain, snow, ash, cherry blossom petals, or confetti. Wind is a sine-wave lateral sway.",
+      "prompt": "At <b>[location]</b>, <b>[1500m]</b> altitude within a <b>[2000m]</b> range, continuously drop <b>[600]</b> white snowflakes with a light side wind sway, respawning after landing.",
+      "tech": "InstancedMesh particles fall continuously + respawn at the top after hitting the ground + sine-wave wind offset",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 121.543,
+        "lat": 24.497,
+        "city": "Taipingshan"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 700
+        },
+        {
+          "id": "spread",
+          "label": "Range (m)",
+          "min": 500,
+          "max": 4000,
+          "step": 100,
+          "default": 2200
+        },
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 500,
+          "max": 3500,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "speed",
+          "label": "Fall Speed",
+          "min": 0.05,
+          "max": 1.5,
+          "step": 0.05,
+          "default": 0.35
+        },
+        {
+          "id": "wind",
+          "label": "Wind",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.25
+        }
+      ]
+    },
+    {
+      "id": "confetti",
+      "category": "particles",
+      "title": "Confetti",
+      "description": "Colored small planes fall while spinning on their own axes -- party confetti. Feels more 'floaty' than snow because a flat plane has area affected by wind. Expresses celebration, reward, or festivity.",
+      "prompt": "At <b>[location]</b>, <b>[1000m]</b> altitude, drift <b>[120]</b> colored rectangular confetti pieces within range, slowly spinning + drifting with the wind, respawning on landing.",
+      "tech": "Multiple PlaneGeometry pieces each with their own color + independent rotation axes + gravity fall",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 121.7733,
+        "lat": 24.8237,
+        "city": "Jiaoxi"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Pieces",
+          "min": 30,
+          "max": 250,
+          "step": 10,
+          "default": 120
+        },
+        {
+          "id": "spread",
+          "label": "Range (m)",
+          "min": 300,
+          "max": 3000,
+          "step": 100,
+          "default": 1500
+        },
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 300,
+          "max": 2500,
+          "step": 100,
+          "default": 1300
+        }
+      ]
+    },
+    {
+      "id": "vortex",
+      "category": "particles",
+      "title": "Black Hole Vortex",
+      "description": "Particles spiral inward from the outer edge, get pulled into the center, then respawn at the edge -- black hole / vortex / drain. Dark center sphere + surrounding particles speed up as they approach it.",
+      "prompt": "At <b>[location]</b>, build a black hole with a <b>[1500m]</b> radius, <b>[400]</b> <b>[pink]</b> particles spiraling inward, dark core <b>[200m]</b>.",
+      "tech": "Dark center sphere + outer particles spiral inward + respawn at the outer edge on reaching the center",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 119.5,
+        "lat": 23.3582,
+        "city": "Wang'an"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 100,
+          "max": 800,
+          "step": 25,
+          "default": 450
+        },
+        {
+          "id": "radius",
+          "label": "Range (m)",
+          "min": 500,
+          "max": 4000,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "coreSize",
+          "label": "Core (m)",
+          "min": 50,
+          "max": 600,
+          "step": 25,
+          "default": 250
+        },
+        {
+          "id": "speed",
+          "label": "Suction Speed",
+          "min": 0.05,
+          "max": 1.5,
+          "step": 0.05,
+          "default": 0.3
+        }
+      ]
+    },
+    {
+      "id": "firework2",
+      "category": "particles",
+      "title": "Multi-stage Firework (Rise + Burst)",
+      "description": "More realistic than a single explosion: the rocket rises first -> bursts at the peak -> particles fall and fade -> relaunches with a new color. A complete lifecycle -- a festival fireworks show.",
+      "prompt": "At <b>[location]</b>, every <b>[3s]</b> cycle: rocket rises to <b>[800m]</b> (with trail) -> bursts into <b>[150]</b> particles -> fades out over 1.5s, random color each time.",
+      "tech": "Stage 1: rocket + trail rising; Stage 2: burst particles + gravity fall",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 120.29,
+        "lat": 22.6122,
+        "city": "Cijin"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 30,
+          "max": 300,
+          "step": 10,
+          "default": 150
+        },
+        {
+          "id": "speed",
+          "label": "Burst Speed",
+          "min": 100,
+          "max": 800,
+          "step": 25,
+          "default": 350
+        },
+        {
+          "id": "peak",
+          "label": "Peak Height (m)",
+          "min": 200,
+          "max": 2500,
+          "step": 50,
+          "default": 900
+        },
+        {
+          "id": "period",
+          "label": "Period (s)",
+          "min": 1.5,
+          "max": 8,
+          "step": 0.2,
+          "default": 3.5
+        }
+      ]
+    },
+    {
+      "id": "waterfall",
+      "category": "particles",
+      "title": "Waterfall",
+      "description": "Particles fall continuously from a narrow region at the top, accelerating and spreading wider as they go down -- a waterfall. Change the color for lava or a mineral flow. The width parameter controls the volume of water.",
+      "prompt": "At <b>[location]</b>, drop <b>[500]</b> pale blue particles from <b>[1500m]</b> altitude, narrow at the top spreading out to <b>[600m]</b> wide at the bottom.",
+      "tech": "InstancedMesh particles + accelerating fall (life-squared simulates gravity) + spreads wider going down",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 121.5512,
+        "lat": 24.8625,
+        "city": "Wulai"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 100,
+          "max": 1000,
+          "step": 25,
+          "default": 600
+        },
+        {
+          "id": "width",
+          "label": "Width (m)",
+          "min": 50,
+          "max": 800,
+          "step": 25,
+          "default": 250
+        },
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 300,
+          "max": 2500,
+          "step": 50,
+          "default": 1500
+        }
+      ]
+    },
+    {
+      "id": "starfield",
+      "category": "particles",
+      "title": "Star Field",
+      "description": "Random star points covering the sky overhead + a twinkle effect. Add an angular offset to see a Milky Way band. Switch to a lower hemisphere for bioluminescent sea creatures.",
+      "prompt": "At <b>[location]</b>, overhead scatter <b>[1200]</b> star points over a <b>[3000m radius]</b> hemisphere, each twinkling.",
+      "tech": "InstancedMesh distributed randomly over an upper hemisphere + sine-wave twinkle sizing",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 120.6829,
+        "lat": 23.976,
+        "city": "Caotun"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Star Count",
+          "min": 200,
+          "max": 1500,
+          "step": 50,
+          "default": 1200
+        },
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 500,
+          "max": 5000,
+          "step": 100,
+          "default": 3500
+        }
+      ]
+    },
+    {
+      "id": "cascade",
+      "category": "particles",
+      "title": "Cascade Release",
+      "description": "Water releases tier by tier from a 3-tier reservoir, top to bottom, with particles falling between each tier. Expresses cascading reservoirs, upstream/downstream relationships, cascading processing, or a waterfall pipeline.",
+      "prompt": "At <b>[location]</b>, lay out a <b>[3]</b>-tier cascade, each tier <b>[400m]</b> radius and <b>[200m]</b> tier height, particles falling tier by tier from top to bottom.",
+      "tech": "3-tier disc platforms + 3 InstancedMesh particle streams (each with a slight parabolic arc)",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 121.0181,
+        "lat": 23.8597,
+        "city": "Wujie"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Tier Radius (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 500
+        },
+        {
+          "id": "tierHeight",
+          "label": "Tier Height (m)",
+          "min": 50,
+          "max": 800,
+          "step": 25,
+          "default": 250
+        }
+      ]
+    },
+    {
+      "id": "evap",
+      "category": "particles",
+      "title": "Evaporation Rise",
+      "description": "Particles rise slowly from a wide base surface with a slight drift -- water surface evaporation / heat dissipation / a scent drifting. Reverse of falling snow, more diffuse than a tornado, slower and softer than a fountain.",
+      "prompt": "At <b>[location]</b>, from a <b>[1500m]</b> wide base surface, slowly rise <b>[200]</b> fine particles up to <b>[800m]</b> high, fading and growing bigger the higher they go.",
+      "tech": "InstancedMesh particles rising slowly from a wide base + slight lateral drift + growing bigger going up",
+      "sourceFile": "src/showcase/effects/particles.js",
+      "location": {
+        "lng": 120.8236,
+        "lat": 24.4444,
+        "city": "Liyutan Reservoir"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 50,
+          "max": 400,
+          "step": 10,
+          "default": 200
+        },
+        {
+          "id": "baseRadius",
+          "label": "Base Radius (m)",
+          "min": 200,
+          "max": 3000,
+          "step": 100,
+          "default": 1500
+        },
+        {
+          "id": "maxHeight",
+          "label": "Height (m)",
+          "min": 200,
+          "max": 2500,
+          "step": 50,
+          "default": 800
+        },
+        {
+          "id": "rise",
+          "label": "Rise Speed",
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "default": 0.6
+        }
+      ]
+    },
+    {
+      "id": "flowline",
+      "category": "line",
+      "title": "Flow Line",
+      "description": "Draws a geographic line with several glowing orbs moving along it to express \"data/logistics flow\". Density, speed, and direction are all adjustable. The train blips in this project use this exact pattern.",
+      "prompt": "Draw a <b>[cyan]</b> line from <b>[Keelung]</b> to <b>[Su-ao]</b>, with <b>[5]</b> glowing orbs continuously flowing from start to end at <b>[1/8 of the full length per second]</b>.",
+      "tech": "Line geometry + glowing orbs moving along the line (position = lerp between start and end)",
+      "sourceFile": "src/showcase/effects/line.js",
+      "location": {
+        "lng": 121.739,
+        "lat": 25.1276,
+        "city": "Keelung -> Su-ao"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Orb count",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "default": 6
+        },
+        {
+          "id": "speed",
+          "label": "Speed",
+          "min": 0.05,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.2
+        },
+        {
+          "id": "size",
+          "label": "Orb diameter (m)",
+          "min": 50,
+          "max": 800,
+          "step": 25,
+          "default": 200
+        }
+      ],
+      "lineEnd": {
+        "lng": 121.8536,
+        "lat": 24.5946
+      },
+      "isLine": true
+    },
+    {
+      "id": "arc",
+      "category": "line",
+      "title": "OD Arc (Bezier Arc)",
+      "description": "Connects two points with a parabolic arc, arc height scaled by distance. Flights, logistics, money flow, and social connections all use this pattern. Stack multiple arcs to form an O-D matrix.",
+      "prompt": "Draw a <b>[pink]</b> parabolic arc from <b>[point A]</b> to <b>[point B]</b> (arc height = 30% of distance), with <b>[4]</b> glowing orbs continuously flowing from A to B.",
+      "tech": "QuadraticBezierCurve3 + glowing orbs along the line (visualizes an O->D pair)",
+      "sourceFile": "src/showcase/effects/line.js",
+      "location": {
+        "lng": 121.5654,
+        "lat": 25.033,
+        "city": "Taipei <-> Penghu"
+      },
+      "params": [
+        {
+          "id": "arcHeight",
+          "label": "Arc height ratio",
+          "min": 0.05,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.3
+        },
+        {
+          "id": "speed",
+          "label": "Speed",
+          "min": 0.05,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.25
+        },
+        {
+          "id": "count",
+          "label": "Orb count",
+          "min": 1,
+          "max": 12,
+          "step": 1,
+          "default": 4
+        },
+        {
+          "id": "size",
+          "label": "Orb diameter (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 500
+        }
+      ],
+      "lineEnd": {
+        "lng": 119.5667,
+        "lat": 23.5667
+      },
+      "isArc": true
+    },
+    {
+      "id": "network",
+      "category": "line",
+      "title": "Network Web",
+      "description": "Multiple nodes connected to each other, with pulses traveling along the edges to represent information/logistics/communication flow. Node count, edge density, and propagation speed are all adjustable. Used for social graphs, local networks, or blockchain nodes.",
+      "prompt": "Lay out <b>[7]</b> nodes at <b>[location]</b> (hexagon + center), fully connect every pair, and have <b>[14]</b> white pulses propagate along the edges at random speeds.",
+      "tech": "Node orbs + all-pairs connecting lines + pulses propagating along the edges (graph network)",
+      "sourceFile": "src/showcase/effects/line.js",
+      "location": {
+        "lng": 120.9675,
+        "lat": 24.8138,
+        "city": "Hsinchu"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 200,
+          "max": 3500,
+          "step": 100,
+          "default": 1200
+        },
+        {
+          "id": "nodeSize",
+          "label": "Node (m)",
+          "min": 50,
+          "max": 500,
+          "step": 25,
+          "default": 180
+        },
+        {
+          "id": "pulseCount",
+          "label": "Pulses",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "default": 14
+        },
+        {
+          "id": "speed",
+          "label": "Speed",
+          "min": 0.05,
+          "max": 1.5,
+          "step": 0.05,
+          "default": 0.4
+        }
+      ]
+    },
+    {
+      "id": "linechart",
+      "category": "line",
+      "title": "3D Line Chart",
+      "description": "12 data points connected into a polyline, with a marker orb at each point. Z height is animated with sin to simulate a time series. Swap in a real data array and this becomes a time-series chart.",
+      "prompt": "Draw a <b>[12-point]</b> polyline at <b>[location]</b> (total length <b>[2000m]</b>), with <b>[yellow]</b> markers at each point, Z height animating to simulate a time series.",
+      "tech": "BufferGeometry polyline + small marker orb per node + Z-height driven by sin",
+      "sourceFile": "src/showcase/effects/line.js",
+      "location": {
+        "lng": 120.4825,
+        "lat": 22.8825,
+        "city": "Qishan"
+      },
+      "params": [
+        {
+          "id": "length",
+          "label": "Length (m)",
+          "min": 500,
+          "max": 4000,
+          "step": 100,
+          "default": 2200
+        },
+        {
+          "id": "maxH",
+          "label": "Height (m)",
+          "min": 50,
+          "max": 1000,
+          "step": 25,
+          "default": 500
+        },
+        {
+          "id": "markerSize",
+          "label": "Marker diameter (m)",
+          "min": 20,
+          "max": 200,
+          "step": 5,
+          "default": 60
+        }
+      ]
+    },
+    {
+      "id": "watershed",
+      "category": "line",
+      "title": "Watershed Tree",
+      "description": "A central trunk splits into multiple layers of branches, with pulses flowing from the leaf tips toward the center -- expressing watershed convergence, neural signaling, or signal aggregation. Adjust depth/branches to change the branching density.",
+      "prompt": "Lay out a watershed tree spanning <b>[1500m]</b> at <b>[location]</b>, with <b>[4 directions]</b> each recursing <b>[3 levels]</b> of branches, pulses flowing from the leaf tips back to the center, plus a pulsing core.",
+      "tech": "Recursively generated tree structure (4 directions x 3 levels) + pulses flowing from the branches toward the center",
+      "sourceFile": "src/showcase/effects/line.js",
+      "location": {
+        "lng": 121.5891,
+        "lat": 24.9011,
+        "city": "Feitsui Reservoir"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Span (m)",
+          "min": 300,
+          "max": 4000,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "speed",
+          "label": "Flow speed",
+          "min": 0.05,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.3
+        },
+        {
+          "id": "coreSize",
+          "label": "Core (m)",
+          "min": 50,
+          "max": 500,
+          "step": 25,
+          "default": 250
+        },
+        {
+          "id": "dotSize",
+          "label": "Dot diameter (m)",
+          "min": 20,
+          "max": 200,
+          "step": 5,
+          "default": 70
+        }
+      ]
+    },
+    {
+      "id": "sankey",
+      "category": "line",
+      "title": "Sankey Flow Ribbon",
+      "description": "A thick tube between two points, where tube thickness represents flow volume and surface stripes scroll toward the destination -- a \"scaled flow\" of material/water/capital. The 3D version of a Sankey diagram.",
+      "prompt": "Draw a <b>[200m]</b> thick <b>[cyan]</b> flow ribbon from <b>[A]</b> to <b>[B]</b>, surface stripes scrolling toward the destination, arc height at 20% of distance.",
+      "tech": "QuadraticBezierCurve3 + TubeGeometry (thickness = flow volume) + shader-animated scrolling stripes",
+      "sourceFile": "src/showcase/effects/line.js",
+      "location": {
+        "lng": 121.2569,
+        "lat": 24.8137,
+        "city": "Shimen -> Taoyuan"
+      },
+      "params": [
+        {
+          "id": "width",
+          "label": "Tube diameter (m)",
+          "min": 30,
+          "max": 600,
+          "step": 10,
+          "default": 220
+        },
+        {
+          "id": "speed",
+          "label": "Flow speed",
+          "min": 0.05,
+          "max": 2,
+          "step": 0.05,
+          "default": 0.5
+        }
+      ],
+      "lineEnd": {
+        "lng": 121.0734,
+        "lat": 25.0367
+      },
+      "isArc": true
+    },
+    {
+      "id": "converge",
+      "category": "line",
+      "title": "Multi-Source Converge",
+      "description": "Multiple outer sources (6 nodes) converging into a central core, with pulses moving from the periphery toward the center plus a pulsing core. Used for watershed convergence, resource aggregation, or community consolidation.",
+      "prompt": "Build <b>[6]</b> outer source nodes around a center at <b>[location]</b> spanning <b>[1500m]</b>, with <b>[3]</b> pulses continuously flowing inward along each radial line.",
+      "tech": "6 outer nodes + a central core + pulses propagating inward along the lines",
+      "sourceFile": "src/showcase/effects/line.js",
+      "location": {
+        "lng": 121.65,
+        "lat": 24.68,
+        "city": "Lanyang Plain"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 300,
+          "max": 3500,
+          "step": 100,
+          "default": 1500
+        },
+        {
+          "id": "coreSize",
+          "label": "Core (m)",
+          "min": 50,
+          "max": 500,
+          "step": 25,
+          "default": 250
+        },
+        {
+          "id": "sourceSize",
+          "label": "Source (m)",
+          "min": 30,
+          "max": 300,
+          "step": 10,
+          "default": 130
+        },
+        {
+          "id": "speed",
+          "label": "Flow speed",
+          "min": 0.05,
+          "max": 1.5,
+          "step": 0.05,
+          "default": 0.3
+        }
+      ]
+    },
+    {
+      "id": "bars",
+      "category": "viz",
+      "title": "3D Bar Chart",
+      "description": "The most basic form of data visualization. Each bar = one value (N periods, N categories), height changes dynamically, color gradients with the value. Can be arranged in a grid to represent matrix data.",
+      "prompt": "Place <b>[7]</b> side-by-side bars at <b>[location]</b>, width <b>[80m]</b>, spacing <b>[120m]</b>, max height <b>[700m]</b>, color gradient from low (blue) to high (red), values fluctuate over time.",
+      "tech": "BoxGeometry × N + dynamic scale.z + HSL color gradient",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 120.5421,
+        "lat": 24.0735,
+        "city": "Changhua"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 3,
+          "max": 20,
+          "step": 1,
+          "default": 7
+        },
+        {
+          "id": "width",
+          "label": "Width (m)",
+          "min": 30,
+          "max": 300,
+          "step": 10,
+          "default": 100
+        },
+        {
+          "id": "spacing",
+          "label": "Spacing ratio",
+          "min": 1,
+          "max": 3,
+          "step": 0.1,
+          "default": 1.6
+        },
+        {
+          "id": "maxH",
+          "label": "Max height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 800
+        }
+      ]
+    },
+    {
+      "id": "heatmap",
+      "category": "viz",
+      "title": "Heatmap 3D Surface",
+      "description": "Subdivides a plane into a grid; each vertex's height = value, color = height gradient. Simulates heatmaps, elevation, population density, signal strength. This project's temperature wave layer follows the same pattern.",
+      "prompt": "Lay a <b>[2500×2500m]</b> heatmap surface at <b>[location]</b>, <b>[48×48 subdivisions]</b>, height fluctuates dynamically via noise, color gradient from low (blue) to high (red).",
+      "tech": "High-subdivision PlaneGeometry + per-frame vertex z update + vertex color HSL",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 121.5985,
+        "lat": 24.1908,
+        "city": "Taroko"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Extent (m)",
+          "min": 500,
+          "max": 5000,
+          "step": 100,
+          "default": 2500
+        },
+        {
+          "id": "maxH",
+          "label": "Max height (m)",
+          "min": 50,
+          "max": 1500,
+          "step": 50,
+          "default": 600
+        },
+        {
+          "id": "speed",
+          "label": "Wave speed",
+          "min": 0,
+          "max": 3,
+          "step": 0.1,
+          "default": 0.5
+        }
+      ]
+    },
+    {
+      "id": "pie",
+      "category": "viz",
+      "title": "3D Pie Chart",
+      "description": "Uses the cylinder's theta parameters to cut wedges that form a pie. Each wedge can have a different height (dual encoding: angle = proportion / height = value).",
+      "prompt": "Place a <b>[600m]</b> radius pie at <b>[location]</b>, <b>[5]</b> segments (30% 22% 18% 16% 14%), each segment a different color + height extruded by value.",
+      "tech": "CylinderGeometry thetaStart/thetaLength sliced into wedges + independent height per wedge",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 120.9686,
+        "lat": 23.9619,
+        "city": "Puli"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 700
+        },
+        {
+          "id": "maxH",
+          "label": "Max height (m)",
+          "min": 50,
+          "max": 800,
+          "step": 25,
+          "default": 350
+        }
+      ]
+    },
+    {
+      "id": "polyextrude",
+      "category": "viz",
+      "title": "Block Extrude (Polygon Buildings)",
+      "description": "Extrudes 2D polygons (administrative districts, building footprints, commercial zones) into 3D. Same concept as this project's reservoir volume / station light-pillar layers. Multiple blocks combine into a city skyline.",
+      "prompt": "Lay <b>[6]</b> random rectangular polygons at <b>[location]</b>, each with height <b>[200-700m]</b>, HSL color gradient from low to high, simulating city blocks.",
+      "tech": "ExtrudeGeometry on Shape polygons -> simulates buildings/extruded zones (same idea as Mapbox fill-extrusion)",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 120.6253,
+        "lat": 24.3457,
+        "city": "Dajia"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Block count",
+          "min": 2,
+          "max": 10,
+          "step": 1,
+          "default": 6
+        },
+        {
+          "id": "size",
+          "label": "Extent (m)",
+          "min": 200,
+          "max": 2500,
+          "step": 50,
+          "default": 1500
+        },
+        {
+          "id": "maxH",
+          "label": "Max height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 700
+        }
+      ]
+    },
+    {
+      "id": "waveform",
+      "category": "viz",
+      "title": "Audio Waveform",
+      "description": "A row of bars whose height comes from superposed multi-frequency sin waves (simulating an FFT spectrum). Swap in real Web Audio analyser data and it becomes a music visualizer. Expresses sound, vibration, rhythm.",
+      "prompt": "Arrange <b>[48]</b> thin side-by-side bars at <b>[location]</b>, height from superposed multi-frequency sin waves simulating a waveform, max height <b>[500m]</b>, color gradient with amplitude.",
+      "tech": "Side-by-side BoxGeometry bars + multi-frequency sin superposition simulating a waveform + HSL color",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 120.3043,
+        "lat": 23.5755,
+        "city": "Beigang"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 16,
+          "max": 96,
+          "step": 4,
+          "default": 56
+        },
+        {
+          "id": "width",
+          "label": "Width (m)",
+          "min": 10,
+          "max": 200,
+          "step": 5,
+          "default": 40
+        },
+        {
+          "id": "maxH",
+          "label": "Max height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 50,
+          "default": 600
+        },
+        {
+          "id": "speed",
+          "label": "Speed",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "default": 1.5
+        }
+      ]
+    },
+    {
+      "id": "tank",
+      "category": "viz",
+      "title": "Storage Tank",
+      "description": "A cylindrical container + an inner water-level column + water-level color (low = red, high = green). Expresses reservoir storage volume, oil tanks, battery capacity, or storage-tank progress.",
+      "prompt": "Erect a <b>[400m]</b> radius, <b>[600m]</b> tall storage tank at <b>[location]</b>, water level auto-cycles from 0-100%, low = red, high = green.",
+      "tech": "Outer wireframe cylinder + inner water-level cylinder (scale.z = fillLevel) + HSL color",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 120.5181,
+        "lat": 23.2542,
+        "city": "Zengwen Reservoir"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 500
+        },
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 700
+        },
+        {
+          "id": "fillLevel",
+          "label": "Water level",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.6
+        },
+        {
+          "id": "autoFill",
+          "label": "Auto",
+          "min": 0,
+          "max": 1,
+          "step": 1,
+          "default": 1
+        }
+      ]
+    },
+    {
+      "id": "vessels",
+      "category": "viz",
+      "title": "Connected Vessels",
+      "description": "Three containers connected at the base; water levels converge toward the mean but with perturbation -- the communicating-vessels principle (Darcy's law). Expresses system equilibrium, cross-region water transfer, energy redistribution.",
+      "prompt": "Place <b>[3]</b> side-by-side containers at <b>[location]</b>, radius <b>[300m]</b>, height <b>[500m]</b>, connected by a pipe at the base, water levels move together but with perturbation.",
+      "tech": "3 side-by-side cylinder tanks + a connecting pipe at the base + water levels each driven by sin but converging toward the mean",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 121.1106,
+        "lat": 24.9706,
+        "city": "Xinwu"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 80,
+          "max": 800,
+          "step": 10,
+          "default": 320
+        },
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 600
+        }
+      ]
+    },
+    {
+      "id": "capacityarray",
+      "category": "viz",
+      "title": "Capacity Array",
+      "description": "N containers side by side, each showing an independent water level + color-coded alert. Expresses multi-station status (reservoir clusters, tank farms, battery packs, per-branch KPIs).",
+      "prompt": "Place <b>[8]</b> side-by-side containers at <b>[location]</b>, radius <b>[150m]</b>, height <b>[500m]</b>, each water level fluctuates independently, low = red, high = green.",
+      "tech": "N side-by-side cylinders + independent sin-driven water level per tank + HSL color (low = red, high = green)",
+      "sourceFile": "src/showcase/effects/viz.js",
+      "location": {
+        "lng": 120.8567,
+        "lat": 23.8094,
+        "city": "Shuili"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 3,
+          "max": 16,
+          "step": 1,
+          "default": 8
+        },
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 50,
+          "max": 400,
+          "step": 10,
+          "default": 180
+        },
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 100,
+          "max": 1200,
+          "step": 25,
+          "default": 550
+        }
+      ]
+    },
+    {
+      "id": "smoke",
+      "category": "atmospheric",
+      "title": "Volumetric Smoke",
+      "description": "10-15 semi-transparent spheres stacked together and drifting -> simulates smoke / cloud / pollution spread. Much cheaper than true volumetric rendering, but visually good enough. Change the color to turn it into cloud, fire, or haze.",
+      "prompt": "Emit <b>[12]</b> soft spheres of radius <b>[350m]</b> in <b>[grayish-white]</b> at <b>[location]</b>, slowly drifting upward + slight jitter + fading with altitude, normal blend opacity 0.18.",
+      "tech": "Multiple soft-edged sphere cluster + random jitter + slow upward drift + grows larger and fades with altitude",
+      "sourceFile": "src/showcase/effects/atmospheric.js",
+      "location": {
+        "lng": 120.2535,
+        "lat": 23.7531,
+        "city": "Mailiao"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 3,
+          "max": 25,
+          "step": 1,
+          "default": 12
+        },
+        {
+          "id": "size",
+          "label": "Diameter (m)",
+          "min": 100,
+          "max": 1000,
+          "step": 25,
+          "default": 400
+        },
+        {
+          "id": "rise",
+          "label": "Rise",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.3
+        },
+        {
+          "id": "spread",
+          "label": "Spread",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2
+        }
+      ]
+    },
+    {
+      "id": "noisecloud",
+      "category": "atmospheric",
+      "title": "Noise Cluster",
+      "description": "Noise functions determine each sphere's position -> an irregular cloud mass. Change the seed for different shapes. The same technique works for nebulae, flame peripheries, or fog fields.",
+      "prompt": "Scatter <b>[250]</b> small spheres of diameter <b>[80m]</b> at <b>[600m]</b> altitude above <b>[location]</b>, positions driven by noise, the whole cluster drifting slowly.",
+      "tech": "InstancedMesh spheres + positions driven by sin/cos noise function + slow drift",
+      "sourceFile": "src/showcase/effects/atmospheric.js",
+      "location": {
+        "lng": 121.4985,
+        "lat": 22.6667,
+        "city": "Green Island"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 250
+        },
+        {
+          "id": "spread",
+          "label": "Range (m)",
+          "min": 200,
+          "max": 2500,
+          "step": 50,
+          "default": 1000
+        },
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 0,
+          "max": 2000,
+          "step": 50,
+          "default": 600
+        },
+        {
+          "id": "drift",
+          "label": "Drift speed",
+          "min": 0,
+          "max": 2,
+          "step": 0.05,
+          "default": 0.3
+        }
+      ]
+    },
+    {
+      "id": "fog",
+      "category": "atmospheric",
+      "title": "Low Fog Layer",
+      "description": "Thin fog hugging the ground, flattened spheres scattered over a large area. Weaker than smoke, lower than cloud. Conveys morning mist, low-level haze, or a mysterious atmosphere.",
+      "prompt": "Lay a thin fog layer over a <b>[3000m]</b> range at <b>[200m]</b> altitude above <b>[location]</b>, <b>[20]</b> flattened soft spheres scattered, drifting slowly.",
+      "tech": "Flattened soft-edged sphere cluster + slow low-altitude drift (thinner and closer to the ground than smoke)",
+      "sourceFile": "src/showcase/effects/atmospheric.js",
+      "location": {
+        "lng": 121.7388,
+        "lat": 25.026,
+        "city": "Pingxi"
+      },
+      "params": [
+        {
+          "id": "count",
+          "label": "Count",
+          "min": 5,
+          "max": 30,
+          "step": 1,
+          "default": 18
+        },
+        {
+          "id": "spread",
+          "label": "Range (m)",
+          "min": 500,
+          "max": 5000,
+          "step": 100,
+          "default": 2800
+        },
+        {
+          "id": "altitude",
+          "label": "Altitude (m)",
+          "min": 50,
+          "max": 800,
+          "step": 25,
+          "default": 250
+        },
+        {
+          "id": "size",
+          "label": "Diameter (m)",
+          "min": 200,
+          "max": 1500,
+          "step": 50,
+          "default": 800
+        }
+      ]
+    },
+    {
+      "id": "text",
+      "category": "scene",
+      "title": "3D Text Label (Canvas Texture)",
+      "description": "Draw any text on a browser canvas -> use it as a texture on a plane -> it becomes a map label. Swap the text, change colors, add a background, add emoji. Simpler than TextGeometry, and any font works.",
+      "prompt": "Lay an <b>[800m]</b> long label at <b>[location]</b>, reading <b>[\"Sun Moon Lake\"]</b>, <b>[white text on a dark background]</b> + pink border, flat on the ground, visible from above.",
+      "tech": "Draw text on canvas -> CanvasTexture -> Plane (ground label)",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 120.9131,
+        "lat": 23.8569,
+        "city": "Sun Moon Lake"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Size (m)",
+          "min": 100,
+          "max": 3000,
+          "step": 50,
+          "default": 1000
+        },
+        {
+          "id": "lift",
+          "label": "Lift (m)",
+          "min": 0,
+          "max": 800,
+          "step": 10,
+          "default": 80
+        }
+      ]
+    },
+    {
+      "id": "dna",
+      "category": "scene",
+      "title": "DNA Double Helix",
+      "description": "Two symmetric helices with base pairs in between. Expresses genetics, intertwining, double-strand structure. Drop to 1 strand for a spring, change the pitch for a staircase, change the radius for a cable.",
+      "prompt": "Erect a <b>[1000m]</b> tall, <b>[200m]</b> radius double helix at <b>[location]</b>, <b>[5 turns]</b>, one base pair every 0.25 turn, the whole thing slowly rotating around the Z axis.",
+      "tech": "TubeGeometry following a CatmullRomCurve3 helix + short base-pair lines in between",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 118.3171,
+        "lat": 24.4321,
+        "city": "Kinmen"
+      },
+      "params": [
+        {
+          "id": "height",
+          "label": "Height (m)",
+          "min": 200,
+          "max": 2500,
+          "step": 50,
+          "default": 1200
+        },
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 50,
+          "max": 500,
+          "step": 10,
+          "default": 250
+        },
+        {
+          "id": "turns",
+          "label": "Turns",
+          "min": 2,
+          "max": 10,
+          "step": 0.5,
+          "default": 5
+        }
+      ]
+    },
+    {
+      "id": "scangrid",
+      "category": "scene",
+      "title": "Ground Scan Grid",
+      "description": "Cyberpunk-style base: a ground grid plus a beam sweeping from one side to the other. Add more sweeps with different phases. Expresses area monitoring, AI scanning, map construction, tactical overlays.",
+      "prompt": "Lay a <b>[2500m]</b> square grid at <b>[location]</b> (<b>[12x12 cells]</b>), a <b>[cyan]</b> beam sweeping from south to north every <b>[3 seconds]</b>.",
+      "tech": "Wireframe grid via LineSegments + one animated sweep LineSegments",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 120.0867,
+        "lat": 23.1481,
+        "city": "Qigu"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Side length (m)",
+          "min": 500,
+          "max": 5000,
+          "step": 100,
+          "default": 2500
+        },
+        {
+          "id": "divisions",
+          "label": "Divisions",
+          "min": 5,
+          "max": 30,
+          "step": 1,
+          "default": 12
+        },
+        {
+          "id": "period",
+          "label": "Period (s)",
+          "min": 1,
+          "max": 8,
+          "step": 0.5,
+          "default": 3
+        }
+      ]
+    },
+    {
+      "id": "shield",
+      "category": "scene",
+      "title": "Energy Shield",
+      "description": "A triangulated sphere = an energy shield / satellite dish / abstract geometric sculpture. Wireframe pulsing + rotation = sci-fi. Change detail for a denser mesh.",
+      "prompt": "Cover <b>[location]</b> with a <b>[600m]</b> radius <b>[green]</b> energy shield, triangulated wireframe + semi-transparent fill, slowly rotating around the Z axis with a pulsing wireframe.",
+      "tech": "IcosahedronGeometry detail=2 + semi-transparent fill + wireframe overlay",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 121.23,
+        "lat": 24.3833,
+        "city": "Snow Mountain"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Radius (m)",
+          "min": 200,
+          "max": 2500,
+          "step": 50,
+          "default": 800
+        },
+        {
+          "id": "spin",
+          "label": "Spin",
+          "min": 0,
+          "max": 2,
+          "step": 0.05,
+          "default": 0.3
+        }
+      ]
+    },
+    {
+      "id": "hexgrid",
+      "category": "scene",
+      "title": "Hex Grid Wave",
+      "description": "A hexagonal grid array tiles the ground, with opacity following sin(distance - time) outward from the center = expanding waves. Expresses area analysis, sensor networks, energy fields.",
+      "prompt": "Lay a <b>[2500m]</b> hex grid array over <b>[location]</b>, opacity rippling outward from the center in waves, <b>[1 wave per second]</b>.",
+      "tech": "Hexagon LineLoop x N tiling a disc + distance+time driven per-cell opacity wave",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 121.1303,
+        "lat": 22.9133,
+        "city": "Luye"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Range (m)",
+          "min": 500,
+          "max": 5000,
+          "step": 100,
+          "default": 2800
+        },
+        {
+          "id": "speed",
+          "label": "Wave speed",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2
+        }
+      ]
+    },
+    {
+      "id": "glitch",
+      "category": "scene",
+      "title": "Glitch Art",
+      "description": "Slice a cube into 12 horizontal layers, each periodically offset at random = VHS glitch / signal interference. A must-have for cyber/synthwave/vaporwave styles.",
+      "prompt": "Erect a <b>[400m]</b> cube at <b>[location]</b>, sliced into <b>[12 layers]</b>, 8 random-offset bursts per second at intensity <b>[2]</b>, alternating three colors.",
+      "tech": "Sliced BoxGeometry x N stacked + periodic random XY offset + multi-color",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 121.5611,
+        "lat": 25.1872,
+        "city": "Qixing Mountain"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Side length (m)",
+          "min": 100,
+          "max": 1500,
+          "step": 25,
+          "default": 500
+        },
+        {
+          "id": "intensity",
+          "label": "Offset",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "default": 2
+        }
+      ]
+    },
+    {
+      "id": "checker",
+      "category": "scene",
+      "title": "Floating Checker Tiles",
+      "description": "A checkerboard ground where each tile's Z rises and falls with sin over time = a rhythmic floating array. Expresses synchronized motion, matrix data, beat visualization.",
+      "prompt": "Lay an <b>[8x8 checkerboard]</b> at <b>[location]</b> (total side <b>[2000m]</b>), each tile's Z floating with sin, up to <b>[300m]</b> high.",
+      "tech": "8x8 PlaneGeometry black/white tiles + Z height driven by sin(r+c+t)",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 120.5414,
+        "lat": 22.8997,
+        "city": "Meinong"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Side length (m)",
+          "min": 500,
+          "max": 4000,
+          "step": 100,
+          "default": 2000
+        },
+        {
+          "id": "maxLift",
+          "label": "Float height (m)",
+          "min": 50,
+          "max": 800,
+          "step": 25,
+          "default": 300
+        }
+      ]
+    },
+    {
+      "id": "orbit",
+      "category": "scene",
+      "title": "Orbiting Satellites",
+      "description": "A central body with multiple satellites orbiting at different tilt angles = a planetary system, satellite cluster, or atomic model. Change the speed ratio to alter angular momentum.",
+      "prompt": "Place a <b>[1000m]</b> wide satellite system at <b>[location]</b>: a central <b>[300m]</b> blue body + <b>[5]</b> yellow satellites orbiting at different tilt angles.",
+      "tech": "Center sphere + 5 satellites each on a tilted orbit + visible orbit rings",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 121.6817,
+        "lat": 25.205,
+        "city": "Wanli"
+      },
+      "params": [
+        {
+          "id": "radius",
+          "label": "Range (m)",
+          "min": 300,
+          "max": 3000,
+          "step": 50,
+          "default": 1200
+        },
+        {
+          "id": "coreSize",
+          "label": "Core (m)",
+          "min": 50,
+          "max": 600,
+          "step": 10,
+          "default": 300
+        },
+        {
+          "id": "satSize",
+          "label": "Satellite (m)",
+          "min": 20,
+          "max": 300,
+          "step": 5,
+          "default": 100
+        }
+      ]
+    },
+    {
+      "id": "drought",
+      "category": "scene",
+      "title": "Drought Cracks",
+      "description": "Irregular cracks (with branches) radiating from the center, with a pulsing red ring at the center. Expresses drought, cracking ground, a warning zone, or a worsening affected area.",
+      "prompt": "Lay a <b>[1500m]</b> drought-crack warning over <b>[location]</b> (8 main cracks radiating from the center + random branches), a pulsing red ring at the center, severity 0-1 controls the severity.",
+      "tech": "Radiating crack lines via random walk from center (with branches) + pulsing center warning ring + severity-driven HSL",
+      "sourceFile": "src/showcase/effects/scene.js",
+      "location": {
+        "lng": 121.0044,
+        "lat": 24.7322,
+        "city": "Baoshan Reservoir"
+      },
+      "params": [
+        {
+          "id": "size",
+          "label": "Range (m)",
+          "min": 300,
+          "max": 4000,
+          "step": 100,
+          "default": 1800
+        },
+        {
+          "id": "severity",
+          "label": "Severity",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.7
+        }
+      ]
+    }
+  ]
+}

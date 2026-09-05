@@ -25,7 +25,9 @@
       "title": "Native circle layer vs custom Three.js layer",
       "settles": "Whether you need a custom layer at all. The same airports rendered both ways, switchable, with the hit-testing difference made visible.",
       "readFirst": "docs/00-start-here/decision-tree.md",
-      "implements": ["docs/00-start-here/decision-tree.md"],
+      "implements": [
+        "docs/00-start-here/decision-tree.md"
+      ],
       "status": "reproduced",
       "tests": 20,
       "screenshot": "examples/00-native-vs-custom/screenshots/globe.png",
@@ -37,14 +39,29 @@
         "CustomLayerInterface"
       ],
       "knobs": [
-        { "id": "mode", "type": "enum", "values": ["native", "custom", "both"], "default": "both", "effect": "Which layer is shown. 'both' proves the two render at identical positions." }
+        {
+          "id": "mode",
+          "type": "enum",
+          "values": [
+            "native",
+            "custom",
+            "both"
+          ],
+          "default": "both",
+          "effect": "Which layer is shown. 'both' proves the two render at identical positions."
+        }
       ],
       "teaches": [
         "Native layers project onto the globe by themselves; custom layers do not.",
         "queryRenderedFeatures sees native layers only — clicking the custom layer returns nothing, by design and with no workaround.",
         "CustomLayerInterface types source, layout, minzoom and maxzoom as never: no data-driven styling, no visibility toggle, no declarative zoom range."
       ],
-      "data": { "source": "OurAirports", "licence": "public domain", "file": "public/airports.json", "records": 1174 }
+      "data": {
+        "source": "OurAirports",
+        "licence": "public domain",
+        "file": "public/airports.json",
+        "records": 1174
+      }
     },
     {
       "id": "01-points-on-globe",
@@ -68,9 +85,33 @@
         "THREE.ShaderMaterial"
       ],
       "knobs": [
-        { "id": "size-mul", "type": "number", "min": 0.2, "max": 3, "step": 0.05, "default": 1, "effect": "Global multiplier on gl_PointSize." },
-        { "id": "opacity", "type": "number", "min": 0.1, "max": 1, "step": 0.05, "default": 0.9, "effect": "Layer alpha before additive blending." },
-        { "id": "core-boost", "type": "number", "min": 0, "max": 1, "step": 0.05, "default": 0.7, "effect": "How far each point's centre is pushed toward white. 0 keeps the source colour; high values read as a light source." }
+        {
+          "id": "size-mul",
+          "type": "number",
+          "min": 0.2,
+          "max": 3,
+          "step": 0.05,
+          "default": 1,
+          "effect": "Global multiplier on gl_PointSize."
+        },
+        {
+          "id": "opacity",
+          "type": "number",
+          "min": 0.1,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.9,
+          "effect": "Layer alpha before additive blending."
+        },
+        {
+          "id": "core-boost",
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.7,
+          "effect": "How far each point's centre is pushed toward white. 0 keeps the source colour; high values read as a light source."
+        }
       ],
       "teaches": [
         "The render arguments the public typings under-document, and what each is for.",
@@ -79,11 +120,31 @@
         "Three-band radial halo plus additive blending as a substitute for post-process bloom."
       ],
       "verifiedStates": [
-        { "zoom": 1.30, "projection": "globe", "transition": 0.0, "note": "on the sphere, far side culled" },
-        { "zoom": 5.32, "projection": "globe", "transition": 0.24, "note": "mid-blend, points still registered on their cities" },
-        { "zoom": 7.33, "projection": "mercator", "transition": 1.0, "note": "flat, early-out active" }
+        {
+          "zoom": 1.3,
+          "projection": "globe",
+          "transition": 0.0,
+          "note": "on the sphere, far side culled"
+        },
+        {
+          "zoom": 5.32,
+          "projection": "globe",
+          "transition": 0.24,
+          "note": "mid-blend, points still registered on their cities"
+        },
+        {
+          "zoom": 7.33,
+          "projection": "mercator",
+          "transition": 1.0,
+          "note": "flat, early-out active"
+        }
       ],
-      "data": { "source": "OurAirports", "licence": "public domain", "file": "public/airports.json", "records": 1174 }
+      "data": {
+        "source": "OurAirports",
+        "licence": "public domain",
+        "file": "public/airports.json",
+        "records": 1174
+      }
     },
     {
       "id": "02-arcs-on-globe",
@@ -91,14 +152,35 @@
       "title": "Great-circle arcs, and why lines cut through the planet",
       "settles": "Lines spanning long distances. Subdivision is the subject: the slider goes down to 2 so the failure is reproducible on demand.",
       "readFirst": "docs/01-hugging-the-globe/mapbox.md",
-      "implements": ["docs/01-hugging-the-globe/mapbox.md"],
+      "implements": [
+        "docs/01-hugging-the-globe/mapbox.md"
+      ],
       "status": "reproduced",
       "tests": 35,
       "screenshot": "examples/02-arcs-on-globe/screenshots/globe.png",
-      "usesApis": ["CustomLayerInterface", "THREE.LineSegments", "mapboxgl.MercatorCoordinate.fromLngLat"],
+      "usesApis": [
+        "CustomLayerInterface",
+        "THREE.LineSegments",
+        "mapboxgl.MercatorCoordinate.fromLngLat"
+      ],
       "knobs": [
-        { "id": "segments", "type": "integer", "min": 2, "max": 128, "default": 24, "effect": "Vertices per arc, not segments per arc. At 2 each arc is a chord straight through the planet — that is the bug this example exists to show." },
-        { "id": "arc-height", "type": "number", "min": 0, "max": 0.08, "step": 0.002, "default": 0.02, "effect": "Peak radial offset at the arc midpoint. Real cruising altitude is about 0.16% of Earth's radius and invisible; this is deliberate exaggeration." }
+        {
+          "id": "segments",
+          "type": "integer",
+          "min": 2,
+          "max": 128,
+          "default": 24,
+          "effect": "Vertices per arc, not segments per arc. At 2 each arc is a chord straight through the planet — that is the bug this example exists to show."
+        },
+        {
+          "id": "arc-height",
+          "type": "number",
+          "min": 0,
+          "max": 0.08,
+          "step": 0.002,
+          "default": 0.02,
+          "effect": "Peak radial offset at the arc midpoint. Real cruising altitude is about 0.16% of Earth's radius and invisible; this is deliberate exaggeration."
+        }
       ],
       "teaches": [
         "Vertices are projected, the segments between them are not. Subdivide anything spanning distance.",
@@ -106,8 +188,15 @@
         "Antipodal pairs need a separate branch (Rodrigues rotation) to avoid dividing by sin(pi).",
         "MercatorCoordinate.fromLngLat is not periodic, so longitude must be resolved per segment, not per vertex."
       ],
-      "counts": { "arcs": 190, "verticesAtDefault": 8740 },
-      "data": { "source": "OurAirports", "licence": "public domain", "note": "20 hand-picked hubs; the 190 O-D pairs are synthetic, not real routes." }
+      "counts": {
+        "arcs": 190,
+        "verticesAtDefault": 8740
+      },
+      "data": {
+        "source": "OurAirports",
+        "licence": "public domain",
+        "note": "20 hand-picked hubs; the 190 O-D pairs are synthetic, not real routes."
+      }
     },
     {
       "id": "03-areas-on-globe",
@@ -115,15 +204,47 @@
       "title": "Filled areas and outlines on a sphere",
       "settles": "Polygons, coverage circles and bounding boxes. Also: a fixed-radius circle is a small circle on a sphere and looks different at every latitude.",
       "readFirst": "docs/01-hugging-the-globe/mapbox.md",
-      "implements": ["docs/01-hugging-the-globe/mapbox.md"],
+      "implements": [
+        "docs/01-hugging-the-globe/mapbox.md"
+      ],
       "status": "reproduced",
       "tests": 15,
       "screenshot": "examples/03-areas-on-globe/screenshots/globe.png",
-      "usesApis": ["CustomLayerInterface", "THREE.Mesh", "THREE.LineLoop", "THREE.BufferGeometry"],
+      "usesApis": [
+        "CustomLayerInterface",
+        "THREE.Mesh",
+        "THREE.LineLoop",
+        "THREE.BufferGeometry"
+      ],
       "knobs": [
-        { "id": "segments", "type": "integer", "min": 1, "max": 64, "default": 32, "effect": "Subdivision per edge. Low values turn circles into visible polygons and bbox edges into chords." },
-        { "id": "radius-km", "type": "integer", "min": 100, "max": 3000, "step": 50, "default": 500, "effect": "Geodesic radius of all three demo circles. Above the distance to the pole, the near-polar circle wraps the pole and its boundary appears on the opposite meridian." },
-        { "id": "shape-mode", "type": "enum", "values": ["circles + bbox", "circles only", "bbox only"], "default": "circles + bbox", "effect": "Which generators are drawn." }
+        {
+          "id": "segments",
+          "type": "integer",
+          "min": 1,
+          "max": 64,
+          "default": 32,
+          "effect": "Subdivision per edge. Low values turn circles into visible polygons and bbox edges into chords."
+        },
+        {
+          "id": "radius-km",
+          "type": "integer",
+          "min": 100,
+          "max": 3000,
+          "step": 50,
+          "default": 500,
+          "effect": "Geodesic radius of all three demo circles. Above the distance to the pole, the near-polar circle wraps the pole and its boundary appears on the opposite meridian."
+        },
+        {
+          "id": "shape-mode",
+          "type": "enum",
+          "values": [
+            "circles + bbox",
+            "circles only",
+            "bbox only"
+          ],
+          "default": "circles + bbox",
+          "effect": "Which generators are drawn."
+        }
       ],
       "teaches": [
         "Polygon edges are chords too — subdivide them like any other line.",
@@ -136,7 +257,10 @@
         "Bounding boxes crossing the antimeridian interpolate the long way round; not detected, not split.",
         "A circle large enough to enclose a pole will self-intersect under fan triangulation."
       ],
-      "data": { "source": "generated at runtime", "licence": "n/a" }
+      "data": {
+        "source": "generated at runtime",
+        "licence": "n/a"
+      }
     },
     {
       "id": "04-moving-trajectory",
@@ -144,18 +268,72 @@
       "title": "Objects moving along paths, with timeline playback",
       "settles": "Geometry whose position changes every frame — the branch where ECEF cannot be precomputed and must be derived in the vertex shader.",
       "readFirst": "docs/01-hugging-the-globe/mapbox.md#unless-your-geometry-moves--then-do-it-in-the-shader",
-      "implements": ["docs/01-hugging-the-globe/mapbox.md", "docs/03-scaling-up/batched-trails.md"],
+      "implements": [
+        "docs/01-hugging-the-globe/mapbox.md",
+        "docs/03-scaling-up/batched-trails.md"
+      ],
       "status": "reproduced",
       "tests": 41,
       "screenshot": "examples/04-moving-trajectory/screenshots/globe.png",
-      "usesApis": ["CustomLayerInterface", "THREE.Points", "BufferAttribute.addUpdateRange", "map.triggerRepaint"],
+      "usesApis": [
+        "CustomLayerInterface",
+        "THREE.Points",
+        "BufferAttribute.addUpdateRange",
+        "map.triggerRepaint"
+      ],
       "knobs": [
-        { "id": "objects", "type": "integer", "min": 1, "max": 50, "default": 30, "effect": "Active object count via setDrawRange. Capacity is fixed at 50; objects are never created or destroyed." },
-        { "id": "trail-length", "type": "integer", "min": 10, "max": 150, "default": 80, "effect": "Fade window in the shader, not ring-buffer capacity. Capacity is fixed at 150 samples." },
-        { "id": "speed", "type": "number", "min": 0.1, "max": 4, "step": 0.1, "default": 1, "effect": "Simulation time multiplier." },
-        { "id": "size-mul", "type": "number", "min": 0.2, "max": 3, "step": 0.05, "default": 1, "effect": "Head point size multiplier." },
-        { "id": "opacity", "type": "number", "min": 0.1, "max": 1, "step": 0.05, "default": 0.9, "effect": "Layer alpha." },
-        { "id": "scrubber", "type": "number", "min": 0, "max": 100, "step": 0.1, "default": 0, "effect": "Timeline position as a percentage. Scrubbing backwards is supported: position is a pure function of time, not accumulated state." }
+        {
+          "id": "objects",
+          "type": "integer",
+          "min": 1,
+          "max": 50,
+          "default": 30,
+          "effect": "Active object count via setDrawRange. Capacity is fixed at 50; objects are never created or destroyed."
+        },
+        {
+          "id": "trail-length",
+          "type": "integer",
+          "min": 10,
+          "max": 150,
+          "default": 80,
+          "effect": "Fade window in the shader, not ring-buffer capacity. Capacity is fixed at 150 samples."
+        },
+        {
+          "id": "speed",
+          "type": "number",
+          "min": 0.1,
+          "max": 4,
+          "step": 0.1,
+          "default": 1,
+          "effect": "Simulation time multiplier."
+        },
+        {
+          "id": "size-mul",
+          "type": "number",
+          "min": 0.2,
+          "max": 3,
+          "step": 0.05,
+          "default": 1,
+          "effect": "Head point size multiplier."
+        },
+        {
+          "id": "opacity",
+          "type": "number",
+          "min": 0.1,
+          "max": 1,
+          "step": 0.05,
+          "default": 0.9,
+          "effect": "Layer alpha."
+        },
+        {
+          "id": "scrubber",
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "step": 0.1,
+          "default": 0,
+          "effect": "Timeline position as a percentage. Scrubbing backwards is supported: position is a pure function of time, not accumulated state."
+        }
       ],
       "teaches": [
         "Deriving ECEF in the vertex shader with an inverse Mercator, for vertices that have no fixed position to precompute.",
@@ -168,7 +346,325 @@
         "Trail vertices are frozen once written but still take the shader-derivation path every frame; the production optimisation is to precompute them on write.",
         "No object eviction — a scenario with a changing population needs the min-heap approach in docs/03-scaling-up/batched-trails.md."
       ],
-      "data": { "source": "generated at runtime, fixed seed", "licence": "n/a" }
+      "data": {
+        "source": "generated at runtime, fixed seed",
+        "licence": "n/a"
+      }
+    },
+    {
+      "id": "05-mass-trajectories",
+      "path": "examples/05-mass-trajectories/",
+      "title": "Thousands of trajectories in one draw call",
+      "settles": "What to do when per-object buffer updates stop scaling. Fixed slot pool, guard vertices, partial uploads, min-heap eviction.",
+      "readFirst": "docs/03-scaling-up/batched-trails.md",
+      "implements": [
+        "docs/03-scaling-up/batched-trails.md",
+        "docs/01-hugging-the-globe/mapbox.md"
+      ],
+      "status": "reproduced",
+      "tests": 57,
+      "screenshot": "examples/05-mass-trajectories/screenshots/globe.png",
+      "usesApis": [
+        "CustomLayerInterface",
+        "THREE.Line",
+        "BufferAttribute.addUpdateRange",
+        "BufferGeometry.setDrawRange"
+      ],
+      "knobs": [
+        {
+          "id": "objects",
+          "type": "integer",
+          "default": 5000,
+          "effect": "Active object count. Capacity is fixed at 4,096 slots, so beyond that objects compete and the losers get evicted."
+        },
+        {
+          "id": "strategy",
+          "type": "enum",
+          "values": [
+            "heap",
+            "linear"
+          ],
+          "default": "heap",
+          "effect": "Eviction strategy. Switch it live and read ms/update — this comparison is the example's whole point."
+        },
+        {
+          "id": "speed",
+          "type": "number",
+          "min": 0.1,
+          "max": 4,
+          "default": 1,
+          "effect": "Simulation rate."
+        },
+        {
+          "id": "opacity",
+          "type": "number",
+          "min": 0.1,
+          "max": 1,
+          "default": 0.9,
+          "effect": "Layer alpha."
+        }
+      ],
+      "measured": {
+        "scenario": "5,000 objects against a 4,096-slot pool, in a browser",
+        "drawCalls": 1,
+        "slotsUsed": "4096 / 4096",
+        "evictionsPerSecond": "~8800",
+        "msPerUpdate": {
+          "heap": 6.31,
+          "linearScan": 22.24
+        },
+        "nodeMicrobench": "3,000 objects / 1,024 slots: heap 16.81 ms per call vs linear scan 277.92 ms — about 16.5x on the eviction step alone, undiluted by the rest of the frame"
+      },
+      "teaches": [
+        "One THREE.Line plus a fixed slot pool keeps the draw call count at 1 regardless of object count.",
+        "Guard vertices isolate slots; without them a line strip connects one object's tail to the next one's head.",
+        "Upload only the changed range per attribute instead of rebuilding the geometry.",
+        "A min-heap replaces an O(capacity) scan for the oldest slot — the single change that turns a CPU-bound frame into a GPU-bound one."
+      ],
+      "limitations": [
+        "Forward playback only: eviction reshuffles the population non-deterministically, so scrubbing backwards would mean replaying the whole eviction history.",
+        "Fixed 4,096-slot capacity; no dynamic resize.",
+        "Line width is about 1px — most drivers ignore lineWidth on THREE.Line."
+      ],
+      "data": {
+        "source": "generated at runtime, fixed seed",
+        "licence": "n/a"
+      }
+    },
+    {
+      "id": "06-particle-field",
+      "path": "examples/06-particle-field/",
+      "title": "Vector field particles, in raw WebGL2",
+      "settles": "Wind and ocean-current streaks when the native raster-particle layer does not fit — your data is not in raster-array format, it updates in real time, or you are on MapLibre.",
+      "readFirst": "docs/03-scaling-up/vector-field-particles.md",
+      "implements": [
+        "docs/03-scaling-up/vector-field-particles.md",
+        "docs/01-hugging-the-globe/mapbox.md"
+      ],
+      "status": "reproduced",
+      "tests": 48,
+      "screenshot": "examples/06-particle-field/screenshots/globe.png",
+      "notThreeJs": true,
+      "usesApis": [
+        "CustomLayerInterface",
+        "WebGL2 VAO",
+        "gl.drawArraysInstanced",
+        "gl.bufferSubData"
+      ],
+      "knobs": [
+        {
+          "id": "particle-count",
+          "type": "integer",
+          "min": 1000,
+          "max": 50000,
+          "default": 4000,
+          "effect": "Base count. At low zoom the adaptive density multiplies it, so the number you set is not the number you get."
+        },
+        {
+          "id": "trail-length",
+          "type": "integer",
+          "min": 4,
+          "max": 40,
+          "default": 12,
+          "effect": "Samples kept per particle. Multiplies segments per frame."
+        },
+        {
+          "id": "speed",
+          "type": "number",
+          "min": 0.1,
+          "max": 4,
+          "default": 1,
+          "effect": "Advection rate. Particle lifetime is a frame counter rather than simulation seconds, so raising speed does not shorten lifetimes."
+        },
+        {
+          "id": "line-width",
+          "type": "number",
+          "min": 0.5,
+          "max": 4,
+          "default": 1.5,
+          "effect": "Fat-line width in pixels."
+        },
+        {
+          "id": "opacity",
+          "type": "number",
+          "min": 0.1,
+          "max": 1,
+          "default": 0.85,
+          "effect": "Layer alpha."
+        },
+        {
+          "id": "quantize-zoom-density",
+          "type": "boolean",
+          "default": true,
+          "effect": "Uncheck to watch ms/update stay elevated as the backing buffer reallocates on nearly every frame instead of only at quantum steps."
+        }
+      ],
+      "measured": {
+        "renderer": "SwiftShader software renderer, no GPU — treat these as an upper bound on real hardware",
+        "rows": [
+          {
+            "sliderCount": 1000,
+            "afterZoomBoost": 4000,
+            "segmentsPerFrame": 19902,
+            "msPerUpdate": 5.0
+          },
+          {
+            "sliderCount": 4000,
+            "afterZoomBoost": 14000,
+            "segmentsPerFrame": 153269,
+            "msPerUpdate": 39.0
+          },
+          {
+            "sliderCount": 10000,
+            "afterZoomBoost": 38000,
+            "segmentsPerFrame": 569538,
+            "msPerUpdate": 99.1
+          }
+        ]
+      },
+      "teaches": [
+        "CPU-side Euler advection with a clamped frame dt, so a backgrounded tab does not fling every particle on return.",
+        "Instanced fat lines: 8 floats per segment instead of six vertices of ten floats.",
+        "Quantize zoom-adaptive density, or the backing buffer reallocates on almost every frame.",
+        "Wrap attributes and divisors in a VAO so you never leave the map's shared GL state altered.",
+        "The globe recipe is not Three.js-specific — this layer hugs the sphere with hand-written GLSL."
+      ],
+      "limitations": [
+        "The flow field is synthetic (a zonal base flow plus nine deterministic vortices), not meteorological data.",
+        "The field is constant; there is no hot-swapping a new frame of data while keeping particle history.",
+        "Particles respawn uniformly worldwide rather than biased toward the viewport, so high zoom wastes particles."
+      ],
+      "data": {
+        "source": "generated analytically at runtime, fixed seed",
+        "licence": "n/a",
+        "note": "Continuous across the antimeridian and safe at the poles by construction: longitude only ever enters through sin/cos, which are exactly 2*pi periodic."
+      }
+    },
+    {
+      "id": "07-picking-and-popups",
+      "path": "examples/07-picking-and-popups/",
+      "title": "Clicks on a layer that cannot be hit-tested",
+      "settles": "Interaction for custom layers. queryRenderedFeatures sees native layers only, and that is not a flag you can turn on.",
+      "readFirst": "docs/00-start-here/decision-tree.md",
+      "implements": [
+        "docs/00-start-here/decision-tree.md",
+        "docs/01-hugging-the-globe/mapbox.md"
+      ],
+      "status": "reproduced",
+      "tests": 45,
+      "screenshot": "examples/07-picking-and-popups/screenshots/globe.png",
+      "usesApis": [
+        "map.queryRenderedFeatures",
+        "map.project",
+        "mapboxgl.Popup",
+        "map.getFreeCameraOptions",
+        "CustomLayerInterface"
+      ],
+      "knobs": [
+        {
+          "id": "strategy",
+          "type": "enum",
+          "values": [
+            "native companion",
+            "screen-space"
+          ],
+          "default": "native companion",
+          "effect": "How a click is resolved. Both feed the same popup path, so the only difference is the search."
+        },
+        {
+          "id": "backface-culling-in-picking",
+          "type": "boolean",
+          "default": true,
+          "effect": "Screen-space only. Turn it off and every point on the far side of the planet becomes clickable."
+        }
+      ],
+      "measured": {
+        "nativeCompanion": {
+          "hit": "Khrabrovo Airport (UMKK)",
+          "hitTestMs": 9.8,
+          "candidates": "n/a — native hit-test"
+        },
+        "screenSpace": {
+          "hit": "Dresden Airport (EDDC)",
+          "hitTestMs": 6.6,
+          "candidatesWithCulling": "734 / 1174",
+          "candidatesWithoutCulling": "1174 / 1174"
+        }
+      },
+      "teaches": [
+        "The companion-layer trick: same data, circle-opacity 0, native layer owns interaction while the custom layer owns appearance.",
+        "map.project() is pure matrix arithmetic and returns a valid screen position for points behind the planet, so screen-space picking must cull the far side itself.",
+        "Read the camera ECEF the visual shader already computed rather than deriving it a second time and letting the two drift.",
+        "In the Mapbox style spec, ['zoom'] may only be the input to a top-level interpolate or step. Nesting it inside another expression is rejected at addLayer(), and TypeScript will not catch it."
+      ],
+      "limitations": [
+        "The GPU ID-buffer strategy is described but not implemented.",
+        "Screen-space click tolerance is a fixed 14px rather than zoom-scaled.",
+        "The spatial grid is rebuilt on every click — fine at about 1k points, wrong at 100k."
+      ],
+      "data": {
+        "source": "OurAirports",
+        "licence": "public domain",
+        "file": "public/airports.json",
+        "records": 1174
+      }
+    },
+    {
+      "id": "08-effects-gallery",
+      "path": "examples/08-effects-gallery/",
+      "title": "68 procedural Three.js effects, with prompt templates",
+      "settles": "A browsable catalogue of visual techniques: geometry, lights, animation, shaders, particles, lines, data-viz forms, atmospherics, composed scenes.",
+      "readFirst": "examples/08-effects-gallery/README.md",
+      "implements": [
+        "docs/02-effects/spark-points.md"
+      ],
+      "status": "reproduced",
+      "tests": 0,
+      "testsNote": "No unit tests: every effect's build/update manipulates Three.js objects directly, with no pure functions worth isolating and nothing verifiable without a GPU.",
+      "screenshot": "examples/08-effects-gallery/screenshots/overview.png",
+      "machineReadableIndex": "examples/08-effects-gallery/effects.json",
+      "counts": {
+        "effects": 68,
+        "categories": 9,
+        "byCategory": {
+          "basic": 8,
+          "light": 3,
+          "animation": 12,
+          "shader": 4,
+          "particles": 14,
+          "line": 7,
+          "viz": 8,
+          "atmospheric": 3,
+          "scene": 9
+        }
+      },
+      "usesApis": [
+        "CustomLayerInterface",
+        "THREE geometries, materials, ShaderMaterial, Points, InstancedMesh"
+      ],
+      "knobs": [
+        {
+          "id": "per-effect",
+          "type": "varies",
+          "effect": "Every effect exposes its own parameter sliders; the full set with ranges and defaults is in effects.json."
+        }
+      ],
+      "teaches": [
+        "Each effect carries a filled-in prompt template — an instruction you can hand to an agent to reproduce that effect elsewhere.",
+        "effects.json gives id, category, title, description, tech, params, prompt and sourceFile for all 68."
+      ],
+      "limitations": [
+        "0 of 68 effects hug the globe. The gallery's shared layer never reads the globe render arguments, so every effect positions itself with a single absolute MercatorCoordinate. To put one on a sphere, apply docs/01-hugging-the-globe/mapbox.md.",
+        "Ported verbatim from an internal showcase: logic unchanged, only comments and display strings translated."
+      ],
+      "data": {
+        "source": "fully procedural",
+        "licence": "n/a"
+      }
     }
-  ]
+  ],
+  "totals": {
+    "examples": 9,
+    "tests": 274
+  }
 }

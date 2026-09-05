@@ -1,0 +1,22 @@
+{
+  "name": "06-particle-field",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mapbox GL JS + raw WebGL2 (no Three.js): tens of thousands of short, flowing, fading line segments advected through a synthetic analytic wind field, hugging the globe projection.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "mapbox-gl": "^3.18.1"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.0",
+    "vite": "^6.1.0",
+    "vitest": "^3.2.6"
+  }
+}

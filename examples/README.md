@@ -26,10 +26,14 @@ Read them in order if you are new here. `00` tells you whether you need any of t
 | [`02-arcs-on-globe`](02-arcs-on-globe/) | Great-circle arcs, and **why lines cut through the planet** — the subdivision slider goes down to 2 so you can watch it happen. | [1.1 Mapbox](../docs/01-hugging-the-globe/mapbox.md) | 35 |
 | [`03-areas-on-globe`](03-areas-on-globe/) | Filled areas and outlines. A 500 km circle is a *small circle* on a sphere, and looks different at every latitude. | [1.1 Mapbox](../docs/01-hugging-the-globe/mapbox.md) | 15 |
 | [`04-moving-trajectory`](04-moving-trajectory/) | Geometry that moves: ECEF derived in the vertex shader instead of precomputed, plus timeline scrubbing. | [1.1 §"Unless your geometry moves"](../docs/01-hugging-the-globe/mapbox.md) | 41 |
+| [`05-mass-trajectories`](05-mass-trajectories/) | 5,000 trajectories in **one** draw call. Switch eviction between min-heap and linear scan and watch `ms / update` change on your own machine. | [3.1 Batched trails](../docs/03-scaling-up/batched-trails.md) | 57 |
+| [`06-particle-field`](06-particle-field/) | Wind/current streaks from a synthetic flow field, in raw WebGL2 with no Three.js. Needs no tiling service. | [3.3 Vector field particles](../docs/03-scaling-up/vector-field-particles.md) | 48 |
+| [`07-picking-and-popups`](07-picking-and-popups/) | Clicks on a layer that cannot be hit-tested. Two working strategies, and the candidate count that proves why backface culling matters. | [0.1 Q5](../docs/00-start-here/decision-tree.md) | 45 |
+| [`08-effects-gallery`](08-effects-gallery/) | 68 procedural Three.js effects, each with a prompt template you can hand to an agent. **Mercator, not globe** — see its README. | [2.1 Spark points](../docs/02-effects/spark-points.md) | — |
 
-Every one of them passes `npx tsc --noEmit`, `npx vitest run` and `npm run build`. 124 tests in total, all on the maths — the part you can check without a browser, a GPU, or a token.
+Every one of them passes `npx tsc --noEmit` and `npm run build`; all but the gallery also carry unit tests, **274 in total**, all on the maths — the part you can check without a browser, a GPU, or a token.
 
-All five have also been opened in a browser with a real token and confirmed rendering correctly on the globe; each example's README carries its own screenshot and status.
+All nine have been opened in a browser with a real token and confirmed rendering; each example's README carries its own screenshot, its measured numbers where it has any, and its own status marker. Read that marker rather than assuming.
 
 ## Sample data
 

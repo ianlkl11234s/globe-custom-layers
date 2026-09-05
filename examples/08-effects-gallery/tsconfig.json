@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode (matches how Vite resolves modules) */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* The 68 ported effects (src/showcase/effects/*.js, src/showcase/core/*.js)
+       stay plain JS on purpose -- see README "TypeScript choice". allowJs lets
+       main.ts import them; checkJs:false means tsc never type-checks their
+       bodies, so the original untyped Three.js code doesn't need a strict-mode
+       rewrite. Only the small harness we wrote (main.ts) is checked under
+       "strict" below. */
+    "allowJs": true,
+    "checkJs": false,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src", "vite.config.ts"]
+}

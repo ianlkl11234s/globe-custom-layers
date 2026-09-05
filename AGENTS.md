@@ -97,9 +97,9 @@ Find your task, read the recipe, then open the example and copy from it.
 | Arcs or routes that follow the sphere | [1.1 Mapbox](docs/01-hugging-the-globe/mapbox.md) | [`02-arcs-on-globe`](examples/02-arcs-on-globe/) |
 | Filled areas, coverage circles, bboxes | [1.1 Mapbox](docs/01-hugging-the-globe/mapbox.md) | [`03-areas-on-globe`](examples/03-areas-on-globe/) |
 | Objects moving along paths, timeline playback | [1.1 §"Unless your geometry moves"](docs/01-hugging-the-globe/mapbox.md) | [`04-moving-trajectory`](examples/04-moving-trajectory/) |
-| Thousands of trails, one draw call | [3.1 Batched trails](docs/03-scaling-up/batched-trails.md) | — |
+| Thousands of trails, one draw call | [3.1 Batched trails](docs/03-scaling-up/batched-trails.md) | [`05-mass-trajectories`](examples/05-mass-trajectories/) |
 | Many instances with per-instance attributes | [3.2 Instanced tracks](docs/03-scaling-up/instanced-tracks.md) | — |
-| Wind / ocean current particles | [3.3 Vector field particles](docs/03-scaling-up/vector-field-particles.md) | — |
+| Wind / ocean current particles | [3.3 Vector field particles](docs/03-scaling-up/vector-field-particles.md) | [`06-particle-field`](examples/06-particle-field/) |
 | It works but it is slow | [3.4 Finding the actual bottleneck](docs/03-scaling-up/debugging-performance.md) | — |
 | My layer disappeared entirely | [1.1 steps 3–4](docs/01-hugging-the-globe/mapbox.md) — two different causes, identical symptom | — |
 | My line cuts through the planet | [1.1 §"One thing to fix before you start"](docs/01-hugging-the-globe/mapbox.md) — subdivision | [`02-arcs-on-globe`](examples/02-arcs-on-globe/) |
@@ -107,6 +107,8 @@ Find your task, read the recipe, then open the example and copy from it.
 | Glow eats the screen when zoomed out | [4.1 Zoom-adaptive sizing](docs/04-discipline/zoom-adaptive-sizing.md) | — |
 | The map went black with no error | [4.3 Sharing a WebGL context](docs/04-discipline/shared-gl-context.md) | — |
 | A shader silently computes the wrong thing | [4.4 GLSL gotchas](docs/04-discipline/glsl-gotchas.md) | — |
+| Make my custom layer clickable / show a popup | [0.1 Q5](docs/00-start-here/decision-tree.md) — custom layers do not hit-test, and there is no flag for it | [`07-picking-and-popups`](examples/07-picking-and-popups/) |
+| Browse visual techniques for ideas | [2.1 Spark points](docs/02-effects/spark-points.md) | [`08-effects-gallery`](examples/08-effects-gallery/) — 68 effects, each with a prompt template. **Mercator, not globe.** |
 | Port a working layer to the other library | [1.3 Porting](docs/01-hugging-the-globe/porting.md) | — |
 
 A dash in the example column means the recipe is documented but has no runnable example here yet. Weight it accordingly.

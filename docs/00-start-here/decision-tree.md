@@ -133,7 +133,7 @@ Vertices are projected; the segments between them are not. A straight line betwe
 |---|---|
 | Visual only | Nothing. Continue. |
 | Clicks, hover, popups | Keep an **invisible native layer alongside** your custom one — same data, `circle-opacity: 0` — and let it own interaction while the custom layer owns appearance. |
-| Precise picking of custom geometry | You are writing your own picking: project candidate positions with `map.project()` and test in screen space, or render an ID buffer. Neither is covered here yet. |
+| Precise picking of custom geometry | You are writing your own picking: project candidate positions with `map.project()` and test in screen space, or render an ID buffer. → [`07-picking-and-popups`](../../examples/07-picking-and-popups/) implements the first and documents the cost of the second. **`map.project()` returns a valid screen position for points behind the planet**, so screen-space picking must cull the far side itself — with culling on, 734 of 1,174 airports are eligible; with it off, all 1,174 are. |
 
 → [`00-native-vs-custom`](../../examples/00-native-vs-custom/) demonstrates the failure directly: click the native layer and get a popup, click the custom layer and get nothing.
 
