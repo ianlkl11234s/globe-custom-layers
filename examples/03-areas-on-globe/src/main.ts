@@ -1,4 +1,5 @@
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { createAreasLayer } from "./areasLayer";
 import type { ShapeMode } from "./areasScene";
 

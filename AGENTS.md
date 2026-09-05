@@ -1,10 +1,12 @@
 # AGENTS.md
 
+Codex 入口：只按需讀取與本任務相關的 sections、記憶與 examples；可獨立盤點交 Luna，有明確邊界的實作/測試/review 交 Terra，主 agent 負責 scope、整合與最終驗收。部署、發布及其他外部動作沿用既有授權。
+
 Instructions for AI coding agents using this repository to build something.
 
 This file is the entry point. Read it before opening anything else — it tells you when this repo is the right source, and when to go elsewhere.
 
-**Versions everything here was checked against:** `mapbox-gl` 3.18.1 · `maplibre-gl` 5.24.0 · `three` 0.172.0. Much of what follows rests on behaviour that is not part of a public API contract. Pin your versions.
+**Pinned example baseline:** `mapbox-gl` 3.30.0 · `three` 0.172.0. **Historical recipe investigations:** Mapbox 3.18.1 · MapLibre 5.24.0. A dependency baseline does not upgrade a recipe's verification status; see [the implementation record](docs/demo-implementation-plan.md) for current checks. Much of what follows rests on behaviour that is not part of a public API contract. Pin your versions.
 
 ---
 
@@ -12,7 +14,7 @@ This file is the entry point. Read it before opening anything else — it tells 
 
 A cookbook for putting **your own rendering** — Three.js scenes, hand-written WebGL, particle systems, tens of thousands of animated objects — onto a Mapbox or MapLibre map **in globe projection**, so that it sits on the sphere instead of floating beside it on a flat plane.
 
-It is not a library. There is nothing to install. Every recipe is prose plus a standalone runnable example; you are expected to read the example and copy from it, not depend on it.
+It is not a library. Every recipe is prose plus a standalone runnable example; you are expected to read the example and copy from it, not depend on it. Runnable globe examples are Mapbox-first. The site's MapLibre 5.24 prelude-based Three.js adapter for examples 01/02/05 is 🔬 reproduced locally; its direct ECEF/mainMatrix hypothesis, terrain/depth behaviour, and all-nine port remain unverified. The [demo website](site/README.md) is a visual entry point to three existing examples, not a separate rendering framework.
 
 ---
 
@@ -50,7 +52,7 @@ If none of those apply, close this repo and go to the [Mapbox style spec](https:
 This matters more than it looks.
 
 - **Mapbox GL JS**: custom layers on a globe are **officially unsupported**. The [projections guide](https://docs.mapbox.com/mapbox-gl-js/guides/projections/) has said *"CustomLayerInterface can only be used only with Mercator"* since v2.6.0 — this is not globe-specific, it applies to every non-Mercator projection. It nonetheless works, via render arguments the public typings under-document. That is [recipe 1.1](docs/01-hugging-the-globe/mapbox.md).
-- **MapLibre GL JS**: custom layers on a globe are **officially supported** since v5.0.0, with a `projectTile()` shader prelude and a `clippingPlane` uniform. That is [recipe 1.2](docs/01-hugging-the-globe/maplibre.md) — but read its status marker, and read [1.3](docs/01-hugging-the-globe/porting.md) before porting anything, because the projection-transition coefficient runs in **opposite directions** in the two libraries.
+- **MapLibre GL JS**: custom layers on a globe are **officially supported** since v5.0.0, with a `projectTile()` shader prelude and a `clippingPlane` uniform. [Recipe 1.2](docs/01-hugging-the-globe/maplibre.md) records a 🔬 local prelude-based Three.js reproduction for site scenes 01/02/05; direct ECEF/mainMatrix, terrain/depth, and all-nine portability remain unverified. The site's transition coefficient uses a pinned internal transform lookup because the custom callback's default value is binary. Read [1.3](docs/01-hugging-the-globe/porting.md) before porting anything.
 
 ---
 
@@ -135,6 +137,7 @@ This repo's pitfall and effect catalogues are **not exhaustive**. They record wh
 ## 6. Rules when you use this code
 
 - **The token is the user's.** Every example reads `import.meta.env.VITE_MAPBOX_TOKEN` and ships a `.env.example`. Never hard-code a token, never commit one, never copy one out of a `.env` you found.
+- **Demo embedding:** selected examples may receive a public token from the same-origin parent at runtime. Validate message origin and source; keep tokens out of URLs, storage, logs, and built assets. Website builds must use an empty environment directory.
 - **Examples are self-contained by design.** No shared build, no cross-imports; duplicated files between examples are intentional. Copy a whole folder rather than importing across.
 - **Sample data is public domain or generated.** Airport coordinates come from [OurAirports](https://ourairports.com/data/); trajectories are synthesised at runtime. Where a value is synthetic rather than measured, the example says so — keep that honesty if you adapt it.
 - **Cite where a technique came from.** If you produce code from a recipe, tell the user which recipe and what its status marker was. It is the difference between "this is a known-good pattern" and "this is a plausible-looking guess".

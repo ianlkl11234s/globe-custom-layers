@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext", "moduleResolution": "bundler", "strict": true,
+    "skipLibCheck": true, "noEmit": true, "esModuleInterop": true,
+    "baseUrl": "..", "types": [],
+    "paths": {
+      "three": ["examples/01-points-on-globe/node_modules/@types/three"],
+      "maplibre-gl": ["site/node_modules/maplibre-gl/dist/maplibre-gl.d.ts"]
+    }
+  },
+  "include": ["maplibreCustom.ts", "mapboxMathCompat.ts"]
+}

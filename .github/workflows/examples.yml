@@ -1,0 +1,88 @@
+name: Examples
+
+on:
+  push:
+    paths:
+      - "examples/**"
+      - "site/**"
+      - "scripts/**"
+      - "docs/**"
+      - "README.md"
+      - "AGENTS.md"
+      - "llms.txt"
+      - "CONTRIBUTING.md"
+      - ".github/workflows/examples.yml"
+  pull_request:
+    paths:
+      - "examples/**"
+      - "site/**"
+      - "scripts/**"
+      - "docs/**"
+      - "README.md"
+      - "AGENTS.md"
+      - "llms.txt"
+      - "CONTRIBUTING.md"
+      - ".github/workflows/examples.yml"
+
+jobs:
+  verify:
+    name: ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - 00-native-vs-custom
+          - 01-points-on-globe
+          - 02-arcs-on-globe
+          - 03-areas-on-globe
+          - 04-moving-trajectory
+          - 05-mass-trajectories
+          - 06-particle-field
+          - 07-picking-and-popups
+          - 08-effects-gallery
+
+    defaults:
+      run:
+        working-directory: examples/${{ matrix.example }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: examples/${{ matrix.example }}/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test --if-present
+      - run: VITE_MAPBOX_TOKEN=pk.audit-placeholder npm run build
+
+  site:
+    name: site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            site/package-lock.json
+            examples/01-points-on-globe/package-lock.json
+            examples/02-arcs-on-globe/package-lock.json
+            examples/05-mass-trajectories/package-lock.json
+      - name: Install site example dependencies
+        run: |
+          npm ci --prefix site
+          npm ci --prefix examples/01-points-on-globe
+          npm ci --prefix examples/02-arcs-on-globe
+          npm ci --prefix examples/05-mass-trajectories
+      - run: npm --prefix site run typecheck
+      - run: npm --prefix site test
+      - run: node site/scripts/build.mjs
+      - run: node scripts/check-docs.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: site/dist

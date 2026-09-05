@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>MapLibre port browser acceptance</title><style>html,body,#map{margin:0;width:100%;height:100%;background:#101c20}pre{position:absolute;z-index:3;top:8px;left:8px;background:#fff;color:#111;padding:12px;max-width:480px;max-height:60vh;overflow:auto;font:12px monospace}</style><script src="./vendor/maplibre-gl.js"></script></head><body><div id="map"></div><pre id="report">Running real WebGL checks…</pre><script type="module">
+// Run after building: copy this file into site/dist/port-check.html and serve
+// site/dist. No token, network fixture interception, or GPU-free claim.
+import {createCustomLayer} from './freeGlobe.js';
+const results=[];window.portResults=results;
+const record=(name,pass,evidence)=>{results.push({name,pass,evidence});document.querySelector('#report').textContent=JSON.stringify(results,null,2);if(!pass)throw new Error(name);};
+const [land,airports]=await Promise.all(['land.json','airports.json'].map(async f=>(await fetch(f)).json()));
+const map=window.proofMap=new maplibregl.Map({container:'map',center:[20,20],zoom:1.3,renderWorldCopies:false,canvasContextAttributes:{preserveDrawingBuffer:true},style:{version:8,projection:{type:['interpolate',['linear'],['zoom'],5,'vertical-perspective',7,'mercator']},sources:{land:{type:'geojson',data:land}},layers:[{id:'ocean',type:'background',paint:{'background-color':'#162a30'}},{id:'land',type:'fill',source:'land',paint:{'fill-color':'#243e44'}}]}});
+const settled=async()=>{map.triggerRepaint();await new Promise(r=>setTimeout(r,350));};
+let layer, data, stats;
+window.selectProof=name=>{if(layer)map.removeLayer(layer.id);layer=window.proofLayer=createCustomLayer(name,{theme:'dark',airports,paused:name==='tracks',onFrameInfo:s=>stats=window.proofStats=s});const render=layer.render.bind(layer);layer.render=(gl,args)=>{data=args.defaultProjectionData;render(gl,args);};map.addLayer(layer);};
+function alignment(){const transform=(m,v)=>[0,1,2,3].map(r=>m[r]*v[0]+m[r+4]*v[1]+m[r+8]*v[2]+m[r+12]);const c=map.getCenter();return [[c.lng,c.lat],[c.lng+.1,c.lat],[c.lng,c.lat+.1]].map(ll=>{const lon=ll[0]*Math.PI/180,lat=ll[1]*Math.PI/180;const merc=maplibregl.MercatorCoordinate.fromLngLat(ll);const g=transform(data.mainMatrix,[Math.sin(lon)*Math.cos(lat),Math.sin(lat),Math.cos(lon)*Math.cos(lat)]);const f=transform(data.fallbackMatrix,[merc.x,merc.y,0]);const t=stats.transition;const p=g.map((v,i)=>f[i]*(1-t)+v*t);const expected=map.project(ll);const canvas=map.getCanvas();return Math.hypot((p[0]/p[3]+1)*canvas.clientWidth/2-expected.x,(1-p[1]/p[3])*canvas.clientHeight/2-expected.y);});}
+async function hash(){await settled();const bytes=new TextEncoder().encode(map.getCanvas().toDataURL());return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).join(',');}
+try{
+await new Promise(r=>map.once('load',r));
+selectProof('arcs');await settled();
+record('190 arcs / default subdivision',stats.arcCount===190&&stats.vertexCount===8740,{...stats});
+const globeError=alignment();record('globe ground positions match map.project',Math.max(...globeError)<.1,globeError);
+layer.setOptions({height:0});const zero=await hash();layer.setOptions({height:.08,segments:64});const raised=await hash();
+record('height changes GPU image / subdivision changes vertices',zero!==raised&&stats.vertexCount===23940,{vertexCount:stats.vertexCount,imagesDiffer:zero!==raised});
+selectProof('tracks');await settled();record('default 1500 objects / one draw',stats.activeCount===1500&&stats.slotsUsed===1500&&stats.drawCalls===1,{...stats});
+layer.setOptions({activeCount:5000});await settled();record('paused count increase / 4096 slots / one draw',stats.activeCount===5000&&stats.slotsUsed===4096&&stats.drawCalls===1,{...stats});
+layer.setOptions({activeCount:1000});await settled();record('paused count decrease updates buffers',stats.activeCount===1000&&stats.slotsUsed===1000,{...stats});
+for(const theme of ['light','dark']){layer.setTheme(theme);layer.setPalette('multicolor');const multi=await hash();layer.setPalette('warm');const warm=await hash();layer.setPalette('cool');const cool=await hash();record(`${theme} palettes change GPU output`,multi!==warm&&warm!==cool&&multi!==cool);}
+layer.setOptions({activeCount:5000});layer.setPalette('multicolor');const paused=await hash();
+record('paused GPU image is stable',paused===await hash());layer.setOptions({paused:false});record('resume changes GPU image',paused!==await hash());
+map.jumpTo({center:[179,0],zoom:1.3});await settled();record('dateline globe render continues',stats.transition===1&&stats.drawCalls===1);
+map.jumpTo({center:[20,20],zoom:6});await settled();record('actual basemap transition reaches 0.5',Math.abs(stats.transition-.5)<.001,{transition:stats.transition});
+map.jumpTo({zoom:8});await settled();const flatError=alignment();record('Mercator fallback stays aligned',stats.transition===0&&Math.max(...flatError)<.1,{transition:stats.transition,errorPx:flatError});
+selectProof('points');map.jumpTo({zoom:1.3});await settled();record('switching back restores globe shader',stats.projection==='globe'&&stats.transition===1,{...stats});
+// A hidden far-side point must produce the same GPU image as an empty scene.
+map.removeLayer(layer.id);
+function probe(rows){if(map.getLayer('maplibre-custom-points'))map.removeLayer('maplibre-custom-points');layer=createCustomLayer('points',{theme:'dark',airports:{airports:rows}});map.addLayer(layer);}
+probe([]);const empty=await hash();probe([['BACK','Back',-160,-20]]);const back=await hash();
+record('far-side point is clipped',back===empty);
+probe([['FRONT','Front',20,20]]);record('front-side point is visible',await hash()!==empty);
+window.portDone=true;
+}catch(error){window.portFailure=String(error);document.querySelector('#report').textContent+='\nFAIL: '+error;}
+</script></body></html>

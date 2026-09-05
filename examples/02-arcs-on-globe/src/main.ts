@@ -1,4 +1,6 @@
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { getEmbedPreferences, getEmbeddedRuntimeToken, reportEmbedMapStatus } from "./embedBridge";
 import { createArcLayer } from "./arcLayer";
 
 /**
@@ -15,24 +17,58 @@ function byId<T extends HTMLElement>(id: string): T {
 }
 
 const tokenWarning = byId<HTMLDivElement>("token-warning");
+const tokenWarningMessage = byId<HTMLParagraphElement>("token-warning-message");
+const preferences = getEmbedPreferences();
+const zh = { title: "地球上的弧線", zoom: "縮放", projection: "投影", transition: "轉換", arcs: "弧線", vertices: "頂點", segments: "每條弧線的分段", height: "弧線高度", hint: "把分段拖到 2，就能看到這個範例要說明的問題：只有兩個端點的弧線是一條穿過地球的直弦。64 以上才會貼合球面。", controls: "控制項" };
+
+document.documentElement.dataset.theme = preferences.theme;
+document.documentElement.dataset.embed = String(preferences.embed);
+if (preferences.embed) {
+  document.documentElement.lang = preferences.lang;
+  if (preferences.lang === "zh-TW") document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((el) => {
+    const text = zh[el.dataset.i18n as keyof typeof zh];
+    if (text) el.textContent = text;
+  });
+}
+
+function setupHudToggle() {
+  if (!preferences.embed) return;
+  const hud = byId<HTMLDivElement>("hud");
+  const toggle = byId<HTMLButtonElement>("hud-toggle");
+  const setCollapsed = (collapsed: boolean) => {
+    hud.classList.toggle("hud-collapsed", collapsed);
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    toggle.textContent = preferences.lang === "zh-TW" ? (collapsed ? "顯示控制項" : "隱藏控制項") : (collapsed ? "Show controls" : "Hide controls");
+  };
+  setCollapsed(window.innerWidth < 520);
+  toggle.addEventListener("click", () => setCollapsed(!hud.classList.contains("hud-collapsed")));
+}
+
+setupHudToggle();
+
+function showTokenFailure(status?: number) {
+  tokenWarningMessage.textContent = status
+    ? preferences.embed && preferences.lang === "zh-TW" ? `Mapbox 拒絕此 token（HTTP ${status}）。請輸入可公開使用且允許此 origin 的 token，然後重新載入場景。` : `Mapbox rejected this token (HTTP ${status}). Enter a public token that is valid and allowed for this origin, then run the scene again.`
+    : preferences.embed && preferences.lang === "zh-TW" ? "找不到 Mapbox access token。獨立執行時，請在自己的 .env 設定 VITE_MAPBOX_TOKEN，然後重新啟動 Vite。" : "No Mapbox access token found. In standalone mode, set VITE_MAPBOX_TOKEN in your own .env and restart Vite.";
+  tokenWarning.classList.add("visible");
+}
 
 // Requirement: never read any .env file ourselves and never hardcode a token
 // -- only import.meta.env.VITE_MAPBOX_TOKEN, which Vite populates from the
 // user's own .env (see .env.example). If it's missing, show a friendly
 // message instead of letting mapbox-gl throw on every tile request.
-const token = import.meta.env.VITE_MAPBOX_TOKEN;
-
-if (!token) {
-  tokenWarning.classList.add("visible");
-} else {
-  mapboxgl.accessToken = token;
-  startMap();
-}
+void getEmbeddedRuntimeToken(import.meta.env.VITE_MAPBOX_TOKEN ?? "").then((token) => {
+  if (!token) showTokenFailure();
+  else {
+    mapboxgl.accessToken = token;
+    startMap();
+  }
+});
 
 function startMap() {
   const map = new mapboxgl.Map({
     container: "map",
-    style: "mapbox://styles/mapbox/dark-v11",
+    style: preferences.theme === "light" ? "mapbox://styles/mapbox/light-v11" : "mapbox://styles/mapbox/dark-v11",
     // mapbox-gl-js v3 already defaults to globe projection at low zoom for
     // most styles, but we set it explicitly so this example behaves the same
     // way regardless of which style you swap in.
@@ -48,9 +84,9 @@ function startMap() {
   map.on("error", (e) => {
     const status = (e.error as { status?: number } | undefined)?.status;
     if (status === 401 || status === 403) {
-      tokenWarning.classList.add("visible");
+      showTokenFailure(status);
     }
-    console.error("[map error]", e.error);
+    reportEmbedMapStatus("error", status);
   });
 
   const segmentsEl = byId<HTMLInputElement>("segments");
@@ -75,6 +111,7 @@ function startMap() {
   const layer = createArcLayer({
     getSegmentsPerArc: () => Number(segmentsEl.value),
     getArcHeightMercZ: () => Number(arcHeightEl.value),
+    theme: preferences.theme,
     // HUD readout of the exact globe state + geometry cost this frame -- see
     // arcLayer's render() for where these values come from.
     onFrameInfo: ({ isGlobe, transition, arcCount, vertexCount }) => {
@@ -86,7 +123,9 @@ function startMap() {
   });
 
   map.on("load", () => {
+    map.setFog(preferences.theme === "light" ? { color: "#f4f8f7", "high-color": "#ffffff", "space-color": "#dcebea", "horizon-blend": 0.08 } : { color: "#0b0d12", "high-color": "#1c2c35", "space-color": "#080b12", "horizon-blend": 0.12 });
     map.addLayer(layer);
+    reportEmbedMapStatus("loaded");
   });
 
   // Zoom changes independently of render() frames (e.g. while idle), so it

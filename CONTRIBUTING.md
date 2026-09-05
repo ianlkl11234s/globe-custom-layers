@@ -42,11 +42,12 @@ Structure follows the existing pages: symptom, cause, steps, the trap that costs
 ## Adding an example
 
 - Self-contained. Its own `package.json`, its own `node_modules`, no imports outside its folder. Duplicated code between examples is fine and expected.
-- Dependencies limited to the map library, `three`, `vite`, `typescript`, and `vitest`. No UI frameworks — the example is about the rendering, and a reader should not have to know your framework to read it.
+- Dependencies limited to the map library, `three`, `vite`, `typescript`, `vitest`, and their required type declarations. No UI frameworks — the example is about the rendering, and a reader should not have to know your framework to read it. Pin direct dependencies and validate a clean install outside a directory with unrelated ancestor `node_modules`.
 - Comment the *why*, especially at anything counter-intuitive. Production code explains what it does; a teaching example explains why it is not the obvious thing.
 - **No tokens, no private data, ever.** Read tokens from `import.meta.env`, ship a `.env.example`, and show a friendly message when the token is missing instead of crashing.
 - Sample data must be public domain or generated at runtime. Label synthetic values as synthetic.
 - `npx tsc --noEmit`, `npx vitest run` and `npm run build` must all pass before you open the PR.
+- Keep the CI example checks passing. Website changes also run `npm --prefix site test` and `node site/scripts/build.mjs`; the website build uses an empty environment directory so local tokens cannot enter distributable assets. A successful build does not verify the live map or a new interaction.
 
 ## Style
 

@@ -66,6 +66,7 @@ precision highp float;
 
 uniform float uOpacity;
 uniform float uCoreBoost;
+uniform float uLightTheme;
 
 varying vec3 vColor;
 varying float vCull;
@@ -89,6 +90,9 @@ void main() {
 
   // Push the very center toward white for a "hot core" look.
   vec3 col = mix(vColor, vec3(1.0), core * uCoreBoost);
+  // The light basemap needs a darker teal edge to retain the same visual
+  // weight as the warm additive glow has against the dark basemap.
+  col = mix(col, mix(col * 0.5, vec3(0.0, 0.58, 0.58), 0.65), uLightTheme);
   gl_FragColor = vec4(col, a);
 }
 `;
@@ -156,6 +160,7 @@ export class GlowPointsScene {
       uniforms: {
         uOpacity: { value: 0.9 },
         uCoreBoost: { value: 0.7 },
+        uLightTheme: { value: 0 },
         uTime: { value: 0 },
         uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 2) },
         uZoomScale: { value: 1 },
@@ -236,6 +241,15 @@ export class GlowPointsScene {
   setCoreBoost(b: number) {
     if (!this.material) return;
     this.material.uniforms.uCoreBoost!.value = Math.max(0, Math.min(1, b));
+  }
+
+  setTheme(theme: "light" | "dark") {
+    if (!this.material) return;
+    this.material.uniforms.uLightTheme!.value = theme === "light" ? 1 : 0;
+    // Additive RGB is always added to the already-light basemap, so it
+    // cannot produce a dark teal point there. Keep alpha and the glow shader
+    // intact, but use ordinary source-over compositing for the light theme.
+    this.material.blending = theme === "light" ? THREE.NormalBlending : THREE.AdditiveBlending;
   }
 
   setSizeMul(m: number) {

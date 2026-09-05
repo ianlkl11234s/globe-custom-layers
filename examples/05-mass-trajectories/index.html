@@ -4,10 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mass trajectories</title>
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v3.18.1/mapbox-gl.css"
-      rel="stylesheet"
-    />
     <style>
       html,
       body,
@@ -163,16 +159,39 @@
       #token-warning a {
         color: #6cb6ff;
       }
+      html[data-theme="light"] body, html[data-theme="light"] #token-warning { background: #f4f8f7; color: #1f2d2e; }
+      html[data-theme="light"] #hud, html[data-theme="light"] #perf, html[data-theme="light"] #transport { background: rgba(255, 255, 255, .9); color: #1f2d2e; box-shadow: 0 8px 24px rgba(20, 51, 51, .14); }
+      html[data-theme="light"] #hud h1, html[data-theme="light"] #perf h1 { color: #123c3d; }
+      html[data-theme="light"] #hud label, html[data-theme="light"] #transport .zoom-readout { color: #426568; }
+      html[data-theme="light"] #hud select, html[data-theme="light"] #transport button { background: #edf6f5; color: #1f2d2e; border-color: #a8c9c7; }
+      html[data-theme="light"] #perf .row span:last-child, html[data-theme="light"] #token-warning a { color: #007f86; }
+      html[data-theme="light"] #perf .row.highlight span:last-child { color: #b45309; }
+      html[data-theme="light"] #token-warning code { background: #dcebea; }
+      html[data-theme="light"] #transport [data-i18n] { color: #426568 !important; }
+      html[data-embed="true"] #hud, html[data-embed="true"] #perf { font-size: 14px; }
+      html[data-embed="true"] #hud { width: min(calc(100% - 48px), 300px); min-width: 0; }
+      html[data-embed="true"] #perf { top: auto; bottom: 62px; width: min(calc(100% - 48px), 300px); min-width: 0; }
+      html[data-embed="true"] #hud h1, html[data-embed="true"] #perf h1 { font-size: 14px; }
+      html[data-embed="true"] #hud label { font-size: 12px; }
+      html[data-embed="true"] input { accent-color: #008b8b; }
+      #hud-toggle { display: none; }
+      @media (max-width: 700px) { html[data-embed="true"] #perf { display: none; } html[data-embed="true"] #hud { max-height: calc(100% - 84px); overflow: auto; } }
+      @media (max-width: 520px) {
+        html[data-embed="true"] #hud-toggle { display: block; position: static; margin: 0 0 8px auto; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: inherit; padding: 2px 6px; font: inherit; font-size: 12px; cursor: pointer; }
+        html[data-embed="true"] #hud.hud-collapsed { width: auto; min-width: 0; }
+        html[data-embed="true"] #hud.hud-collapsed > :not(h1):not(#hud-toggle) { display: none; }
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
 
     <div id="hud">
-      <h1>Mass trajectories</h1>
+      <h1 data-i18n="title">Mass trajectories</h1>
+      <button id="hud-toggle" type="button" data-i18n="controls" aria-expanded="true">Controls</button>
 
-      <label for="objects">objects <span id="objects-value"></span></label>
-      <input id="objects" type="range" min="100" max="12000" step="100" value="5000" list="objects-ticks" />
+      <label for="objects"><span data-i18n="objects">objects</span> <span id="objects-value"></span></label>
+      <input id="objects" type="range" min="100" max="12000" step="100" value="1500" list="objects-ticks" />
       <datalist id="objects-ticks">
         <option value="500"></option>
         <option value="2000"></option>
@@ -180,45 +199,46 @@
         <option value="10000"></option>
       </datalist>
 
-      <label for="strategy">eviction</label>
+      <label for="strategy" data-i18n="eviction">eviction</label>
       <select id="strategy">
-        <option value="heap">min-heap (O(log capacity))</option>
-        <option value="linear">linear scan (O(capacity))</option>
+        <option value="heap" data-i18n="heap">min-heap (O(log capacity))</option>
+        <option value="linear" data-i18n="linear">linear scan (O(capacity))</option>
       </select>
 
-      <label for="speed">speed &times; <span id="speed-value"></span></label>
+      <label for="palette" data-i18n="palette">palette</label>
+      <select id="palette">
+        <option value="multicolor" data-i18n="multicolor">multicolor</option>
+        <option value="cool" data-i18n="cool">cool</option>
+        <option value="warm" data-i18n="warm">warm</option>
+      </select>
+
+      <label for="speed"><span data-i18n="speed">speed ×</span> <span id="speed-value"></span></label>
       <input id="speed" type="range" min="0.1" max="4" step="0.1" value="1" />
 
-      <label for="opacity">opacity <span id="opacity-value"></span></label>
+      <label for="opacity"><span data-i18n="opacity">opacity</span> <span id="opacity-value"></span></label>
       <input id="opacity" type="range" min="0.1" max="1" step="0.05" value="0.9" />
     </div>
 
     <div id="perf">
-      <h1>Batching proof</h1>
-      <div class="row"><span>objects (active)</span><span id="stat-objects">--</span></div>
-      <div class="row"><span>slots used</span><span id="stat-slots">--</span></div>
-      <div class="row highlight"><span>draw calls</span><span id="stat-draws">--</span></div>
-      <div class="row"><span>evictions / sec</span><span id="stat-evictions">--</span></div>
-      <div class="row highlight"><span>ms / update</span><span id="stat-ms">--</span></div>
-      <div class="row"><span>zoom</span><span id="zoom-value">--</span></div>
-      <div class="row"><span>projection</span><span id="projection-value">--</span></div>
-      <div class="row"><span>transition</span><span id="transition-value">--</span></div>
+      <h1 data-i18n="proof">Batching proof</h1>
+      <div class="row"><span data-i18n="active">objects (active)</span><span id="stat-objects">--</span></div>
+      <div class="row"><span data-i18n="slots">slots used</span><span id="stat-slots">--</span></div>
+      <div class="row highlight"><span data-i18n="draws">draw calls</span><span id="stat-draws">--</span></div>
+      <div class="row"><span data-i18n="perSecond">evictions / sec</span><span id="stat-evictions">--</span></div>
+      <div class="row highlight"><span data-i18n="perUpdate">ms / update</span><span id="stat-ms">--</span></div>
+      <div class="row"><span data-i18n="zoom">zoom</span><span id="zoom-value">--</span></div>
+      <div class="row"><span data-i18n="projection">projection</span><span id="projection-value">--</span></div>
+      <div class="row"><span data-i18n="transition">transition</span><span id="transition-value">--</span></div>
     </div>
 
     <div id="transport">
       <button id="play-pause" type="button">Pause</button>
-      <span style="color: #9aa4b2">Legs are generated procedurally and never stop -- there is no fixed-length timeline to scrub.</span>
+      <span data-i18n="transport" style="color: #9aa4b2">Legs are generated procedurally and never stop -- there is no fixed-length timeline to scrub.</span>
     </div>
 
     <div id="token-warning">
       <div class="box">
-        <p>
-          No Mapbox access token found. Copy <code>.env.example</code> to <code>.env</code>,
-          set <code>VITE_MAPBOX_TOKEN</code> to a token from your
-          <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noreferrer"
-            >Mapbox account</a
-          >, then restart <code>npm run dev</code>.
-        </p>
+        <p id="token-warning-message"></p>
       </div>
     </div>
 

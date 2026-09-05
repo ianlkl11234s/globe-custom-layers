@@ -1,4 +1,5 @@
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 // The 68 effects + the two core modules are plain, untranslated-logic JS
 // (see README "TypeScript choice"). Static imports are enough here -- unlike

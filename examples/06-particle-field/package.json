@@ -12,11 +12,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "mapbox-gl": "^3.18.1"
+    "mapbox-gl": "3.30.0"
   },
   "devDependencies": {
-    "typescript": "~5.7.0",
-    "vite": "^6.1.0",
-    "vitest": "^3.2.6"
+    "@types/geojson": "7946.0.16",
+    "typescript": "5.7.3",
+    "vite": "6.4.3",
+    "vitest": "3.2.7"
   }
 }

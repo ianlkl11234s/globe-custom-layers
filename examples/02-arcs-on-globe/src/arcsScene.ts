@@ -46,6 +46,8 @@ export const MAX_ARC_HEIGHT_MERC_Z = 0.08;
 // a high per-arc value would blow every hub out to solid white.
 const ARC_COLOR = "#ffb454";
 const ARC_ALPHA = 0.28;
+const LIGHT_ARC_COLOR = "#007f86";
+const LIGHT_ARC_ALPHA = 0.5;
 
 const VERT = /* glsl */ `
 ${GLOBE_PROJECT_GLSL}
@@ -224,6 +226,16 @@ export class ArcsScene {
     this.routes = routes.slice(0, MAX_ARC_COUNT);
     this.segmentsPerArc = -1;
     this.arcHeightMercZ = -1;
+  }
+
+  setTheme(theme: "light" | "dark") {
+    if (!this.material) return;
+    this.material.uniforms.uColor!.value.set(theme === "light" ? LIGHT_ARC_COLOR : ARC_COLOR);
+    this.material.uniforms.uAlpha!.value = theme === "light" ? LIGHT_ARC_ALPHA : ARC_ALPHA;
+    // Additive RGB cannot read as dark teal over a light basemap. Preserve
+    // the fragment shader's alpha/horizon fade and use source-over only in
+    // light mode; dark mode keeps its original additive hub glow.
+    this.material.blending = theme === "light" ? THREE.NormalBlending : THREE.AdditiveBlending;
   }
 
   /**

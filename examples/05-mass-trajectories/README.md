@@ -24,8 +24,6 @@ And the eviction strategy, switched live on the same machine and the same scene:
 
 About 3.5x, in the browser, on a whole frame's work. A Node micro-benchmark of the eviction step alone, at 3,000 objects against 1,024 slots, shows ~16.5x (16.81 ms versus 277.92 ms per call) — the browser figure is smaller because everything else in the frame dilutes it. Run both yourself; the numbers that matter are the ones from your machine.
 
-_(Screenshot pending — see Status above.)_
-
 Thousands of independently-moving, flight-like trails, batched into a **single `THREE.Line` draw call**, on Mapbox's globe. This is the runnable companion to [3.1 Batched trails](../../docs/03-scaling-up/batched-trails.md) — until now a "📋 Reported, not yet reproduced" doc in this cookbook — combined with [1.1 Hugging the globe: Mapbox GL JS](../../docs/01-hugging-the-globe/mapbox.md)'s two ECEF branches used **together, per vertex, in the same draw call**, which no other example here does.
 
 [`04-moving-trajectory`](../04-moving-trajectory/)'s own README says it outright: "No eviction policy... a production layer with an unbounded, fluctuating population... needs the min-heap eviction scheme in `batched-trails.md`'s Step 5." This example is that next step.
@@ -48,7 +46,7 @@ cp .env.example .env      # then edit .env and set VITE_MAPBOX_TOKEN
 npm run dev
 ```
 
-Get a free token at <https://account.mapbox.com/access-tokens/>. Without one, the page shows an on-screen message instead of a blank map or a crash — this path (the `#token-warning` overlay) is standard across every example in this cookbook, but note this specific example has NOT been visually confirmed in a browser at all yet — see Status above.
+Get your own token at <https://account.mapbox.com/access-tokens/>. Without one, the page shows an on-screen message instead of a blank map or a crash. The screenshot and browser measurements above are the recorded reproduction evidence; they do not validate every later adaptation or dependency update.
 
 ## Verifying it without a token
 
@@ -140,8 +138,9 @@ Compared to what the production source (and a maximally faithful port of it) wou
 
 | Control | Where | Default | Effect |
 |---|---|---|---|
-| Objects | HUD slider | 5000 (range 100–12000, tick marks at 500/2000/5000/10000) | How many of `MAX_OBJECTS`'s logical trajectories are simulated. Below `SLOT_CAPACITY` (4096): little to no eviction. Above it: heavy churn — watch `evictions/sec` and `ms/update` climb. |
+| Objects | HUD slider | 1500 (range 100–12000, tick marks at 500/2000/5000/10000) | How many of `MAX_OBJECTS`'s logical trajectories are simulated. Below `SLOT_CAPACITY` (4096): little to no eviction. Above it: heavy churn — watch `evictions/sec` and `ms/update` climb. |
 | Eviction | HUD select | min-heap | `heap` (O(log capacity)) or `linear` (O(capacity)) — see "Benchmarking it yourself" above. Both modes pay identical heap-push bookkeeping cost; only the find-victim step differs, isolating exactly what the doc is about. |
+| Palette | HUD select | multicolor | Changes a shader uniform only: `multicolor` uses the stored deterministic object hue, while `cool` and `warm` derive stable per-object gradients without rebuilding GPU trail buffers. |
 | Speed × | HUD slider | 1.0 (range 0.1–4) | Multiplies wall-clock time into simulation time — how fast legs advance and expire. |
 | Opacity | HUD slider | 0.9 (range 0.1–1) | `uGlobalOpacity` uniform — a whole-layer multiplier, NOT a per-vertex attribute, so changing it never requires rewriting any slot's data. |
 | `SLOT_CAPACITY` | `trajectoryScene.ts` constant | 4096 | Fixed GPU render capacity — never resized at runtime (see "Deliberate simplifications"). |

@@ -1,6 +1,7 @@
 import type { CustomLayerInterface, Map as MapboxMap } from "mapbox-gl";
-import { TrajectoryScene, type UpdateStats } from "./trajectoryScene";
+import { TrajectoryScene, type TrailPalette, type UpdateStats } from "./trajectoryScene";
 import type { EvictionStrategy } from "./slotPool";
+import type { EmbedTheme } from "./embedBridge";
 
 export const TRAJECTORY_LAYER_ID = "mass-trajectories";
 
@@ -9,6 +10,8 @@ export interface TrajectoryLayerControls {
   getActiveCount: () => number;
   getOpacity: () => number;
   getStrategy: () => EvictionStrategy;
+  getPalette: () => TrailPalette;
+  theme: EmbedTheme;
   onFrameInfo?: (info: { isGlobe: boolean; transition: number; stats: UpdateStats; drawCalls: number }) => void;
 }
 
@@ -50,6 +53,8 @@ export function createTrajectoryLayer(controls: TrajectoryLayerControls): Custom
       scene.setActiveCount(controls.getActiveCount());
       scene.setOpacity(controls.getOpacity());
       scene.setStrategy(controls.getStrategy());
+      scene.setPalette(controls.getPalette());
+      scene.setTheme(controls.theme);
 
       // Advance every active object's leg (and write its trail into a
       // slot, acquiring/evicting as needed) BEFORE reading the globe/camera

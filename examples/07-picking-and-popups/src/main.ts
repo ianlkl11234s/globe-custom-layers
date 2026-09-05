@@ -1,4 +1,5 @@
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { loadAirports } from "./airports";
 import { airportsToGeoJSON } from "./airportsGeoJSON";
 import { addCompanionLayer, queryCompanionAt, type CompanionHit } from "./nativeCompanionLayer";

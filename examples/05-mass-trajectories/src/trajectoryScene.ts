@@ -39,6 +39,8 @@ export const SLOT_CAPACITY = 4096;
 
 const SEED = 20260905;
 
+export type TrailPalette = "multicolor" | "cool" | "warm";
+
 interface ObjectState {
   rand: () => number;
   leg: Leg;
@@ -84,11 +86,22 @@ const TRAIL_FRAG = /* glsl */ `
 precision highp float;
 
 uniform float uGlobalOpacity;
+uniform float uLightTheme;
+uniform float uPaletteMode;
 
 varying vec3 vColor;
 varying float vOpacity;
 varying float vProgress;
 varying float vCull;
+
+vec3 paletteColor(vec3 source) {
+  if (uPaletteMode < 0.5) return source;
+  // Derive a stable per-object gradient coordinate from the existing color
+  // attribute. Palette changes stay GPU-only and never rewrite trail buffers.
+  float t = fract(dot(source, vec3(12.9898, 78.233, 37.719)));
+  if (uPaletteMode < 1.5) return mix(vec3(0.03, 0.31, 0.72), vec3(0.25, 0.92, 0.86), t);
+  return mix(vec3(0.72, 0.08, 0.12), vec3(1.0, 0.72, 0.10), t);
+}
 
 void main() {
   // Same non-linear tail fade + head glow as plan-art's trail.frag:
@@ -99,14 +112,17 @@ void main() {
   // requires rewriting any slot's per-vertex data.
   float alpha = pow(vProgress, 2.0) * vOpacity * vCull * uGlobalOpacity;
   float glow = smoothstep(0.85, 1.0, vProgress) * 0.5;
-  vec3 color = vColor + vec3(glow);
+  vec3 base = paletteColor(vColor);
+  // Keep full hue variation on white without washing the heads to white.
+  vec3 color = mix(base + vec3(glow), base * 0.5 + vec3(glow * 0.08), uLightTheme);
   gl_FragColor = vec4(color, alpha);
 }
 `;
 
-/** Deterministic per-object hue spread, same recipe as 04's objectColor. */
+/** Deterministic hue spacing across any active object prefix. */
 function objectColor(index: number): { r: number; g: number; b: number } {
-  const hue = (index / MAX_OBJECTS) % 1;
+  // Golden-angle spacing keeps even a small active prefix multi-colored.
+  const hue = (index * 0.618033988749895) % 1;
   return new THREE.Color().setHSL(hue, 0.75, 0.6);
 }
 
@@ -193,6 +209,8 @@ export class TrajectoryScene {
       fragmentShader: TRAIL_FRAG,
       uniforms: {
         uGlobalOpacity: { value: 0.9 },
+        uLightTheme: { value: 0 },
+        uPaletteMode: { value: 0 },
         uGlobeToMerc: { value: new THREE.Matrix4() },
         uTransition: { value: 1 },
         uCameraEcef: { value: new THREE.Vector3() },
@@ -223,6 +241,20 @@ export class TrajectoryScene {
     this.material.uniforms.uGlobalOpacity!.value = Math.max(0, Math.min(1, o));
   }
 
+  setTheme(theme: "light" | "dark") {
+    if (!this.material) return;
+    this.material.uniforms.uLightTheme!.value = theme === "light" ? 1 : 0;
+    // The trail alpha (including guard vertices and the tail fade) remains
+    // shader-owned. Only light-mode compositing changes so teal trails are
+    // visible over the light Mapbox style; dark keeps additive accumulation.
+    this.material.blending = theme === "light" ? THREE.NormalBlending : THREE.AdditiveBlending;
+  }
+
+  setPalette(palette: TrailPalette) {
+    if (!this.material) return;
+    this.material.uniforms.uPaletteMode!.value = palette === "cool" ? 1 : palette === "warm" ? 2 : 0;
+  }
+
   /** How many objects (of MAX_OBJECTS) are currently simulated/eligible for a render slot -- the "objects" HUD slider. Lowering this releases slots for objects that just dropped out of range; raising it does NOT reallocate anything, only widens which indices get visited each frame. */
   setActiveCount(n: number) {
     const next = Math.max(0, Math.min(MAX_OBJECTS, Math.round(n)));
@@ -237,6 +269,7 @@ export class TrajectoryScene {
         }
       }
     }
+    if (next !== this.activeCount) this.lastSimTime = null;
     this.activeCount = next;
   }
 

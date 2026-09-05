@@ -1,6 +1,6 @@
 # 1.2 Hugging the globe: MapLibre GL JS
 
-> **Status:** mixed, deliberately. The survey of what MapLibre provides and what its official examples cover is 📋 **Reported** — read from the `maplibre-gl@5.24.0` typings and from the examples themselves. The Three.js porting hypothesis in the second half is ⚠️ **Unverified**: reasoned, not run. It is stated with a way to falsify it, and should not be repeated as fact until someone does.
+> **Status:** mixed, deliberately. MapLibre's official projection API is 📋 **Reported**. The site's prelude-based Three.js adapter for examples 01/02/05 is 🔬 **Reproduced** in a local browser without a token. The direct ECEF/mainMatrix path below remains ⚠️ **Unverified**. This does not verify terrain, depth interaction, or all nine example ports.
 >
 > The mercator half of this story *is* measured — see [1.3 Porting](porting.md).
 
@@ -42,9 +42,9 @@ Not in "can custom layers work on a MapLibre globe" — they can, officially, wi
 |---|---|
 | Raw WebGL, small geometry, prelude-based | ✅ two examples |
 | Raw WebGL, many subdivided tiles | ✅ one example |
-| **Three.js, per-vertex GPU projection** | ❌ nothing |
-| **Tens of thousands of independently moving objects** | ❌ nothing |
-| Additive blending, depth interaction with the basemap | ❌ nothing |
+| **Three.js, per-vertex GPU projection** | Not covered by these official examples; local reproduction below |
+| **Tens of thousands of independently moving objects** | Not covered; the local port below was exercised at 5,000 objects |
+| Additive blending, depth interaction with the basemap | Not covered by these official examples; local blending and clipping findings below |
 
 A per-object CPU matrix is a sound approach for one building and the wrong shape for forty thousand moving ones. Splicing MapLibre's prelude into a Three.js `ShaderMaterial` — which brings its own prelude and its own matrix conventions — is the specific unknown this page exists to resolve.
 
@@ -54,7 +54,19 @@ The tile example's documentation notes that geometry subdivision is advisable un
 
 Vertices are projected; the segments between them are not. Two vertices give you a straight line in screen space no matter how correct each endpoint is. Subdivide long spans into enough intermediate vertices that each segment is short relative to the sphere's curvature — the same constraint applies on Mapbox, where nothing in the library will do it for you either.
 
-## The hypothesis worth testing first
+## 🔬 Reproduced locally: prelude-based Three.js adapter
+
+`site/maplibreCustom.ts` keeps the original Three.js scene geometry and fragment shaders, then replaces only the vertex projection with MapLibre's `shaderData.vertexShaderPrelude` and `projectTileWithElevation()`. The local browser reproduction covers:
+
+- 01 points: original point-size path, `vCull = 1`, and MapLibre's official horizon clip;
+- 02 arcs: 190 raised arcs / 8,740 vertices, with normal blending in light mode and additive blending in dark mode;
+- 05 tracks: 5,000 tracks in 4,096 slots and one draw call.
+
+The adapter keeps custom-layer coordinates in `[0,1]` for x/y and passes height in metres. MapLibre 5.24's `defaultProjectionData.projectionTransition` is only binary in this callback, so the adapter obtains the basemap coefficient from `map.transform.getProjectionData({overscaledTileID: null, applyGlobeMatrix: true}).projectionTransition`; this is pinned internal integration, not a public portability contract. The prelude's horizon clip plus `vCull = 1` does not reproduce Mapbox's soft limb fade pixel-for-pixel. `projectTileWithElevation()` is used with `depthTest: false`; measured depth-tested 3D rendering cut points, so terrain/depth correctness is not claimed.
+
+The site's free mode is this MapLibre custom-layer preview, not a native `circle`/`line` substitute. Its token-free bundle aliases `mapbox-gl` to a MercatorCoordinate-only shim and does not ship the Mapbox SDK. The site build reuses the three example TypeScript scenes without changing the examples' self-contained copy-out contract.
+
+## ⚠️ Unverified: direct ECEF/mainMatrix hypothesis
 
 `mainMatrix` projects a **unit sphere**. A layer that already precomputes ECEF positions per vertex (as [1.1](mapbox.md) does, for its own reasons) is therefore two steps from working here:
 

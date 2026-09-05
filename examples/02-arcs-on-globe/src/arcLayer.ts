@@ -2,12 +2,14 @@ import type { CustomLayerInterface, Map as MapboxMap } from "mapbox-gl";
 import { ArcsScene } from "./arcsScene";
 import { loadHubs } from "./airports";
 import { buildArcRoutes } from "./arcs";
+import type { EmbedTheme } from "./embedBridge";
 
 export const ARC_LAYER_ID = "arcs-on-globe";
 
 export interface ArcLayerControls {
   getSegmentsPerArc: () => number;
   getArcHeightMercZ: () => number;
+  theme: EmbedTheme;
   /**
    * Called once per render() frame with the current globe/geometry state --
    * purely for main.ts's HUD readout, not needed for the projection
@@ -65,6 +67,7 @@ export function createArcLayer(controls: ArcLayerControls): CustomLayerInterface
       // setParams() only actually rebuilds when a value changed, so calling
       // it every frame costs nothing once the sliders are idle.
       scene.setParams(controls.getSegmentsPerArc(), controls.getArcHeightMercZ());
+      scene.setTheme(controls.theme);
 
       // Same globe-detection rule as glowLayer.ts: projection?.name === "globe"
       // is the authoritative check, not zoom level.

@@ -1,0 +1,13 @@
+{
+  "name": "globe-custom-layers-field-guide",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/iframe-bridge.test.mjs",
+    "typecheck": "node ../examples/01-points-on-globe/node_modules/typescript/bin/tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "maplibre-gl": "5.24.0"
+  }
+}

@@ -1,4 +1,5 @@
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { createTrajectoryLayer } from "./trajectoryLayer";
 import { TIMELINE_DURATION_SEC, mod1 } from "./objectPath";
 

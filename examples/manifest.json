@@ -3,14 +3,19 @@
   "version": 1,
   "generated": "2026-09-05",
   "checkedAgainst": {
-    "mapbox-gl": "3.18.1",
+    "mapbox-gl": "3.30.0",
     "three": "0.172.0",
     "node": "23.10.0"
   },
+  "verificationNote": "Pinned examples passed isolated installation, typecheck, math tests and build. Recorded screenshots retain their historical provenance. See docs/demo-implementation-plan.md for current browser checks and remaining gates.",
+  "historicalRecipeInvestigations": {
+    "mapbox-gl": "3.18.1",
+    "maplibre-gl": "5.24.0"
+  },
   "conventions": {
     "selfContained": "Each example has its own package.json and node_modules and imports nothing outside its own folder. Duplicated files between examples are intentional. Copy a whole folder rather than importing across.",
-    "token": "Every example reads import.meta.env.VITE_MAPBOX_TOKEN and ships a .env.example. No token is committed. A missing token shows a message rather than crashing.",
-    "acceptance": "npx tsc --noEmit && npx vitest run && npm run build passes in every example.",
+    "token": "Standalone examples read import.meta.env.VITE_MAPBOX_TOKEN. In demo embed mode, examples 01/02/05 accept a runtime public token only from the same-origin parent. No token is committed; site builds use an empty envDir.",
+    "acceptance": "npm ci && npm run typecheck && npm run test --if-present && npm run build. The gallery has no math tests. Browser behavior is a separate gate.",
     "statusMarkers": {
       "verified": "Runs in production and is reproduced by an example here",
       "reproduced": "Reproduced by an example here",
@@ -75,7 +80,7 @@
         "docs/04-discipline/zoom-adaptive-sizing.md"
       ],
       "status": "reproduced",
-      "tests": 13,
+      "tests": 19,
       "screenshot": "examples/01-points-on-globe/screenshots/globe.png",
       "usesApis": [
         "CustomLayerInterface.render(gl, matrix, projection, projectionToMercatorMatrix, projectionToMercatorTransition)",
@@ -374,8 +379,10 @@
         {
           "id": "objects",
           "type": "integer",
-          "default": 5000,
-          "effect": "Active object count. Capacity is fixed at 4,096 slots, so beyond that objects compete and the losers get evicted."
+          "default": 1500,
+          "effect": "Active object count. Capacity is fixed at 4,096 slots, so beyond that objects compete and the losers get evicted.",
+          "min": 100,
+          "max": 12000
         },
         {
           "id": "strategy",
@@ -402,6 +409,17 @@
           "max": 1,
           "default": 0.9,
           "effect": "Layer alpha."
+        },
+        {
+          "id": "palette",
+          "type": "enum",
+          "values": [
+            "multicolor",
+            "cool",
+            "warm"
+          ],
+          "default": "multicolor",
+          "effect": "Per-object trail colors, retained in light and dark themes; shader uniform switch without rebuilding trail buffers."
         }
       ],
       "measured": {
@@ -665,6 +683,6 @@
   ],
   "totals": {
     "examples": 9,
-    "tests": 274
+    "tests": 280
   }
 }
