@@ -2,6 +2,8 @@
 
 **A Mapbox-first cookbook for developers and AI agents building custom globe effects, from glowing points to thousands of animated tracks.**
 
+**[Try the live demo](https://globe-custom-layers.zeabur.app/)** — choose an effect, adjust it, then open its recipe, source, or Agent prompt. Bring your own public Mapbox token, or explore the MapLibre preview without one.
+
 ![1,174 airports rendered as glowing points hugging a Mapbox globe](examples/01-points-on-globe/screenshots/globe.png)
 
 <sup>1,174 airports as a Three.js custom layer on a Mapbox globe. Points sit on the sphere, the far side is culled, and the whole thing blends back to flat Web Mercator as you zoom in. Runnable: [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
