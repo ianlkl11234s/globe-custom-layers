@@ -12,7 +12,7 @@ const scenes = {
 const sceneOrder = ["nativePoints", "nativeLines", "nativeAreas", "points", "arcs", "tracks"];
 const nativeScenes = new Set(sceneOrder.slice(0, 3));
 const $ = (selector) => document.querySelector(selector);
-let language = "zh-TW";
+let language = "en";
 let theme = "light";
 let selected = "nativePoints";
 let engine = "free";

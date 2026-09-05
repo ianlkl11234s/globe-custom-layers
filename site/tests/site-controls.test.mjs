@@ -7,6 +7,7 @@ const read = (name) => readFile(new URL(name, site), "utf8");
 
 test("atlas navigation leads with element names and keeps data as subtitles", async () => {
   const html = await read("index.html");
+  const app = await read("app.js");
   const copy = await read("i18n.js");
   const styles = await read("styles.css");
   const point = html.indexOf('data-scene="nativePoints"');
@@ -14,6 +15,8 @@ test("atlas navigation leads with element names and keeps data as subtitles", as
   const area = html.indexOf('data-scene="nativeAreas"');
   const custom = html.indexOf('data-scene="points"');
   assert.ok(point >= 0 && point < line && line < area && area < custom);
+  assert.match(html, /<html lang="en">/);
+  assert.match(app, /let language = "en";/);
   assert.match(html, /data-i18n="nativeFoundations"/);
   assert.match(html, /data-i18n="threeCustom"/);
   assert.match(copy, /"nativePoints": "點位圖層"/);
