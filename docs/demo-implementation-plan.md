@@ -1,12 +1,12 @@
 # Demo implementation record
 
-Decision recorded 2026-09-05 and updated through 2026-09-06. This is a chronological implementation and verification record, not a release claim. Historical counts and “no commit” statements below describe the checkpoint where they were written; the current consolidated batch is committed locally, while push, remote CI and deployment remain separate actions.
+Decision recorded 2026-09-05 and updated through 2026-09-06. This is a chronological implementation and verification record. Historical counts and “no commit” statements below describe the checkpoint where they were written; the consolidated batch was merged through [PR #1](https://github.com/ianlkl11234s/globe-custom-layers/pull/1), passed post-merge CI, and was deployed from merge commit `cb7dc0f`.
 
 ## Current atlas state — 2026-09-06
 
 The website now presents six reusable globe elements: native point, line and area layers first, followed by glow points, great-circle arcs and mass trajectories. The supporting fixtures are 1,174 OurAirports locations, 281 OSM-derived North Atlantic cable LineStrings, 50 European map units joined to World Bank 2023 GDP, and explicitly synthetic route/track data. The repository contains 11 standalone Mapbox examples and 294 tests across the ten examples with test suites; the effects gallery has no unit suite.
 
-Local acceptance for the consolidated batch includes 15 site tests, site typecheck/build, both new native-example tests/typechecks/builds, documentation checks, whitespace checks, and browser readback of all six token-free MapLibre scenes. Embedded Mapbox line/area scenes now use the same fail-closed memory-backed SDK storage boundary as the existing embedded examples. The new standalone Mapbox line and choropleth examples still need a real-token browser gate. The public Zeabur site has not been redeployed for this batch.
+Local acceptance for the consolidated batch includes 15 site tests, site typecheck/build, both new native-example tests/typechecks/builds, documentation checks, whitespace checks, and browser readback of all six token-free MapLibre scenes. Embedded Mapbox line/area scenes now use the same fail-closed memory-backed SDK storage boundary as the existing embedded examples. The new standalone Mapbox line and choropleth examples still need a real-token browser gate. The current English-default atlas is deployed at [globe-custom-layers.zeabur.app](https://globe-custom-layers.zeabur.app/).
 
 ## Product decision
 
@@ -169,3 +169,9 @@ The line fixture contains 281 OSM-derived LineStrings under ODbL. The area fixtu
 The Mapbox public-token entry now lives in a collapsible left-sidebar session panel. Only `pk.` tokens are accepted into `sessionStorage`; switching scenes and reloading keeps the token, while explicit forgetting or closing the browser session clears it. The central gate no longer duplicates the token input. This is application storage behavior, not a claim that provider requests or browser network tooling cannot observe the public token.
 
 Current local acceptance: 15 site contract/data/style tests passed; both new examples passed two tests, typecheck and production build; the static site typecheck/build passed. Browser readback showed 1,174 airport points, 281 cable features and 50 GDP areas on one MapLibre canvas. Each scene switch re-collapsed the parameter panel; changing cable width/color and GDP opacity/palette/border updated the rendered layer. No commit, push or deployment was performed for this batch.
+
+## Release result — 2026-09-06
+
+[PR #1](https://github.com/ianlkl11234s/globe-custom-layers/pull/1) merged the four reviewed commits into `main` as `cb7dc0f`. Both pre-merge workflow runs and the [post-merge `main` workflow](https://github.com/ianlkl11234s/globe-custom-layers/actions/runs/33981377816) completed successfully across all 11 examples and the site job.
+
+GitHub recorded a successful production deployment of `cb7dc0f` by Zeabur. Live HTTP readback confirmed `lang="en"` plus the native line and area scene entries, and browser inspection rendered the 1,174-point MapLibre scene with the current layout. This proves the published static shell and token-free preview, not real visitor-token access to Mapbox services; the new standalone Mapbox line and choropleth browser gates remain open.

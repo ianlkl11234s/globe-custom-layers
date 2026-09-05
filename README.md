@@ -2,7 +2,7 @@
 
 **A Mapbox-first cookbook for developers and AI agents building custom globe effects, from glowing points to thousands of animated tracks.**
 
-**[Published demo](https://globe-custom-layers.zeabur.app/)** — choose an element, adjust it, then open its recipe, source, or Agent prompt. The published site can lag the current `main` branch; the current six-scene atlas is verified locally and awaits a separate deployment. Bring your own public Mapbox token, or explore the MapLibre preview without one.
+**[Try the published demo](https://globe-custom-layers.zeabur.app/)** — the current six-scene atlas is deployed from `main`. Choose an element, adjust it, then open its recipe, source, or Agent prompt. Bring your own public Mapbox token, or explore the MapLibre preview without one.
 
 ![Current English atlas showing the native global-airport point layer](site/screenshots/atlas-en-light.png)
 
