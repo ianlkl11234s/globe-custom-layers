@@ -9,6 +9,7 @@ const siteRoot = resolve(projectRoot, "site");
 const outputRoot = resolve(siteRoot, "dist");
 const emptyEnvDir = await mkdtemp(join(tmpdir(), "gcl-empty-env-"));
 const examples = [
+  ["00-native-vs-custom", "native-vs-custom.png"],
   ["01-points-on-globe", "points-globe.png"],
   ["02-arcs-on-globe", "arcs-globe.png"],
   ["05-mass-trajectories", "tracks-globe.png"],

@@ -40,7 +40,7 @@ function setupHudToggle() {
     toggle.setAttribute("aria-expanded", String(!collapsed));
     toggle.textContent = preferences.lang === "zh-TW" ? (collapsed ? "顯示控制項" : "隱藏控制項") : (collapsed ? "Show controls" : "Hide controls");
   };
-  setCollapsed(window.innerWidth < 520);
+  setCollapsed(true);
   toggle.addEventListener("click", () => setCollapsed(!hud.classList.contains("hud-collapsed")));
 }
 

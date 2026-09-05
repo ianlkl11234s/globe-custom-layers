@@ -14,7 +14,7 @@
   },
   "conventions": {
     "selfContained": "Each example has its own package.json and node_modules and imports nothing outside its own folder. Duplicated files between examples are intentional. Copy a whole folder rather than importing across.",
-    "token": "Standalone examples read import.meta.env.VITE_MAPBOX_TOKEN. In demo embed mode, examples 01/02/05 accept a runtime public token only from the same-origin parent. No token is committed; site builds use an empty envDir.",
+    "token": "Standalone examples read import.meta.env.VITE_MAPBOX_TOKEN. In demo embed mode, examples 00/01/02/05 accept a runtime public token only from the same-origin parent. No token is committed; site builds use an empty envDir.",
     "acceptance": "npm ci && npm run typecheck && npm run test --if-present && npm run build. The gallery has no math tests. Browser behavior is a separate gate.",
     "statusMarkers": {
       "verified": "Runs in production and is reproduced by an example here",
@@ -34,7 +34,7 @@
         "docs/00-start-here/decision-tree.md"
       ],
       "status": "reproduced",
-      "tests": 20,
+      "tests": 23,
       "screenshot": "examples/00-native-vs-custom/screenshots/globe.png",
       "usesApis": [
         "map.addLayer({type:'circle'})",
@@ -80,7 +80,7 @@
         "docs/04-discipline/zoom-adaptive-sizing.md"
       ],
       "status": "reproduced",
-      "tests": 19,
+      "tests": 21,
       "screenshot": "examples/01-points-on-globe/screenshots/globe.png",
       "usesApis": [
         "CustomLayerInterface.render(gl, matrix, projection, projectionToMercatorMatrix, projectionToMercatorTransition)",
@@ -90,6 +90,13 @@
         "THREE.ShaderMaterial"
       ],
       "knobs": [
+        {
+          "id": "point-palette",
+          "type": "select",
+          "options": ["solar", "aurora", "plasma", "ice"],
+          "default": "solar",
+          "effect": "Recolors the same synthetic airport weight with one of four illustrative glow ramps; it does not encode a real category."
+        },
         {
           "id": "size-mul",
           "type": "number",
@@ -683,6 +690,6 @@
   ],
   "totals": {
     "examples": 9,
-    "tests": 280
+    "tests": 285
   }
 }

@@ -5,11 +5,10 @@
  *
  *   - The native `circle` layer (src/nativeLayer.ts) needs `ident`/`name`
  *     for its click popup, on top of position/color/size.
- *   - The custom Three.js layer (src/glowPointsScene.ts, copied unmodified
- *     from examples/01-points-on-globe) only reads `lon`/`lat`/`colorHex`/
+ *   - The custom Three.js layer (src/glowPointsScene.ts, kept as a local
+ *     self-contained copy of examples/01-points-on-globe) only reads `lon`/`lat`/`colorHex`/
  *     `sizeNorm` and ignores the rest -- which is why this interface is
- *     still named `AirportPoint`: it's a superset of what that copied file
- *     imports, so it works as-is with zero edits.
+ *     still named `AirportPoint`: it's a superset of what that scene imports.
  *
  * IMPORTANT: `sizeNorm` here is NOT real traffic/passenger data. OurAirports
  * (the source of the lon/lat/name data) doesn't publish traffic figures, so

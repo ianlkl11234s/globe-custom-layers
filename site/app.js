@@ -2,6 +2,7 @@ import { forgetRuntimeToken, isTrustedReadyEvent, unloadFrame } from "./bridgeSt
 import { translate } from "./i18n.js";
 const root = "https://github.com/ianlkl11234s/globe-custom-layers";
 const scenes = {
+  basics: { path: "00-native-vs-custom", recipe: "docs/00-start-here/decision-tree.md" },
   points: { path: "01-points-on-globe", recipe: "docs/02-effects/spark-points.md" },
   arcs: { path: "02-arcs-on-globe", recipe: "docs/01-hugging-the-globe/mapbox.md" },
   tracks: { path: "05-mass-trajectories", recipe: "docs/03-scaling-up/batched-trails.md" }
@@ -9,7 +10,7 @@ const scenes = {
 const $ = (selector) => document.querySelector(selector);
 let language = "zh-TW";
 let theme = "light";
-let selected = "points";
+let selected = "basics";
 let engine = "mapbox";
 let token = "";
 let frame = null;
@@ -39,7 +40,21 @@ function setMapMessage(key, values) {
 function promptForScene() {
   const title = t(selected);
   const source = t(sceneKey("Source"));
-  const acceptance = language === "zh-TW" ? selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
+  const acceptance = language === "zh-TW" ? selected === "basics" ? "確認 native 點、線、面可獨立開關與調整，並知道 Mapbox 範例主要比較 native/custom points。" : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : selected === "basics" ? "Verify independent native point, line and polygon controls; the Mapbox example principally compares native/custom points." : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
+  if (engine === "free" && selected === "basics") {
+    const intro = language === "zh-TW" ? `用 MapLibre GL JS 5.24.0 為 [YOUR DATA] 建立原生點、線、面圖層，不需 Mapbox token。` : `Build native point, line and polygon layers for [YOUR DATA] with MapLibre GL JS 5.24.0, without a Mapbox token.`;
+    return `${intro}
+
+Read ${root}/blob/main/AGENTS.md first; prefer native layers when sufficient.
+Implementation: ${root}/blob/main/site/freeGlobe.js
+Decision guide: ${root}/blob/main/docs/00-start-here/decision-tree.md
+Mapbox native/custom point comparison: ${root}/tree/main/examples/00-native-vs-custom
+
+${source}
+${acceptance}
+
+Keep source attribution and distinguish measured data from synthetic teaching geometry. Verify layer visibility, point size, line width, area opacity, globe/flat transition, antimeridian behavior, and the chosen local basemap palette in a browser.`;
+  }
   if (engine === "free") {
     const intro = language === "zh-TW" ? `用 MapLibre GL JS 5.24.0 為 [YOUR DATA] 建立「${title}」。不需 Mapbox token。` : `Build ${title} for [YOUR DATA] with MapLibre GL JS 5.24.0, without a Mapbox token.`;
     return `${intro}
@@ -134,15 +149,19 @@ function forgetToken() {
 }
 function renderReuseLinks() {
   $("#scene-status").textContent = engine === "free" ? (language === "zh-TW" ? "MapLibre：本機瀏覽器已重現" : "MapLibre: reproduced locally") : t("status");
-  const recipe = engine === "free" ? "docs/01-hugging-the-globe/maplibre.md" : scenes[selected].recipe;
+  const recipe = selected === "basics" ? scenes.basics.recipe : engine === "free" ? "docs/01-hugging-the-globe/maplibre.md" : scenes[selected].recipe;
   $("#recipe-link").href = `${root}/blob/main/${recipe}`;
-  $("#source-link").href = engine === "free" ? `${root}/blob/main/site/maplibreCustom.ts` : `${root}/tree/main/examples/${scenes[selected].path}`;
+  $("#source-link").href = engine === "free" ? `${root}/blob/main/site/${selected === "basics" ? "freeGlobe.js" : "maplibreCustom.ts"}` : `${root}/tree/main/examples/${scenes[selected].path}`;
   $("#agent-prompt").textContent = promptForScene();
 }
 function setEngineButtons() {
   renderReuseLinks();
-  $("#free-mode").classList.toggle("is-active", engine === "free");
-  $("#mapbox-mode").classList.toggle("is-active", engine === "mapbox");
+  const freeActive = engine === "free";
+  const mapboxActive = engine === "mapbox";
+  $("#free-mode").classList.toggle("is-active", freeActive);
+  $("#free-mode").setAttribute("aria-pressed", String(freeActive));
+  $("#mapbox-mode").classList.toggle("is-active", mapboxActive);
+  $("#mapbox-mode").setAttribute("aria-pressed", String(mapboxActive));
 }
 async function returnFree({ forget = true } = {}) {
   stopMapbox();
@@ -220,7 +239,7 @@ function render() {
     button.querySelector("strong").textContent = t(scene);
     button.querySelector("small").textContent = t(`${scene}Sub`);
   });
-  $("#scene-label").textContent = `${zh ? "範例" : "EXAMPLE"} ${["points", "arcs", "tracks"].indexOf(selected) + 1} / ${t(selected)}`;
+  $("#scene-label").textContent = `${zh ? "範例" : "EXAMPLE"} ${selected === "basics" ? "00" : `0${["points", "arcs", "tracks"].indexOf(selected) + 1}`} / ${t(selected)}`;
   $("#map-subtitle").textContent = t(`${selected}Sub`);
   $("#details-pane > .kicker").textContent = zh ? "在自己的專案使用" : "Use it in your project";
   $(".scene-list").setAttribute("aria-label", t("effects"));

@@ -18,6 +18,8 @@ export interface AirportPoint {
   sizeNorm: number;
 }
 
+export type PointPalette = "solar" | "aurora" | "plasma" | "ice";
+
 interface AirportsFile {
   source: string;
   fields: ["ident", "name", "lon", "lat"];
@@ -45,14 +47,19 @@ function hashToUnitFloat(s: string): number {
  * point size (mirrors the "big and bright" pattern of a real hub-traffic
  * visualization, without claiming to have real traffic data behind it).
  */
-function syntheticColorRamp(t: number): string {
+const PALETTE_STOPS: Record<PointPalette, [[number, number, number], [number, number, number], [number, number, number]]> = {
+  solar: [[255, 255, 255], [255, 140, 26], [255, 30, 30]],
+  aurora: [[224, 255, 245], [0, 224, 182], [0, 122, 174]],
+  plasma: [[255, 232, 255], [229, 69, 255], [72, 198, 255]],
+  ice: [[239, 252, 255], [92, 202, 255], [54, 91, 255]],
+};
+
+export function syntheticColorRamp(t: number, palette: PointPalette = "solar"): string {
   const k = Math.max(0, Math.min(1, t));
-  const white: [number, number, number] = [255, 255, 255];
-  const orange: [number, number, number] = [255, 140, 26];
-  const red: [number, number, number] = [255, 30, 30];
+  const [low, mid, high] = PALETTE_STOPS[palette];
   const lerp = (a: [number, number, number], b: [number, number, number], m: number) =>
     a.map((v, i) => Math.round(v + (b[i]! - v) * m)) as [number, number, number];
-  const [r, g, b] = k < 0.5 ? lerp(white, orange, k / 0.5) : lerp(orange, red, (k - 0.5) / 0.5);
+  const [r, g, b] = k < 0.5 ? lerp(low, mid, k / 0.5) : lerp(mid, high, (k - 0.5) / 0.5);
   return `rgb(${r},${g},${b})`;
 }
 

@@ -4,6 +4,7 @@ import { loadAirports } from "./airports";
 import { airportsToGeoJSON } from "./airportsGeoJSON";
 import { addNativeAirportsLayer, bindNativeClickPopup, NATIVE_LAYER_ID } from "./nativeLayer";
 import { createGlowLayer } from "./glowLayer";
+import { getEmbedPreferences, getEmbeddedRuntimeToken, reportEmbedMapStatus } from "./embedBridge";
 
 /**
  * Wires up: one map, two layers drawing the SAME airport data, and a mode
@@ -27,12 +28,12 @@ type Mode = "native" | "custom" | "both";
 //
 // CUSTOM_LOC covers ONLY drawing: globeProject.ts (229 lines) is genuinely
 // not optional if you want a custom layer to hug the globe at all, and
-// glowPointsScene.ts (330) + glowLayer.ts (121) are the Three.js scene +
+// glowPointsScene.ts (340) + glowLayer.ts (124) are the Three.js scene +
 // CustomLayerInterface glue. It does NOT include any interaction code,
 // because there isn't any to count -- see the "custom mode" click handler
 // below for why.
 const NATIVE_LOC = 89; // wc -l src/nativeLayer.ts
-const CUSTOM_LOC = 229 + 330 + 121; // globeProject.ts + glowPointsScene.ts + glowLayer.ts
+const CUSTOM_LOC = 229 + 340 + 124; // globeProject.ts + glowPointsScene.ts + glowLayer.ts
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -41,24 +42,52 @@ function byId<T extends HTMLElement>(id: string): T {
 }
 
 const tokenWarning = byId<HTMLDivElement>("token-warning");
+const tokenWarningMessage = byId<HTMLParagraphElement>("token-warning-message");
+const preferences = getEmbedPreferences();
+document.documentElement.dataset.theme = preferences.theme;
+document.documentElement.dataset.embed = String(preferences.embed);
+const zh = { title: "原生與自訂圖層", controls: "控制項", mode: "模式", zoom: "縮放", projection: "投影", transition: "轉換", native: "原生", custom: "自訂", both: "兩者", loc: "程式行數", circle: "原生點位", three: "Three.js 自訂", hint: "點擊地圖上的點，比較原生圖層與 custom layer 的互動差異。" };
+if (preferences.embed && preferences.lang === "zh-TW") {
+  document.documentElement.lang = "zh-TW";
+  document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((element) => {
+    const value = zh[element.dataset.i18n as keyof typeof zh];
+    if (value) element.textContent = value;
+  });
+}
+
+function setupPanelToggle() {
+  if (!preferences.embed) return;
+  const panel = byId<HTMLDivElement>("panel");
+  const toggle = byId<HTMLButtonElement>("panel-toggle");
+  const setCollapsed = (collapsed: boolean) => {
+    panel.classList.toggle("panel-collapsed", collapsed);
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    toggle.textContent = preferences.lang === "zh-TW" ? (collapsed ? "顯示控制項" : "隱藏控制項") : (collapsed ? "Show controls" : "Hide controls");
+  };
+  setCollapsed(true);
+  toggle.addEventListener("click", () => setCollapsed(!panel.classList.contains("panel-collapsed")));
+}
+
+setupPanelToggle();
 
 // Requirement: never read any .env file ourselves and never hardcode a token
 // -- only import.meta.env.VITE_MAPBOX_TOKEN, which Vite populates from the
 // user's own .env (see .env.example). If it's missing, show a friendly
 // message instead of letting mapbox-gl throw on every tile request.
-const token = import.meta.env.VITE_MAPBOX_TOKEN;
-
-if (!token) {
-  tokenWarning.classList.add("visible");
-} else {
+void getEmbeddedRuntimeToken(import.meta.env.VITE_MAPBOX_TOKEN ?? "").then((token) => {
+  if (!token) {
+    tokenWarningMessage.textContent = "No Mapbox access token found. Set VITE_MAPBOX_TOKEN in your own .env and restart Vite.";
+    tokenWarning.classList.add("visible");
+    return;
+  }
   mapboxgl.accessToken = token;
   startMap();
-}
+});
 
 function startMap() {
   const map = new mapboxgl.Map({
     container: "map",
-    style: "mapbox://styles/mapbox/dark-v11",
+    style: preferences.theme === "light" ? "mapbox://styles/mapbox/light-v11" : "mapbox://styles/mapbox/dark-v11",
     // mapbox-gl-js v3 already defaults to globe projection at low zoom for
     // most styles, but we set it explicitly so this example behaves the same
     // way regardless of which style you swap in.
@@ -76,6 +105,7 @@ function startMap() {
     if (status === 401 || status === 403) {
       tokenWarning.classList.add("visible");
     }
+    reportEmbedMapStatus("error", status);
     console.error("[map error]", e.error);
   });
 
@@ -101,11 +131,9 @@ function startMap() {
   //
   // customVisible is read by getOpacity() below instead of calling some
   // `customLayer.setVisible()` -- CustomLayerInterface (glowLayer.ts's
-  // return type) has no such method, and glowLayer.ts is copied unmodified
-  // from 01-points-on-globe on purpose. Driving opacity to 0 achieves the
-  // same visible result with zero edits to the copied files: with
-  // THREE.AdditiveBlending, alpha 0 means `srcColor * 0 + dstColor` --
-  // genuinely no pixels change, even though Mapbox still calls render()
+  // return type) has no such method. Driving opacity to 0 achieves the same
+  // visible result in either theme: zero source alpha leaves the framebuffer
+  // unchanged with both normal and additive blending, even though Mapbox still calls render()
   // every frame (see the applyMode() comment on why that's actually useful
   // here, not just a workaround).
   let customVisible = true;
@@ -113,6 +141,7 @@ function startMap() {
     getSizeMul: () => 1,
     getOpacity: () => (customVisible ? 0.9 : 0),
     getCoreBoost: () => 0.7,
+    theme: preferences.theme,
     onFrameInfo: ({ isGlobe, transition }) => {
       projectionValueEl.textContent = isGlobe ? "globe" : "mercator";
       transitionValueEl.textContent = transition.toFixed(2);
@@ -126,6 +155,7 @@ function startMap() {
     modeValueEl.textContent = mode;
     for (const [m, btn] of Object.entries(modeButtons) as Array<[Mode, HTMLButtonElement]>) {
       btn.classList.toggle("active", m === mode);
+      btn.setAttribute("aria-pressed", String(m === mode));
     }
 
     const showNative = mode === "native" || mode === "both";
@@ -183,6 +213,7 @@ function startMap() {
 
     map.addLayer(customLayer);
     applyMode(mode); // custom layer visibility can be set immediately
+    reportEmbedMapStatus("loaded");
   });
 
   // THE most important click handler in this example. It is deliberately a

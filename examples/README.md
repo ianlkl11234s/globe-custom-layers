@@ -31,7 +31,7 @@ Read them in order if you are new here. `00` tells you whether you need any of t
 | [`07-picking-and-popups`](07-picking-and-popups/) | Clicks on a layer that cannot be hit-tested. Two working strategies, and the candidate count that proves why backface culling matters. | [0.1 Q5](../docs/00-start-here/decision-tree.md) | 45 |
 | [`08-effects-gallery`](08-effects-gallery/) | 68 procedural Three.js effects, each with a prompt template you can hand to an agent. **Mercator, not globe** — see its README. | [2.1 Spark points](../docs/02-effects/spark-points.md) | — |
 
-Every one of them passes `npx tsc --noEmit` and `npm run build`; all but the gallery also carry unit tests, **280 in total**: 274 math tests plus six checks for the demo's embedded-token, memory-storage and presentation-preference boundary. The website has two additional iframe-state tests. These checks run without a browser, a GPU, or a token; live interactions remain a separate browser gate.
+Every one of them passes `npx tsc --noEmit` and `npm run build`; all but the gallery also carry unit tests, **285 in total**: 274 existing math/data tests, nine embedded-token/storage/preference checks, and two glow-palette checks. The website has five additional iframe-state and control-contract tests. These checks run without a browser, a GPU, or a token; live interactions remain a separate browser gate.
 
 All nine have been opened in a browser with a real token and confirmed rendering; each example's README carries its own screenshot, its measured numbers where it has any, and its own status marker. Read that marker rather than assuming.
 

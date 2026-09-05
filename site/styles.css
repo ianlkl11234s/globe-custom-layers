@@ -190,6 +190,13 @@ h3 {
   gap: 7px;
   margin-top: 30px;
 }
+.scene-group {
+  margin: 14px 8px 0;
+  color: var(--muted);
+  font: 500 10px/1 var(--mono);
+  letter-spacing: .12em;
+}
+.scene-group:first-child { margin-top: 0; }
 .scene-tab {
   display: grid;
   grid-template-columns: 28px 1fr;
@@ -595,7 +602,7 @@ input {
     white-space: normal;
   }
   .scene-list {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 5px;
     margin-top: 18px;
   }
@@ -610,6 +617,7 @@ input {
   .scene-tab small {
     font-size: 10px;
   }
+  .scene-group { grid-column: 1 / -1; margin: 7px 4px 0; }
   .rail-foot {
     display: none;
   }
@@ -648,6 +656,7 @@ input {
 .free-custom-hud .custom-stats { white-space: pre-line; font: 12px/1.7 var(--mono); }
 .free-custom-hud label { display: block; font-size: 12px; margin-top: 10px; }
 .free-custom-hud input { display: block; width: 100%; accent-color: var(--teal); }
+.free-custom-hud input[type="checkbox"] { display: inline-block; width: auto; min-height: 0; padding: 0; vertical-align: middle; }
 .free-custom-hud select { display: block; width: 100%; min-height: 34px; margin-top: 4px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
 .free-custom-hud button { background: var(--paper); border: 1px solid var(--line); padding: 6px 14px; cursor: pointer; }
 .globe-stage:has(#token-gate:not([hidden])) .free-custom-hud { visibility: hidden; }

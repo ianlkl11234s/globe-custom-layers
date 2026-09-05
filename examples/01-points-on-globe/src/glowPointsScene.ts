@@ -90,9 +90,10 @@ void main() {
 
   // Push the very center toward white for a "hot core" look.
   vec3 col = mix(vColor, vec3(1.0), core * uCoreBoost);
-  // The light basemap needs a darker teal edge to retain the same visual
-  // weight as the warm additive glow has against the dark basemap.
-  col = mix(col, mix(col * 0.5, vec3(0.0, 0.58, 0.58), 0.65), uLightTheme);
+  // On a light basemap, darken the selected palette instead of forcing every
+  // ramp toward one teal. This keeps Solar/Aurora/Plasma/Ice distinguishable
+  // while normal alpha blending preserves contrast against the pale map.
+  col = mix(col, col * 0.44, uLightTheme);
   gl_FragColor = vec4(col, a);
 }
 `;

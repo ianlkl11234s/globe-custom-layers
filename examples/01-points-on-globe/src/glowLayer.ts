@@ -1,6 +1,6 @@
 import type { CustomLayerInterface, Map as MapboxMap } from "mapbox-gl";
 import { GlowPointsScene } from "./glowPointsScene";
-import { loadAirports } from "./airports";
+import { loadAirports, syntheticColorRamp, type AirportPoint, type PointPalette } from "./airports";
 import type { EmbedTheme } from "./embedBridge";
 
 export const GLOW_LAYER_ID = "01-points-on-globe";
@@ -9,6 +9,7 @@ export interface GlowLayerControls {
   getSizeMul: () => number;
   getOpacity: () => number;
   getCoreBoost: () => number;
+  getPalette: () => PointPalette;
   theme: EmbedTheme;
   /**
    * Called once per render() frame with the raw globe state Mapbox reported
@@ -28,6 +29,14 @@ export function createGlowLayer(controls: GlowLayerControls): CustomLayerInterfa
   const scene = new GlowPointsScene();
   let map: MapboxMap | null = null;
   let dataReady = false;
+  let rows: AirportPoint[] = [];
+  let currentPalette: PointPalette | null = null;
+
+  function applyPalette(palette: PointPalette) {
+    if (!rows.length || palette === currentPalette) return;
+    currentPalette = palette;
+    scene.setData(rows.map((row) => ({ ...row, colorHex: syntheticColorRamp(row.sizeNorm, palette) })));
+  }
 
   return {
     id: GLOW_LAYER_ID,
@@ -41,8 +50,9 @@ export function createGlowLayer(controls: GlowLayerControls): CustomLayerInterfa
       map = mapInstance;
       scene.init(gl);
       loadAirports()
-        .then((rows) => {
-          scene.setData(rows);
+        .then((loadedRows) => {
+          rows = loadedRows;
+          applyPalette(controls.getPalette());
           dataReady = true;
           map?.triggerRepaint();
         })
@@ -64,6 +74,7 @@ export function createGlowLayer(controls: GlowLayerControls): CustomLayerInterfa
 
       scene.setOpacity(controls.getOpacity());
       scene.setCoreBoost(controls.getCoreBoost());
+      applyPalette(controls.getPalette());
       scene.setTheme(controls.theme);
       scene.setSizeMul(controls.getSizeMul());
       if (map) scene.setZoom(map.getZoom());

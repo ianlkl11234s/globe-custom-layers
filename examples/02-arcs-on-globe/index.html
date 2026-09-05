@@ -107,11 +107,13 @@
       html[data-embed="true"] #hud label, html[data-embed="true"] #hud .hint { font-size: 12px; }
       html[data-embed="true"] input { accent-color: #008b8b; }
       #hud-toggle { display: none; }
+      html[data-embed="true"] #hud-toggle { display: block; position: static; margin: 0 0 8px auto; border: 1px solid currentColor; border-radius: 999px; background: transparent; color: inherit; padding: 3px 9px; font: inherit; font-size: 12px; cursor: pointer; }
+      html[data-embed="true"] #hud.hud-collapsed { width: auto; min-width: 0; display: grid; grid-template-columns: auto auto; align-items: center; gap: 12px; overflow: hidden; }
+      html[data-embed="true"] #hud.hud-collapsed h1 { margin: 0; }
+      html[data-embed="true"] #hud.hud-collapsed #hud-toggle { margin: 0; }
+      html[data-embed="true"] #hud.hud-collapsed > :not(h1):not(#hud-toggle) { display: none; }
       @media (max-width: 520px) {
         html[data-embed="true"] #hud { max-height: calc(100% - 48px); overflow: auto; }
-        html[data-embed="true"] #hud-toggle { display: block; position: static; margin: 0 0 8px auto; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: inherit; padding: 2px 6px; font: inherit; font-size: 12px; cursor: pointer; }
-        html[data-embed="true"] #hud.hud-collapsed { width: auto; min-width: 0; }
-        html[data-embed="true"] #hud.hud-collapsed > :not(h1):not(#hud-toggle) { display: none; }
       }
     </style>
   </head>

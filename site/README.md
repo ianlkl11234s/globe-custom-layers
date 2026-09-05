@@ -1,10 +1,10 @@
 # Globe Custom Layers atlas demo
 
-The white map workspace puts scene selection on the left, an interactive globe in the center, and recipes/source/Agent prompts in the inspector. It borrows the compact map-and-panel organization of Mini Taiwan Pulse, with fine cartographic lines and blue/teal accents.
+The cartographic-lab workspace puts scene selection on the left, an interactive globe in the center, and recipes/source/Agent prompts in the inspector. It starts with **Native foundations**: local MapLibre point, line, and polygon layers can be independently shown and tuned before moving into the Three.js custom scenes. The free basics view deliberately shows all three together; its Mapbox counterpart is the existing `00-native-vs-custom` point-focused comparison.
 
 The default mode is **Mapbox full example**, with a translucent globe and an explicit runtime-token entry form. Visitors may choose **Free MapLibre preview**, which uses MapLibre GL JS 5.24.0's prelude-based custom-layer adapter and local geographic data without a Mapbox token or external tile service. It reuses the original Three.js scene geometry and fragment shaders for airport points, raised arcs and mass tracks; a visible notice explains the horizon/limb, blending and depth differences. These are different implementations, not an engine capability comparison.
 
-The interface and selected embedded examples support Traditional Chinese/English and light/dark themes. Light custom geometry uses dark teal with normal alpha blending for visibility on white; dark mode retains additive glow. Use dark mode when studying additive highlight accumulation.
+The interface and selected embedded examples support Traditional Chinese/English and light/dark themes. Parameter panels start collapsed in embedded views and expand only on request; changing the selected free scene collapses the panel again so it does not cover the globe. The free HUD exposes local-only Atlas, Midnight, and Blueprint basemap presets (ocean/land/border/grid colours only); no tile endpoint is added. Points expose size, opacity, core boost, and Solar/Aurora/Plasma/Ice palettes; arcs and tracks retain their scene-specific controls. Light custom geometry uses normal alpha blending for visibility on pale paper; dark mode retains additive glow. Use dark mode when studying additive highlight accumulation.
 
 Both modes support the site's light/dark appearance. The interface offers Traditional Chinese and English, larger text, and a direct path from the effect to its GitHub source and an Agent task prompt. This remains a cookbook entry point, not a data service or an engine-independent rendering library.
 
@@ -22,14 +22,15 @@ MapLibre's license is bundled in `dist/vendor/maplibre-LICENSE.txt`. Local Natur
 - `airports.json`: the existing 1,174-record OurAirports fixture copied from example 01, including its source metadata. Airport locations are not a live event feed.
 - Preview routes and moving tracks are synthetic illustrations. Their appearance/counts are not runtime performance measurements from the WebGL examples.
 
-These small data files are bundled locally; browsing the free globe does not request Mapbox tiles or require a Mapbox token. The site build reuses the three example TypeScript scenes without changing the examples' self-contained copy-out contract.
+These small data files are bundled locally; browsing the free globe does not request Mapbox tiles or require a Mapbox token. The site build embeds the native-foundations comparison plus three selected Three.js scenes without changing the examples' self-contained copy-out contract.
 
 ## Fresh clone
 
-Install the pinned MapLibre dependency for the site and the three independently bundled example dependencies before building:
+Install the pinned MapLibre dependency for the site and the four independently bundled example dependencies before building:
 
 ```sh
 (cd site && npm ci)
+(cd examples/00-native-vs-custom && npm ci)
 (cd examples/01-points-on-globe && npm ci)
 (cd examples/02-arcs-on-globe && npm ci)
 (cd examples/05-mass-trajectories && npm ci)
@@ -47,7 +48,7 @@ docker build -t globe-custom-layers .
 docker run --rm -p 8080:8080 globe-custom-layers
 ```
 
-The multi-stage image uses Node 22 to run `npm ci` independently for `site` and examples 01, 02, and 05, then runs the existing token-clearing site build. Its final Nginx image contains only `site/dist` and the port-8080 static-server configuration. The Docker allowlist and `.dockerignore` exclude local `.env` files, so no deployment token or runtime API is required.
+The multi-stage image uses Node 22 to run `npm ci` independently for `site` and examples 00, 01, 02, and 05, then runs the existing token-clearing site build. Its final Nginx image contains only `site/dist` and the port-8080 static-server configuration. The Docker allowlist and `.dockerignore` exclude local `.env` files, so no deployment token or runtime API is required.
 
 On Zeabur, deploy this repository's `main` branch from the repository root. Its [Dockerfile deployment](https://zeabur.com/docs/en-US/deploy/methods/dockerfile) detects the root Dockerfile and exposed port 8080. Do not configure `VITE_MAPBOX_TOKEN`: visitors supply their own public token in the browser.
 
@@ -71,7 +72,7 @@ Reset and leaving the page explicitly forget the token, including a page restore
 
 ## Verification boundary
 
-The site test covers handshake origin/source checks and token-forget iframe unload. Typechecking and the build cover the selected iframe bundles, including their relative fixture path. They do not prove real Mapbox tiles, a valid visitor token, or visual globe/shader behavior. Those require the browser fixture and scene controls with a deliberately supplied runtime token.
+The site tests cover handshake origin/source checks, token-forget iframe unload, and the static DOM/control contract for foundations, local basemap presets, native layers, and glow controls. Typechecking and the build cover the selected iframe bundles, including their relative fixture path. They do not prove real Mapbox tiles, a valid visitor token, actual GPU palette rendering, or visual globe/shader behavior. Those require browser inspection (and a deliberately supplied runtime token for Mapbox).
 
 The [implementation record](../docs/demo-implementation-plan.md) separates completed local browser checks with a synthetic offline style from unverified real Mapbox tile access and public deployment. That test-only Mapbox style interception is not shipped. Free MapLibre mode is a locally reproduced custom-layer port preview; it does not verify the direct ECEF/mainMatrix hypothesis, terrain/depth behaviour, or all nine examples.
 

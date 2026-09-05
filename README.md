@@ -28,7 +28,7 @@ This cookbook records the additional work from production projects: Mapbox's und
 
 ## Explore an effect
 
-The [demo website](site/README.md) introduces three scenes: glowing airport points, global arcs, and mass trajectory playback. The default Mapbox mode is token-gated. The free mode is a clearly labelled MapLibre 5.24 custom-layer preview using the prelude adapter and local data; it keeps the original scene geometry/fragment shaders, but its horizon/limb, blending and depth behaviour differ from Mapbox and are not pixel-identical. Each scene links to its recipe and source and provides a task prompt for your agent. See the [implementation plan](docs/demo-implementation-plan.md) for current acceptance and publication status.
+The [demo website](site/README.md) leads with adjustable native point, line and polygon foundations, then moves through three selected Three.js scenes: glowing airport points, global arcs, and mass trajectory playback. The default Mapbox mode is token-gated. The free mode is a clearly labelled MapLibre 5.24 custom-layer preview using the prelude adapter and local data; it keeps the original scene geometry/fragment shaders, but its horizon/limb, blending and depth behaviour differ from Mapbox and are not pixel-identical. Each scene links to its recipe and source and provides a task prompt for your agent. See the [implementation plan](docs/demo-implementation-plan.md) for current acceptance and publication status.
 
 ## Use with an agent
 

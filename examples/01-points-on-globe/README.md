@@ -42,7 +42,7 @@ This example was built and verified without ever opening it in a browser (no Map
 
 ```bash
 npx tsc --noEmit    # 0 errors
-npx vitest run      # 13/13 tests pass
+npx vitest run      # 21/21 tests pass (13 projection, 6 embed lifecycle, 2 palette)
 npm run build        # succeeds (vite build)
 ```
 
@@ -52,6 +52,7 @@ The unit tests (`src/globeProject.test.ts`) cover the ECEF math and the sphere/f
 
 | Control | Where | Default | Effect |
 |---|---|---|---|
+| Glow palette | HUD select | Solar (also Aurora / Plasma / Ice) | Recolors the same synthetic weight; colors remain illustrative and do not encode airport categories |
 | Point size × | HUD slider | 1.0 (range 0.2–3) | `uSizeMul` — scales every point's pixel size |
 | Opacity | HUD slider | 0.9 (range 0.1–1) | `uOpacity` — overall glow alpha |
 | Core boost | HUD slider | 0.7 (range 0–1) | `uCoreBoost` — how hard the point center is pushed toward white |
@@ -64,7 +65,7 @@ The unit tests (`src/globeProject.test.ts`) cover the ECEF math and the sphere/f
 
 - **Positions and names are real.** `public/airports.json` is produced by `scripts/fetch-airports.mjs` from [OurAirports](https://ourairports.com/data/airports.csv) (public domain, no attribution required), filtered to `type === "large_airport"`. As fetched for this example, that's **1,174 airports** — noticeably more than the ~400–500 this example's spec estimated, because the live OurAirports dataset has grown since that estimate was written. The script keeps only `ident`, `name`, `lon`, `lat`.
   The file is shaped `{ source, fields: ["ident","name","lon","lat"], airports: [[ident, name, lon, lat], ...] }` — **array-of-arrays, not array-of-objects** — purely to keep the file small: repeating four key names across 1,174 records would cost ~33KB for zero benefit (103KB vs the 71KB this format produces). `src/airports.ts` is where it gets turned into the `{lon, lat, colorHex, sizeNorm}` shape the render code actually wants.
-- **Point size and color are synthetic.** OurAirports doesn't publish traffic figures, so `src/airports.ts` derives a stable, arbitrary "weight" per airport from a hash of its `ident` code, sqrt-compresses it, and maps that to both point size and a white→orange→red color ramp. This produces a plausible-looking "some airports are bigger/brighter than others" pattern, but it has **no relationship to actual passenger or flight volume** — don't read anything into which airports render large.
+- **Point size and color are synthetic.** OurAirports doesn't publish traffic figures, so `src/airports.ts` derives a stable, arbitrary "weight" per airport from a hash of its `ident` code, sqrt-compresses it, and maps that to point size and the selected Solar/Aurora/Plasma/Ice ramp. The palettes are visual alternatives, not real airport categories. This produces a plausible-looking "some airports are bigger/brighter than others" pattern, but it has **no relationship to actual passenger or flight volume** — don't read anything into which airports render large.
 - **Fallback:** if `scripts/fetch-airports.mjs` can't reach the network, it generates 500 points evenly spread over the sphere (a Fibonacci-sphere spiral) instead of fabricating airport-shaped data. Check `public/airports.json`'s own `"source"` field — it says `SYNTHETIC` in that case. This example's own `public/airports.json` was generated with the network reachable, so it ships the real OurAirports data.
 
 To regenerate the data file yourself:
@@ -89,6 +90,6 @@ Compared to the production code this recipe was extracted from, this example lea
 
 - **Popups / hit-testing.** Custom layers don't participate in `queryRenderedFeatures`; a production layer would keep an invisible native `circle` layer alongside this one for click/hover interaction. This example has neither.
 - **Repaint throttling.** `glowLayer.ts` calls `map.triggerRepaint()` unconditionally on every frame to keep the size-pulse animation smooth. Production code throttles this (e.g. down to ~20fps while idle, stopping entirely after ~30s of no activity) via a shared scheduler across multiple layers — that infrastructure is orthogonal to globe-hugging itself and was cut for clarity. Don't copy the "always repaint" line into something with a real GPU budget.
-- **Multiple color modes.** The production version this was extracted from can switch between a traffic-based ramp and a discrete status-based palette. This example has exactly one ramp, and it's synthetic (see above) either way.
+- **Semantic color modes.** The selectable ramps are all synthetic presentation palettes. The example still does not implement traffic-based or discrete status colors; use a real field and legend before assigning meaning to color.
 - **Limb-fade widening at far zoom.** Some production variants widen the backface-cull falloff at very low zoom so the horizon seam is less visible from far away. This example uses one fixed cull width at all zooms.
 - **A stricter backface cull than some production points layers use.** This example's cull (`uCameraEcef`, true ECEF space, `smoothstep(-0.08, 0.02, ...)`) is the recipe doc's method. At least one production glow-points layer this example draws on uses an older, looser variant instead — camera kept in mercator space, normal computed as `mat3(uGlobeToMerc) * aEcef`, and a wider `smoothstep(-0.25, 0.05, ...)`. Both hide the far side; the doc's version does it in the geometrically correct space. If you're porting from a points layer elsewhere and its horizon looks different from this example's, this is why.
