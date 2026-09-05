@@ -138,11 +138,11 @@ Compared to what the production source (and a maximally faithful port of it) wou
 
 | Control | Where | Default | Effect |
 |---|---|---|---|
-| Objects | HUD slider | 1500 (range 100–12000, tick marks at 500/2000/5000/10000) | How many of `MAX_OBJECTS`'s logical trajectories are simulated. Below `SLOT_CAPACITY` (4096): little to no eviction. Above it: heavy churn — watch `evictions/sec` and `ms/update` climb. |
+| Objects | HUD slider | 600 (range 100–12000, tick marks at 500/2000/5000/10000) | How many of `MAX_OBJECTS`'s logical trajectories are simulated. Below `SLOT_CAPACITY` (4096): little to no eviction. Above it: heavy churn — watch `evictions/sec` and `ms/update` climb. |
 | Eviction | HUD select | min-heap | `heap` (O(log capacity)) or `linear` (O(capacity)) — see "Benchmarking it yourself" above. Both modes pay identical heap-push bookkeeping cost; only the find-victim step differs, isolating exactly what the doc is about. |
-| Palette | HUD select | multicolor | Changes a shader uniform only: `multicolor` uses the stored deterministic object hue, while `cool` and `warm` derive stable per-object gradients without rebuilding GPU trail buffers. |
-| Speed × | HUD slider | 1.0 (range 0.1–4) | Multiplies wall-clock time into simulation time — how fast legs advance and expire. |
-| Opacity | HUD slider | 0.9 (range 0.1–1) | `uGlobalOpacity` uniform — a whole-layer multiplier, NOT a per-vertex attribute, so changing it never requires rewriting any slot's data. |
+| Palette | HUD select | warm | Changes a shader uniform only: `multicolor` uses the stored deterministic object hue, while `cool` and `warm` derive stable per-object gradients without rebuilding GPU trail buffers. |
+| Speed × | HUD slider | 0.3 (range 0.1–4) | Multiplies wall-clock time into simulation time — how fast legs advance and expire. |
+| Opacity | HUD slider | 0.7 (range 0.1–1) | `uGlobalOpacity` uniform — a whole-layer multiplier, NOT a per-vertex attribute, so changing it never requires rewriting any slot's data. |
 | `SLOT_CAPACITY` | `trajectoryScene.ts` constant | 4096 | Fixed GPU render capacity — never resized at runtime (see "Deliberate simplifications"). |
 | `MAX_OBJECTS` | `trajectoryScene.ts` constant | 12000 | Logical population ceiling — the "objects" slider's max. |
 | `PATH_SUBDIVISIONS` | `leg.ts` constant | 48 | Dense slerp samples per leg. |

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildArcRoutes, sampleArc } from "./arcs";
+import { arcColorForRoute, buildArcRoutes, sampleArc, type ArcPalette } from "./arcs";
 import type { Hub } from "./airports";
 import type { LonLat } from "./slerp";
 
@@ -37,6 +37,24 @@ describe("buildArcRoutes", () => {
     const first = routes[0]!;
     expect(first.origin).toEqual({ lon: hubs[0]!.lon, lat: hubs[0]!.lat });
     expect(first.dest).toEqual({ lon: hubs[1]!.lon, lat: hubs[1]!.lat });
+  });
+});
+
+describe("arc palettes", () => {
+  const palettes: ArcPalette[] = ["spectrum", "solar", "aurora", "plasma", "ice"];
+  const route = buildArcRoutes(makeHubs(2))[0]!;
+
+  it("returns a valid, deterministic RGB color for every selectable palette", () => {
+    for (const palette of palettes) {
+      const first = arcColorForRoute(route, palette);
+      expect(first).toMatch(/^rgb\(\d+,\d+,\d+\)$/);
+      expect(arcColorForRoute(route, palette)).toBe(first);
+    }
+  });
+
+  it("gives the Spectrum palette visible per-route variety", () => {
+    const colors = buildArcRoutes(makeHubs(6)).map((item) => arcColorForRoute(item, "spectrum"));
+    expect(new Set(colors).size).toBeGreaterThan(8);
   });
 });
 

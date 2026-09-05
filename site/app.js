@@ -1,18 +1,22 @@
-import { forgetRuntimeToken, isTrustedReadyEvent, unloadFrame } from "./bridgeState.js";
+import { forgetRuntimeToken, isPublicMapboxToken, isTrustedReadyEvent, readRuntimeToken, saveRuntimeToken, unloadFrame } from "./bridgeState.js";
 import { translate } from "./i18n.js";
 const root = "https://github.com/ianlkl11234s/globe-custom-layers";
 const scenes = {
-  basics: { path: "00-native-vs-custom", recipe: "docs/00-start-here/decision-tree.md" },
+  nativePoints: { path: "00-native-vs-custom", recipe: "docs/00-start-here/decision-tree.md" },
+  nativeLines: { path: "00-native-lines", recipe: "docs/00-start-here/decision-tree.md" },
+  nativeAreas: { path: "00-native-choropleth", recipe: "docs/00-start-here/decision-tree.md" },
   points: { path: "01-points-on-globe", recipe: "docs/02-effects/spark-points.md" },
   arcs: { path: "02-arcs-on-globe", recipe: "docs/01-hugging-the-globe/mapbox.md" },
   tracks: { path: "05-mass-trajectories", recipe: "docs/03-scaling-up/batched-trails.md" }
 };
+const sceneOrder = ["nativePoints", "nativeLines", "nativeAreas", "points", "arcs", "tracks"];
+const nativeScenes = new Set(sceneOrder.slice(0, 3));
 const $ = (selector) => document.querySelector(selector);
 let language = "zh-TW";
 let theme = "light";
-let selected = "basics";
-let engine = "mapbox";
-let token = "";
+let selected = "nativePoints";
+let engine = "free";
+let token = readRuntimeToken(window.sessionStorage);
 let frame = null;
 let free = null;
 let freePromise = null;
@@ -24,11 +28,14 @@ let activePage = true;
 const gate = $("#token-gate");
 const liveStage = $("#live-stage");
 const freeStage = $("#free-stage");
-const input = $("#token");
+const sidebarInput = $("#sidebar-token");
 const status = $("#token-status");
 const t = (key, values) => translate(language, key, values);
 function sceneKey(suffix) {
   return `${selected}${suffix}`;
+}
+function freeNoteKey() {
+  return nativeScenes.has(selected) ? "nativeDifference" : "freeDifference";
 }
 function statusText() {
   return mapMessage ? t(mapMessage.key, mapMessage.values) : "";
@@ -40,20 +47,23 @@ function setMapMessage(key, values) {
 function promptForScene() {
   const title = t(selected);
   const source = t(sceneKey("Source"));
-  const acceptance = language === "zh-TW" ? selected === "basics" ? "確認 native 點、線、面可獨立開關與調整，並知道 Mapbox 範例主要比較 native/custom points。" : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : selected === "basics" ? "Verify independent native point, line and polygon controls; the Mapbox example principally compares native/custom points." : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
-  if (engine === "free" && selected === "basics") {
-    const intro = language === "zh-TW" ? `用 MapLibre GL JS 5.24.0 為 [YOUR DATA] 建立原生點、線、面圖層，不需 Mapbox token。` : `Build native point, line and polygon layers for [YOUR DATA] with MapLibre GL JS 5.24.0, without a Mapbox token.`;
+  const acceptance = language === "zh-TW" ? nativeScenes.has(selected) ? `確認「${title}」只顯示自己的 geometry type，參數可立即更新且來源語意不被誤讀。` : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : nativeScenes.has(selected) ? `Verify that ${title} displays only its own geometry type, updates immediately, and preserves source meaning.` : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
+  if (nativeScenes.has(selected)) {
+    const usingMapLibre = engine === "free";
+    const engineName = usingMapLibre ? "MapLibre GL JS 5.24.0" : "Mapbox GL JS 3.30.0";
+    const intro = language === "zh-TW" ? `用 ${engineName} 為 [YOUR DATA] 建立「${title}」原生圖層。` : `Build a native ${title} layer for [YOUR DATA] with ${engineName}.`;
+    const implementation = usingMapLibre ? `${root}/blob/main/site/freeGlobe.js` : `${root}/tree/main/examples/${scenes[selected].path}`;
     return `${intro}
 
 Read ${root}/blob/main/AGENTS.md first; prefer native layers when sufficient.
-Implementation: ${root}/blob/main/site/freeGlobe.js
+Implementation: ${implementation}
 Decision guide: ${root}/blob/main/docs/00-start-here/decision-tree.md
-Mapbox native/custom point comparison: ${root}/tree/main/examples/00-native-vs-custom
+Data provenance: ${root}/blob/main/docs/data-sources.md
 
 ${source}
 ${acceptance}
 
-Keep source attribution and distinguish measured data from synthetic teaching geometry. Verify layer visibility, point size, line width, area opacity, globe/flat transition, antimeridian behavior, and the chosen local basemap palette in a browser.`;
+Keep source attribution and missing-data semantics. Do not turn incomplete OSM coverage or null GDP into absence or zero. Verify this geometry type, its controls, camera, and globe projection in a browser.`;
   }
   if (engine === "free") {
     const intro = language === "zh-TW" ? `用 MapLibre GL JS 5.24.0 為 [YOUR DATA] 建立「${title}」。不需 Mapbox token。` : `Build ${title} for [YOUR DATA] with MapLibre GL JS 5.24.0, without a Mapbox token.`;
@@ -96,7 +106,9 @@ function renderFreeStatus() {
     $("#asset-status").textContent = "Mapbox · WebGL";
     return;
   }
-  const label = freeStatus.state === "ready" ? `${freeStatus.engine ?? "maplibre"} · ${t("sourceRecords", { count: freeStatus.airportCount ?? "—" })}` : freeStatus.state === "error" ? t("fallback") : "…";
+  const recordKey = nativeScenes.has(selected) ? "sourceFeatures" : "sourceRecords";
+  const count = nativeScenes.has(selected) ? freeStatus.featureCount ?? "—" : freeStatus.airportCount ?? "—";
+  const label = freeStatus.state === "ready" ? `${freeStatus.engine ?? "maplibre"} · ${t(recordKey, { count })}` : freeStatus.state === "error" ? t("fallback") : "…";
   $("#asset-status").textContent = label;
 }
 async function ensureFree() {
@@ -144,14 +156,28 @@ function setGate(visible) {
   liveStage.inert = visible;
 }
 function forgetToken() {
-  token = forgetRuntimeToken();
-  input.value = "";
+  token = forgetRuntimeToken(window.sessionStorage);
+  sidebarInput.value = "";
+  renderTokenPanel();
+}
+function saveToken(candidate) {
+  token = saveRuntimeToken(window.sessionStorage, candidate);
+  sidebarInput.value = "";
+  renderTokenPanel();
+  return Boolean(token);
+}
+function renderTokenPanel() {
+  const presence = $("#sidebar-token-presence");
+  const hasToken = Boolean(token);
+  presence.classList.toggle("is-present", hasToken);
+  $("#sidebar-token-status").textContent = t(hasToken ? "tokenStored" : "tokenEmpty");
+  $("#forget-token").hidden = !hasToken;
 }
 function renderReuseLinks() {
   $("#scene-status").textContent = engine === "free" ? (language === "zh-TW" ? "MapLibre：本機瀏覽器已重現" : "MapLibre: reproduced locally") : t("status");
-  const recipe = selected === "basics" ? scenes.basics.recipe : engine === "free" ? "docs/01-hugging-the-globe/maplibre.md" : scenes[selected].recipe;
+  const recipe = nativeScenes.has(selected) ? scenes[selected].recipe : engine === "free" ? "docs/01-hugging-the-globe/maplibre.md" : scenes[selected].recipe;
   $("#recipe-link").href = `${root}/blob/main/${recipe}`;
-  $("#source-link").href = engine === "free" ? `${root}/blob/main/site/${selected === "basics" ? "freeGlobe.js" : "maplibreCustom.ts"}` : `${root}/tree/main/examples/${scenes[selected].path}`;
+  $("#source-link").href = engine === "free" ? `${root}/blob/main/site/${nativeScenes.has(selected) ? "freeGlobe.js" : "maplibreCustom.ts"}` : `${root}/tree/main/examples/${scenes[selected].path}`;
   $("#agent-prompt").textContent = promptForScene();
 }
 function setEngineButtons() {
@@ -163,16 +189,15 @@ function setEngineButtons() {
   $("#mapbox-mode").classList.toggle("is-active", mapboxActive);
   $("#mapbox-mode").setAttribute("aria-pressed", String(mapboxActive));
 }
-async function returnFree({ forget = true } = {}) {
+async function returnFree() {
   stopMapbox();
-  if (forget) forgetToken();
   engine = "free";
   setGate(false);
   mapMessage = null;
   status.textContent = "";
   setEngineButtons();
-  $("#engine-note").textContent = t("previewNote");
-  $("#free-difference-note").textContent = t("freeDifference");
+  $("#engine-note").textContent = t(nativeScenes.has(selected) ? "nativePreviewNote" : "previewNote");
+  $("#free-difference-note").textContent = t(freeNoteKey());
   $("#free-difference-note").hidden = false;
   renderFreeStatus();
   $("#reset-live").hidden = true;
@@ -180,7 +205,6 @@ async function returnFree({ forget = true } = {}) {
 }
 async function showGate({ focus = false } = {}) {
   stopMapbox();
-  forgetToken();
   engine = "mapbox";
   setGate(true);
   setEngineButtons();
@@ -189,8 +213,11 @@ async function showGate({ focus = false } = {}) {
   $("#engine-note").textContent = t("gateTitle");
   $("#free-difference-note").hidden = true;
   $("#reset-live").hidden = true;
-  await ensureFree();
-  if (focus && engine === "mapbox" && !frame && activePage) input.focus();
+  if (token) mountMapbox();
+  else {
+    await ensureFree();
+    if (focus && engine === "mapbox" && !frame && activePage) sidebarInput.focus();
+  }
 }
 function mountMapbox() {
   stopMapbox();
@@ -223,12 +250,13 @@ function render() {
   $("#language-toggle").textContent = t("language");
   $("#theme-toggle").textContent = theme === "light" ? zh ? "切換深色" : "Switch to dark" : zh ? "切換淺色" : "Switch to light";
   $(".github-button").textContent = t("github");
-  $(".rail-copy").textContent = zh ? "選擇效果，取得程式碼，交給 Agent 在你的專案實作。" : "Choose an effect, get its code, and ask your Agent to build it in your project.";
+  $(".rail-copy").textContent = zh ? "從點、線、面到動態特效，選一個元素，調整後帶回你的地球應用。" : "Choose a globe element, tune it, then take the recipe into your application.";
   $("#free-mode").textContent = t("freeMode");
   $("#mapbox-mode").textContent = t("mapboxMode");
   $("#gate-free").textContent = t("freeReturn");
   $(".gate-card .kicker").textContent = zh ? "MAPBOX 模式" : "MAPBOX MODE";
   $("#reset-live").textContent = t("unload");
+  renderTokenPanel();
   document.querySelectorAll(".scene-tab").forEach((button) => {
     const scene = button.dataset.scene;
     const active = scene === selected;
@@ -239,7 +267,7 @@ function render() {
     button.querySelector("strong").textContent = t(scene);
     button.querySelector("small").textContent = t(`${scene}Sub`);
   });
-  $("#scene-label").textContent = `${zh ? "範例" : "EXAMPLE"} ${selected === "basics" ? "00" : `0${["points", "arcs", "tracks"].indexOf(selected) + 1}`} / ${t(selected)}`;
+  $("#scene-label").textContent = `${zh ? "範例" : "EXAMPLE"} 0${sceneOrder.indexOf(selected)} / ${t(selected)}`;
   $("#map-subtitle").textContent = t(`${selected}Sub`);
   $("#details-pane > .kicker").textContent = zh ? "在自己的專案使用" : "Use it in your project";
   $(".scene-list").setAttribute("aria-label", t("effects"));
@@ -254,8 +282,8 @@ function render() {
   $("#source-link").textContent = `${t("source")} ↗`;
   $("#agent-prompt").textContent = promptForScene();
   status.textContent = statusText();
-  $("#engine-note").textContent = frame ? mapMessage?.key === "loaded" ? t("live") : t("loading") : engine === "mapbox" ? t("gateBody") : t("previewNote");
-  $("#free-difference-note").textContent = t("freeDifference");
+  $("#engine-note").textContent = frame ? mapMessage?.key === "loaded" ? t("live") : t("loading") : engine === "mapbox" ? t("gateBody") : t(nativeScenes.has(selected) ? "nativePreviewNote" : "previewNote");
+  $("#free-difference-note").textContent = t(freeNoteKey());
   $("#free-difference-note").hidden = engine !== "free";
   $("#zoom-in").setAttribute("aria-label", t("zoomIn"));
   $("#zoom-out").setAttribute("aria-label", t("zoomOut"));
@@ -302,13 +330,6 @@ function resetForLifecycle() {
   activePage = false;
   stopMapbox();
   stopFree();
-  forgetToken();
-  engine = "mapbox";
-  setGate(true);
-  mapMessage = null;
-  status.textContent = "";
-  $("#reset-live").hidden = true;
-  setEngineButtons();
 }
 $("#free-mode").addEventListener("click", () => returnFree());
 $("#gate-free").addEventListener("click", () => returnFree());
@@ -325,19 +346,25 @@ $("#theme-toggle").addEventListener("click", () => {
   render();
   if (frame && token) mountMapbox();
 });
-$("#token-form").addEventListener("submit", (event) => {
-  event.preventDefault();
-  const candidate = input.value.trim();
-  if (!candidate) return setMapMessage("noToken");
-  if (!candidate.startsWith("pk.")) {
-    input.value = "";
-    return setMapMessage("invalidToken");
-  }
-  token = candidate;
-  input.value = "";
+function submitToken(candidate) {
+  const publicToken = candidate.trim();
+  sidebarInput.value = "";
+  if (!publicToken) return setMapMessage("noToken");
+  if (!isPublicMapboxToken(publicToken)) return setMapMessage("invalidToken");
+  if (!saveToken(publicToken)) return setMapMessage("failed");
   mountMapbox();
+}
+$("#sidebar-token-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  submitToken(sidebarInput.value);
+});
+$("#forget-token").addEventListener("click", async () => {
+  forgetToken();
+  await returnFree();
+  setMapMessage("forgot");
 });
 $("#reset-live").addEventListener("click", async () => {
+  forgetToken();
   await returnFree();
   setMapMessage("forgot");
 });
@@ -350,7 +377,7 @@ $("#copy-prompt").addEventListener("click", copyPrompt);
 document.querySelectorAll(".inspector-tab").forEach((button) => button.addEventListener("click", () => setPanel(button.dataset.panel)));
 const sceneButtons = [...document.querySelectorAll(".scene-tab")];
 sceneButtons.forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     selected = button.dataset.scene;
     render();
     if (engine === "free" || !token) ensureFree();
@@ -393,13 +420,13 @@ window.addEventListener("message", (event) => {
 window.addEventListener("pagehide", resetForLifecycle);
 window.addEventListener("pageshow", (event) => {
   if (!event.persisted) return;
-  resetForLifecycle();
   activePage = true;
   render();
-  showGate({ focus: false });
+  if (engine === "mapbox" && token) mountMapbox();
+  else returnFree();
 });
 render();
-showGate({ focus: false });
+returnFree();
 const inspectorTabs = [...document.querySelectorAll(".inspector-tab")];
 inspectorTabs.forEach((button, index) => button.addEventListener("keydown", (event) => {
   if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;

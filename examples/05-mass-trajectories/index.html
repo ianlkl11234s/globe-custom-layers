@@ -159,15 +159,15 @@
       #token-warning a {
         color: #6cb6ff;
       }
-      html[data-theme="light"] body, html[data-theme="light"] #token-warning { background: #f4f8f7; color: #1f2d2e; }
-      html[data-theme="light"] #hud, html[data-theme="light"] #perf, html[data-theme="light"] #transport { background: rgba(255, 255, 255, .9); color: #1f2d2e; box-shadow: 0 8px 24px rgba(20, 51, 51, .14); }
-      html[data-theme="light"] #hud h1, html[data-theme="light"] #perf h1 { color: #123c3d; }
-      html[data-theme="light"] #hud label, html[data-theme="light"] #transport .zoom-readout { color: #426568; }
-      html[data-theme="light"] #hud select, html[data-theme="light"] #transport button { background: #edf6f5; color: #1f2d2e; border-color: #a8c9c7; }
-      html[data-theme="light"] #perf .row span:last-child, html[data-theme="light"] #token-warning a { color: #007f86; }
+      html[data-theme="light"] body, html[data-theme="light"] #token-warning { background: #fff; color: #202020; }
+      html[data-theme="light"] #hud, html[data-theme="light"] #perf, html[data-theme="light"] #transport { background: rgba(255, 255, 255, .94); color: #202020; box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
+      html[data-theme="light"] #hud h1, html[data-theme="light"] #perf h1 { color: #202020; }
+      html[data-theme="light"] #hud label, html[data-theme="light"] #transport .zoom-readout { color: #6a6a6a; }
+      html[data-theme="light"] #hud select, html[data-theme="light"] #transport button { background: #f3f3f3; color: #202020; border-color: #c8c8c8; }
+      html[data-theme="light"] #perf .row span:last-child, html[data-theme="light"] #token-warning a { color: #4c4c4c; }
       html[data-theme="light"] #perf .row.highlight span:last-child { color: #b45309; }
-      html[data-theme="light"] #token-warning code { background: #dcebea; }
-      html[data-theme="light"] #transport [data-i18n] { color: #426568 !important; }
+      html[data-theme="light"] #token-warning code { background: #eeeeee; }
+      html[data-theme="light"] #transport [data-i18n] { color: #6a6a6a !important; }
       html[data-embed="true"] #hud, html[data-embed="true"] #perf { font-size: 14px; }
       html[data-embed="true"] #hud { width: min(calc(100% - 48px), 300px); min-width: 0; }
       html[data-embed="true"] #perf { top: auto; bottom: 62px; width: min(calc(100% - 48px), 300px); min-width: 0; }
@@ -191,7 +191,7 @@
       <button id="hud-toggle" type="button" data-i18n="controls" aria-expanded="true">Controls</button>
 
       <label for="objects"><span data-i18n="objects">objects</span> <span id="objects-value"></span></label>
-      <input id="objects" type="range" min="100" max="12000" step="100" value="1500" list="objects-ticks" />
+      <input id="objects" type="range" min="100" max="12000" step="100" value="600" list="objects-ticks" />
       <datalist id="objects-ticks">
         <option value="500"></option>
         <option value="2000"></option>
@@ -209,14 +209,14 @@
       <select id="palette">
         <option value="multicolor" data-i18n="multicolor">multicolor</option>
         <option value="cool" data-i18n="cool">cool</option>
-        <option value="warm" data-i18n="warm">warm</option>
+        <option value="warm" data-i18n="warm" selected>warm</option>
       </select>
 
       <label for="speed"><span data-i18n="speed">speed ×</span> <span id="speed-value"></span></label>
-      <input id="speed" type="range" min="0.1" max="4" step="0.1" value="1" />
+      <input id="speed" type="range" min="0.1" max="4" step="0.1" value="0.3" />
 
       <label for="opacity"><span data-i18n="opacity">opacity</span> <span id="opacity-value"></span></label>
-      <input id="opacity" type="range" min="0.1" max="1" step="0.05" value="0.9" />
+      <input id="opacity" type="range" min="0.1" max="1" step="0.05" value="0.7" />
     </div>
 
     <div id="perf">

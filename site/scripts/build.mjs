@@ -10,6 +10,8 @@ const outputRoot = resolve(siteRoot, "dist");
 const emptyEnvDir = await mkdtemp(join(tmpdir(), "gcl-empty-env-"));
 const examples = [
   ["00-native-vs-custom", "native-vs-custom.png"],
+  ["00-native-lines", null],
+  ["00-native-choropleth", null],
   ["01-points-on-globe", "points-globe.png"],
   ["02-arcs-on-globe", "arcs-globe.png"],
   ["05-mass-trajectories", "tracks-globe.png"],
@@ -30,6 +32,7 @@ try {
     cp(join(siteRoot, "bridgeState.js"), join(outputRoot, "bridgeState.js")),
     cp(join(siteRoot, "land.json"), join(outputRoot, "land.json")),
     cp(join(siteRoot, "airports.json"), join(outputRoot, "airports.json")),
+    cp(join(siteRoot, "data"), join(outputRoot, "data"), { recursive: true }),
     mkdir(join(outputRoot, "previews"), { recursive: true }),
   ]);
   await mkdir(join(outputRoot, "vendor"), { recursive: true });
@@ -56,7 +59,7 @@ try {
 
   for (const [name, previewName] of examples) {
     const exampleRoot = join(projectRoot, "examples", name);
-    await cp(join(exampleRoot, "screenshots", "globe.png"), join(outputRoot, "previews", previewName));
+    if (previewName) await cp(join(exampleRoot, "screenshots", "globe.png"), join(outputRoot, "previews", previewName));
     const viteModule = pathToFileURL(join(exampleRoot, "node_modules", "vite", "dist", "node", "index.js")).href;
     const { build } = await import(viteModule);
     await build({

@@ -148,7 +148,9 @@ function startMap() {
     },
   });
 
-  let mode: Mode = "both";
+  // The atlas presents this as its basic point-layer specimen; the standalone
+  // cookbook page still opens on the comparison that this example teaches.
+  let mode: Mode = preferences.embed ? "native" : "both";
 
   function applyMode(next: Mode) {
     mode = next;

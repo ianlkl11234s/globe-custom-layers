@@ -2,6 +2,7 @@ import type { CustomLayerInterface, Map as MapboxMap } from "mapbox-gl";
 import { ArcsScene } from "./arcsScene";
 import { loadHubs } from "./airports";
 import { buildArcRoutes } from "./arcs";
+import type { ArcPalette } from "./arcs";
 import type { EmbedTheme } from "./embedBridge";
 
 export const ARC_LAYER_ID = "arcs-on-globe";
@@ -9,6 +10,7 @@ export const ARC_LAYER_ID = "arcs-on-globe";
 export interface ArcLayerControls {
   getSegmentsPerArc: () => number;
   getArcHeightMercZ: () => number;
+  getPalette: () => ArcPalette;
   theme: EmbedTheme;
   /**
    * Called once per render() frame with the current globe/geometry state --
@@ -42,6 +44,7 @@ export function createArcLayer(controls: ArcLayerControls): CustomLayerInterface
         .then((hubs) => {
           const routes = buildArcRoutes(hubs);
           scene.setRoutes(routes);
+          scene.setPalette(controls.getPalette());
           scene.setParams(controls.getSegmentsPerArc(), controls.getArcHeightMercZ());
           dataReady = true;
           map?.triggerRepaint();
@@ -67,6 +70,7 @@ export function createArcLayer(controls: ArcLayerControls): CustomLayerInterface
       // setParams() only actually rebuilds when a value changed, so calling
       // it every frame costs nothing once the sliders are idle.
       scene.setParams(controls.getSegmentsPerArc(), controls.getArcHeightMercZ());
+      scene.setPalette(controls.getPalette());
       scene.setTheme(controls.theme);
 
       // Same globe-detection rule as glowLayer.ts: projection?.name === "globe"

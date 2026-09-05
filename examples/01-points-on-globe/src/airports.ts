@@ -16,9 +16,11 @@ export interface AirportPoint {
   colorHex: string;
   /** 0..1, synthetic (see module docstring) -- NOT real traffic. */
   sizeNorm: number;
+  /** 0..1, separately hashed and synthetic -- only for visual color variety. */
+  colorNorm: number;
 }
 
-export type PointPalette = "solar" | "aurora" | "plasma" | "ice";
+export type PointPalette = "spectrum" | "solar" | "aurora" | "plasma" | "ice";
 
 interface AirportsFile {
   source: string;
@@ -47,15 +49,27 @@ function hashToUnitFloat(s: string): number {
  * point size (mirrors the "big and bright" pattern of a real hub-traffic
  * visualization, without claiming to have real traffic data behind it).
  */
-const PALETTE_STOPS: Record<PointPalette, [[number, number, number], [number, number, number], [number, number, number]]> = {
+const PALETTE_STOPS: Record<Exclude<PointPalette, "spectrum">, [[number, number, number], [number, number, number], [number, number, number]]> = {
   solar: [[255, 255, 255], [255, 140, 26], [255, 30, 30]],
   aurora: [[224, 255, 245], [0, 224, 182], [0, 122, 174]],
   plasma: [[255, 232, 255], [229, 69, 255], [72, 198, 255]],
   ice: [[239, 252, 255], [92, 202, 255], [54, 91, 255]],
 };
+const SPECTRUM_STOPS: Array<[number, number, number]> = [
+  [0, 153, 255], [0, 220, 200], [255, 196, 0], [255, 88, 32], [255, 25, 94], [168, 35, 255], [0, 153, 255],
+];
 
-export function syntheticColorRamp(t: number, palette: PointPalette = "solar"): string {
+export function syntheticColorRamp(t: number, palette: PointPalette = "plasma"): string {
   const k = Math.max(0, Math.min(1, t));
+  if (palette === "spectrum") {
+    const scaled = k * (SPECTRUM_STOPS.length - 1);
+    const index = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(scaled));
+    const local = scaled - index;
+    const from = SPECTRUM_STOPS[index]!;
+    const to = SPECTRUM_STOPS[index + 1]!;
+    const color = from.map((value, channel) => Math.round(value + (to[channel]! - value) * local));
+    return `rgb(${color[0]},${color[1]},${color[2]})`;
+  }
   const [low, mid, high] = PALETTE_STOPS[palette];
   const lerp = (a: [number, number, number], b: [number, number, number], m: number) =>
     a.map((v, i) => Math.round(v + (b[i]! - v) * m)) as [number, number, number];
@@ -79,11 +93,13 @@ export async function loadAirports(): Promise<AirportPoint[]> {
     // sqrt-compress the hash so the size distribution is a bit less flat than
     // a raw uniform hash would give -- purely a visual choice, still synthetic.
     const sizeNorm = Math.sqrt(hashToUnitFloat(ident));
+    const colorNorm = hashToUnitFloat(`${ident}:color`);
     return {
       lon,
       lat,
       sizeNorm,
-      colorHex: syntheticColorRamp(sizeNorm),
+      colorNorm,
+      colorHex: syntheticColorRamp(colorNorm),
     };
   });
 }

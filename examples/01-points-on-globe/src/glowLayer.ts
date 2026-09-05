@@ -35,7 +35,7 @@ export function createGlowLayer(controls: GlowLayerControls): CustomLayerInterfa
   function applyPalette(palette: PointPalette) {
     if (!rows.length || palette === currentPalette) return;
     currentPalette = palette;
-    scene.setData(rows.map((row) => ({ ...row, colorHex: syntheticColorRamp(row.sizeNorm, palette) })));
+    scene.setData(rows.map((row) => ({ ...row, colorHex: syntheticColorRamp(row.colorNorm, palette) })));
   }
 
   return {

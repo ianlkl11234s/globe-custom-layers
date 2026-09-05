@@ -14,7 +14,7 @@
   },
   "conventions": {
     "selfContained": "Each example has its own package.json and node_modules and imports nothing outside its own folder. Duplicated files between examples are intentional. Copy a whole folder rather than importing across.",
-    "token": "Standalone examples read import.meta.env.VITE_MAPBOX_TOKEN. In demo embed mode, examples 00/01/02/05 accept a runtime public token only from the same-origin parent. No token is committed; site builds use an empty envDir.",
+    "token": "Standalone examples read import.meta.env.VITE_MAPBOX_TOKEN. In demo embed mode, selected native and custom examples accept a runtime public token only from the same-origin parent. No token is committed; site builds use an empty envDir.",
     "acceptance": "npm ci && npm run typecheck && npm run test --if-present && npm run build. The gallery has no math tests. Browser behavior is a separate gate.",
     "statusMarkers": {
       "verified": "Runs in production and is reproduced by an example here",
@@ -69,6 +69,46 @@
       }
     },
     {
+      "id": "00-native-lines",
+      "path": "examples/00-native-lines/",
+      "title": "Native North Atlantic submarine-cable lines",
+      "settles": "How a native Mapbox line layer represents real cross-ocean geometry without a custom renderer.",
+      "readFirst": "docs/00-start-here/decision-tree.md",
+      "implements": ["docs/00-start-here/decision-tree.md"],
+      "status": "unverified",
+      "tests": 3,
+      "screenshot": "examples/00-native-lines/screenshots/globe.jpg",
+      "screenshotScope": "Token-free MapLibre counterpart in the atlas; not evidence of real Mapbox tile access.",
+      "usesApis": ["map.addSource", "map.addLayer({type:'line'})", "map.setPaintProperty"],
+      "knobs": [
+        { "id": "width", "type": "number", "min": 0.5, "max": 12, "step": 0.5, "default": 2, "effect": "Changes native line width." },
+        { "id": "opacity", "type": "number", "min": 0.05, "max": 1, "step": 0.05, "default": 0.8, "effect": "Changes native line opacity." },
+        { "id": "color", "type": "color", "default": "#43d6c7", "effect": "Changes the display color; it does not encode a cable attribute." }
+      ],
+      "teaches": ["Use a native line layer when GPU-specific custom rendering is unnecessary.", "Treat the dated OSM snapshot as incomplete crowdsourced context, not an engineering chart."],
+      "data": { "source": "OpenStreetMap via Overpass", "licence": "ODbL 1.0", "file": "public/atlantic-submarine-cables.geojson", "records": 281 }
+    },
+    {
+      "id": "00-native-choropleth",
+      "path": "examples/00-native-choropleth/",
+      "title": "Native Europe GDP choropleth",
+      "settles": "How a native Mapbox fill layer expresses a quantitative area pattern while preserving missing values.",
+      "readFirst": "docs/00-start-here/decision-tree.md",
+      "implements": ["docs/00-start-here/decision-tree.md"],
+      "status": "unverified",
+      "tests": 3,
+      "screenshot": "examples/00-native-choropleth/screenshots/globe.jpg",
+      "screenshotScope": "Token-free MapLibre counterpart in the atlas; not evidence of real Mapbox tile access.",
+      "usesApis": ["map.addSource", "map.addLayer({type:'fill'})", "map.setPaintProperty", "Mapbox expressions"],
+      "knobs": [
+        { "id": "opacity", "type": "number", "min": 0.05, "max": 1, "step": 0.05, "default": 0.78, "effect": "Changes fill opacity." },
+        { "id": "palette", "type": "enum", "values": ["teal", "amber"], "default": "teal", "effect": "Changes the positive-value GDP color scale; null remains gray." },
+        { "id": "border", "type": "color", "default": "#36545c", "effect": "Changes the country-outline color." }
+      ],
+      "teaches": ["Use a native fill layer for choropleths.", "Keep missing GDP distinct from measured zero."],
+      "data": { "source": "World Bank 2023 GDP joined to Natural Earth 1:50m boundaries", "licence": "CC BY 4.0 plus Natural Earth public domain", "file": "public/europe-gdp-2023.geojson", "records": 50, "missing": 4 }
+    },
+    {
       "id": "01-points-on-globe",
       "path": "examples/01-points-on-globe/",
       "title": "Glowing points that hug the globe",
@@ -80,7 +120,7 @@
         "docs/04-discipline/zoom-adaptive-sizing.md"
       ],
       "status": "reproduced",
-      "tests": 21,
+      "tests": 22,
       "screenshot": "examples/01-points-on-globe/screenshots/globe.png",
       "usesApis": [
         "CustomLayerInterface.render(gl, matrix, projection, projectionToMercatorMatrix, projectionToMercatorTransition)",
@@ -93,9 +133,9 @@
         {
           "id": "point-palette",
           "type": "select",
-          "options": ["solar", "aurora", "plasma", "ice"],
-          "default": "solar",
-          "effect": "Recolors the same synthetic airport weight with one of four illustrative glow ramps; it does not encode a real category."
+          "options": ["spectrum", "solar", "aurora", "plasma", "ice"],
+          "default": "plasma",
+          "effect": "Recolors each airport from a separate deterministic synthetic color hash; it does not encode a real category."
         },
         {
           "id": "size-mul",
@@ -103,7 +143,7 @@
           "min": 0.2,
           "max": 3,
           "step": 0.05,
-          "default": 1,
+          "default": 0.6,
           "effect": "Global multiplier on gl_PointSize."
         },
         {
@@ -112,7 +152,7 @@
           "min": 0.1,
           "max": 1,
           "step": 0.05,
-          "default": 0.9,
+          "default": 0.65,
           "effect": "Layer alpha before additive blending."
         },
         {
@@ -121,7 +161,7 @@
           "min": 0,
           "max": 1,
           "step": 0.05,
-          "default": 0.7,
+          "default": 0.85,
           "effect": "How far each point's centre is pushed toward white. 0 keeps the source colour; high values read as a light source."
         }
       ],
@@ -168,7 +208,7 @@
         "docs/01-hugging-the-globe/mapbox.md"
       ],
       "status": "reproduced",
-      "tests": 35,
+      "tests": 37,
       "screenshot": "examples/02-arcs-on-globe/screenshots/globe.png",
       "usesApis": [
         "CustomLayerInterface",
@@ -181,7 +221,7 @@
           "type": "integer",
           "min": 2,
           "max": 128,
-          "default": 24,
+          "default": 53,
           "effect": "Vertices per arc, not segments per arc. At 2 each arc is a chord straight through the planet — that is the bug this example exists to show."
         },
         {
@@ -190,8 +230,15 @@
           "min": 0,
           "max": 0.08,
           "step": 0.002,
-          "default": 0.02,
+          "default": 0.028,
           "effect": "Peak radial offset at the arc midpoint. Real cruising altitude is about 0.16% of Earth's radius and invisible; this is deliberate exaggeration."
+        },
+        {
+          "id": "arc-palette",
+          "type": "select",
+          "options": ["spectrum", "solar", "aurora", "plasma", "ice"],
+          "default": "plasma",
+          "effect": "Assigns stable synthetic per-route colors for visual separation; colors do not encode route categories or traffic."
         }
       ],
       "teaches": [
@@ -202,7 +249,7 @@
       ],
       "counts": {
         "arcs": 190,
-        "verticesAtDefault": 8740
+        "verticesAtDefault": 19760
       },
       "data": {
         "source": "OurAirports",
@@ -386,7 +433,7 @@
         {
           "id": "objects",
           "type": "integer",
-          "default": 1500,
+          "default": 600,
           "effect": "Active object count. Capacity is fixed at 4,096 slots, so beyond that objects compete and the losers get evicted.",
           "min": 100,
           "max": 12000
@@ -406,7 +453,7 @@
           "type": "number",
           "min": 0.1,
           "max": 4,
-          "default": 1,
+          "default": 0.3,
           "effect": "Simulation rate."
         },
         {
@@ -414,7 +461,7 @@
           "type": "number",
           "min": 0.1,
           "max": 1,
-          "default": 0.9,
+          "default": 0.7,
           "effect": "Layer alpha."
         },
         {
@@ -425,7 +472,7 @@
             "cool",
             "warm"
           ],
-          "default": "multicolor",
+          "default": "warm",
           "effect": "Per-object trail colors, retained in light and dark themes; shader uniform switch without rebuilding trail buffers."
         }
       ],
@@ -689,7 +736,7 @@
     }
   ],
   "totals": {
-    "examples": 9,
-    "tests": 285
+    "examples": 11,
+    "tests": 294
   }
 }

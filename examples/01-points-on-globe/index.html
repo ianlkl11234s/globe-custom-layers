@@ -95,17 +95,17 @@
       #token-warning a {
         color: #6cb6ff;
       }
-      html[data-theme="light"] body, html[data-theme="light"] #token-warning { background: #f4f8f7; color: #1f2d2e; }
-      html[data-theme="light"] #hud { background: rgba(255, 255, 255, .9); color: #1f2d2e; box-shadow: 0 8px 24px rgba(20, 51, 51, .14); }
-      html[data-theme="light"] #hud h1 { color: #123c3d; }
-      html[data-theme="light"] #hud label { color: #426568; }
-      html[data-theme="light"] #hud select { background: #fff; color: #1f2d2e; border-color: #b9ccca; }
-      html[data-theme="light"] #token-warning code { background: #dcebea; }
-      html[data-theme="light"] #token-warning a { color: #007f86; }
+      html[data-theme="light"] body, html[data-theme="light"] #token-warning { background: #fff; color: #202020; }
+      html[data-theme="light"] #hud { background: rgba(255, 255, 255, .94); color: #202020; box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
+      html[data-theme="light"] #hud h1 { color: #202020; }
+      html[data-theme="light"] #hud label { color: #6a6a6a; }
+      html[data-theme="light"] #hud select { background: #fff; color: #202020; border-color: #c8c8c8; }
+      html[data-theme="light"] #token-warning code { background: #eeeeee; }
+      html[data-theme="light"] #token-warning a { color: #4c4c4c; }
       html[data-embed="true"] #hud { width: min(calc(100% - 48px), 300px); min-width: 0; font-size: 14px; }
       html[data-embed="true"] #hud h1 { font-size: 14px; }
       html[data-embed="true"] #hud label { font-size: 12px; }
-      html[data-embed="true"] input { accent-color: #008b8b; }
+      html[data-embed="true"] input { accent-color: #555; }
       #hud-toggle { display: none; }
       html[data-embed="true"] #hud-toggle { display: block; position: static; margin: 0 0 8px auto; border: 1px solid currentColor; border-radius: 999px; background: transparent; color: inherit; padding: 3px 9px; font: inherit; font-size: 12px; cursor: pointer; }
       html[data-embed="true"] #hud.hud-collapsed { width: auto; min-width: 0; display: grid; grid-template-columns: auto auto; align-items: center; gap: 12px; overflow: hidden; }
@@ -129,20 +129,21 @@
 
       <label for="point-palette" data-i18n="color">glow palette</label>
       <select id="point-palette">
+        <option value="spectrum" data-i18n="spectrum">Spectrum</option>
         <option value="solar" data-i18n="solar">Solar</option>
         <option value="aurora" data-i18n="aurora">Aurora</option>
-        <option value="plasma" data-i18n="plasma">Plasma</option>
+        <option value="plasma" data-i18n="plasma" selected>Plasma</option>
         <option value="ice" data-i18n="ice">Ice</option>
       </select>
 
       <label for="size-mul"><span data-i18n="size">point size ×</span> <span id="size-mul-value"></span></label>
-      <input id="size-mul" type="range" min="0.2" max="3" step="0.05" value="1" />
+      <input id="size-mul" type="range" min="0.2" max="3" step="0.05" value="0.6" />
 
       <label for="opacity"><span data-i18n="opacity">opacity</span> <span id="opacity-value"></span></label>
-      <input id="opacity" type="range" min="0.1" max="1" step="0.05" value="0.9" />
+      <input id="opacity" type="range" min="0.1" max="1" step="0.05" value="0.65" />
 
       <label for="core-boost"><span data-i18n="core">core boost</span> <span id="core-boost-value"></span></label>
-      <input id="core-boost" type="range" min="0" max="1" step="0.05" value="0.7" />
+      <input id="core-boost" type="range" min="0" max="1" step="0.05" value="0.85" />
     </div>
 
     <div id="token-warning">

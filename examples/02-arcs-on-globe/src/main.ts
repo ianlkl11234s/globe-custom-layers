@@ -2,6 +2,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { getEmbedPreferences, getEmbeddedRuntimeToken, reportEmbedMapStatus } from "./embedBridge";
 import { createArcLayer } from "./arcLayer";
+import type { ArcPalette } from "./arcs";
 
 /**
  * Wires up the map + custom layer + a handful of sliders. No framework, no
@@ -19,7 +20,7 @@ function byId<T extends HTMLElement>(id: string): T {
 const tokenWarning = byId<HTMLDivElement>("token-warning");
 const tokenWarningMessage = byId<HTMLParagraphElement>("token-warning-message");
 const preferences = getEmbedPreferences();
-const zh = { title: "地球上的弧線", zoom: "縮放", projection: "投影", transition: "轉換", arcs: "弧線", vertices: "頂點", segments: "每條弧線的分段", height: "弧線高度", hint: "把分段拖到 2，就能看到這個範例要說明的問題：只有兩個端點的弧線是一條穿過地球的直弦。64 以上才會貼合球面。", controls: "控制項" };
+const zh = { title: "地球上的弧線", zoom: "縮放", projection: "投影", transition: "轉換", arcs: "弧線", vertices: "頂點", segments: "每條弧線的分段", height: "弧線高度", color: "弧線色盤", spectrum: "繽紛", solar: "日耀", aurora: "極光", plasma: "等離子", ice: "冰藍", hint: "把分段拖到 2，就能看到這個範例要說明的問題：只有兩個端點的弧線是一條穿過地球的直弦。64 以上才會貼合球面。", controls: "控制項" };
 
 document.documentElement.dataset.theme = preferences.theme;
 document.documentElement.dataset.embed = String(preferences.embed);
@@ -91,6 +92,7 @@ function startMap() {
 
   const segmentsEl = byId<HTMLInputElement>("segments");
   const arcHeightEl = byId<HTMLInputElement>("arc-height");
+  const paletteEl = byId<HTMLSelectElement>("arc-palette");
   const segmentsValueEl = byId<HTMLSpanElement>("segments-value");
   const arcHeightValueEl = byId<HTMLSpanElement>("arc-height-value");
   const zoomValueEl = byId<HTMLSpanElement>("zoom-value");
@@ -111,6 +113,7 @@ function startMap() {
   const layer = createArcLayer({
     getSegmentsPerArc: () => Number(segmentsEl.value),
     getArcHeightMercZ: () => Number(arcHeightEl.value),
+    getPalette: () => paletteEl.value as ArcPalette,
     theme: preferences.theme,
     // HUD readout of the exact globe state + geometry cost this frame -- see
     // arcLayer's render() for where these values come from.
@@ -123,7 +126,7 @@ function startMap() {
   });
 
   map.on("load", () => {
-    map.setFog(preferences.theme === "light" ? { color: "#f4f8f7", "high-color": "#ffffff", "space-color": "#dcebea", "horizon-blend": 0.08 } : { color: "#202020", "high-color": "#292929", "space-color": "#202020", "horizon-blend": 0.12 });
+    map.setFog(preferences.theme === "light" ? { color: "#f2f2f2", "high-color": "#ffffff", "space-color": "#ffffff", "horizon-blend": 0.08 } : { color: "#202020", "high-color": "#292929", "space-color": "#202020", "horizon-blend": 0.12 });
     map.addLayer(layer);
     reportEmbedMapStatus("loaded");
   });
