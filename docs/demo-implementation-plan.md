@@ -1,6 +1,12 @@
-# Demo implementation plan
+# Demo implementation record
 
-Decision recorded 2026-09-05. This is an implementation plan, not a release claim.
+Decision recorded 2026-09-05 and updated through 2026-09-06. This is a chronological implementation and verification record, not a release claim. Historical counts and “no commit” statements below describe the checkpoint where they were written; the current consolidated batch is committed locally, while push, remote CI and deployment remain separate actions.
+
+## Current atlas state — 2026-09-06
+
+The website now presents six reusable globe elements: native point, line and area layers first, followed by glow points, great-circle arcs and mass trajectories. The supporting fixtures are 1,174 OurAirports locations, 281 OSM-derived North Atlantic cable LineStrings, 50 European map units joined to World Bank 2023 GDP, and explicitly synthetic route/track data. The repository contains 11 standalone Mapbox examples and 294 tests across the ten examples with test suites; the effects gallery has no unit suite.
+
+Local acceptance for the consolidated batch includes 15 site tests, site typecheck/build, both new native-example tests/typechecks/builds, documentation checks, whitespace checks, and browser readback of all six token-free MapLibre scenes. Embedded Mapbox line/area scenes now use the same fail-closed memory-backed SDK storage boundary as the existing embedded examples. The new standalone Mapbox line and choropleth examples still need a real-token browser gate. The public Zeabur site has not been redeployed for this batch.
 
 ## Product decision
 
@@ -121,3 +127,45 @@ Final shell acceptance confirmed the Mapbox default gate on reload and persisted
 The user requested committing the accumulated demo work and adding adjustable mass trajectories with 1,500 objects by default and visibly different colors. Both engines now use the shared trajectory scene palette contract: multicolor by default, plus cool and warm palettes. Light mode preserves hue distinctions with normal alpha blending; dark mode retains additive blending. The free controller exposes object count (100–12,000), simulation speed (0.1–4), opacity (0.1–1), palette and pause/resume. Existing Mapbox controls are wired to the same palette choices and updated default. The previous 5,000-object / 4,096-slot measurements remain stress-test evidence, not the current default.
 
 Validation for the parameter update: 57 trajectory tests and both site bridge tests passed, both affected TypeScript checks and the static site build passed, and the browser fixture passed all 16 checks. It verifies the 1,500-object default, increases/decreases while paused, all three palette outputs in both light and dark modes, then retains the prior projection and clipping checks. UI review confirmed speed, opacity and palette survive a theme change. Multi-color hues now use golden-angle spacing so the 1,500-object prefix spans the color wheel.
+
+## Foundation-first atlas and glow controls — 2026-09-05
+
+The atlas now leads with a `00` Native foundations scene before the selected Three.js scenes. The token-free MapLibre view renders local native point, line and polygon layers together, with independent visibility, point-size, line-width and area-opacity controls. It also offers Atlas, Midnight and Blueprint cartographic palettes by changing only the bundled ocean/land/border/grid paint values; it does not add a tile service or broaden the free-basemap claim. The Mapbox counterpart remains the narrower `00-native-vs-custom` point comparison and is labelled as such.
+
+Glow points now expose size, opacity, core boost and Solar/Aurora/Plasma/Ice palettes in both the free atlas and the standalone Mapbox point example. These ramps recolor the existing deterministic synthetic airport weight; they are presentation choices, not airport categories or traffic. Light mode darkens the selected hue instead of collapsing every palette toward teal, while dark mode retains additive blending.
+
+Integration added the same-origin runtime-token bridge and iframe-local memory storage to example 00, and the static site/Docker/CI build paths now include that example. A fake `pk.audit-placeholder` reached the expected HTTP 401 after the parent/iframe handshake, proving the new embedding path and sanitized error surface but not valid Mapbox service rendering. The input was cleared and one iframe remained mounted for retry.
+
+Current local verification: all nine examples passed typecheck and build; the eight tested examples passed 285 tests in total, while the gallery has no unit suite. Six site tests, site typecheck/build, documentation checks and whitespace checks passed. Browser acceptance covered all four free scenes, visible palette changes in light/dark, basemap switching, native layer toggles, arc geometry changing from 8,740 to 23,940 vertices at 64 samples, 3,000 tracks with one reported draw call, and a 390px reload with the HUD initially collapsed and zero horizontal overflow. No commit, push or deployment was performed; the public Zeabur demo still represents the previously published three-scene version until a separate release is authorized.
+
+## Collapsible effect controls — 2026-09-05
+
+Embedded controls now start collapsed for the native-foundations comparison, glow points, arcs and mass trajectories. The compact title/button chip expands only the selected scene's controls; switching scenes collapses the token-free MapLibre panel again. Standalone desktop examples retain their original expanded presentation, while embedded views no longer cover the globe by default.
+
+## Semantic native layers and visible glow swatches — 2026-09-05
+
+The combined native-foundations scene is superseded by three separate token-free MapLibre scenes. Point uses nine real class-1 fishery-port locations, line uses seven generalized OSM Baltic submarine-cable excerpts, and area uses six real class-1 fishery-port polygons, all sampled from Mini Taiwan Pulse. Only the selected geometry type and its relevant size, width or opacity control are visible. The point and area samples are static location/administrative geometry, not vessel positions, sea conditions or current operating extents. The line sample retains OpenStreetMap/ODbL attribution and `incomplete_crowdsourced` semantics; it is not an engineering chart or complete cable inventory.
+
+The glow palette selector uses directly clickable gradient swatches with visible selected state and `aria-pressed`, replacing the native dropdown that made the color choice hard to discover. This changes the controls, not the underlying deterministic airport weight or shader meaning.
+
+## Neutral light theme and multicolor points — 2026-09-05
+
+The light website shell, local basemap palettes, and selected embedded Mapbox surfaces now use pure white and neutral grays; visualization marks remain colored. Glow points offer a bright multi-stop Spectrum, with each airport receiving a separate deterministic synthetic color hash so point size and hue do not imply the same variable. Spectrum joins Solar, Aurora, Plasma and Ice as a selectable palette in both engines. Native fishery-port points also cycle through a compact display palette. In both cases, color is explicitly presentation-only and does not represent traffic, port class, risk or another measured category.
+
+## Screenshot-aligned effect defaults and arc palettes — 2026-09-05
+
+The free preview now opens on Blueprint. Glow points default to Plasma with size 0.60, opacity 0.65 and core boost 0.85; Spectrum remains selectable with brighter, more saturated stops. Great-circle arcs default to height 0.028, 53 samples (19,760 vertices across 190 arcs) and Plasma; they expose the same five palettes and use stable synthetic per-route colors rather than one shared line color. Mass trajectories default to 600 objects, 0.3× speed, 0.70 opacity and Warm. Embedded parameter panels remain collapsible and start closed on scene changes.
+
+The native Baltic line scene now opens at an overview scale with a wider data stroke. Its bundled Natural Earth 1:110m land geometry is explicitly labelled as a generalized overview basemap, not street-level coastline data; this scale mismatch caused the previously blocky close-up appearance.
+
+Affected verification passed: 22 point tests, 37 arc tests, 57 trajectory tests, all three example typechecks/builds, eight site contract tests, site typecheck/build, documentation checks and whitespace checks. Browser acceptance read back every requested default, toggled the details panel closed, changed the live point and arc palettes, returned to the arc scene with height 0.028, 53 samples, Plasma and 190 arcs / 19,760 vertices intact, confirmed 600 tracks / one draw call, and found zero desktop horizontal overflow. No commit, push or deployment was performed for this batch.
+
+## Element-first real-data atlas — 2026-09-05
+
+The demo now treats geometry elements as the primary navigation: Point layer / global airports, Line layer / North Atlantic submarine cables, and Area layer / European country GDP. Data is supporting context, not the product taxonomy. Each native scene has its own camera, count, attribution, and only its relevant controls. Point colors are deliberately presentational; cable geometry remains an incomplete crowdsourced OSM snapshot; four unavailable 2023 GDP observations remain `null` and render as no-data gray rather than zero.
+
+The line fixture contains 281 OSM-derived LineStrings under ODbL. The area fixture contains 50 Natural Earth 1:50m European map units joined to World Bank GDP (current US$), 2023. Generator scripts and retrieval/licensing limits are recorded in [`data-sources.md`](data-sources.md). Two independent Mapbox native examples were added for `line` and `fill`; their controls begin collapsed when embedded. Their tests, typechecks and builds pass, but real Mapbox tile rendering remains unverified because no visitor token was supplied in this browser session. The retained screenshots therefore show the corresponding MapLibre atlas scenes and are labelled as such in the manifest.
+
+The Mapbox public-token entry now lives in a collapsible left-sidebar session panel. Only `pk.` tokens are accepted into `sessionStorage`; switching scenes and reloading keeps the token, while explicit forgetting or closing the browser session clears it. The central gate no longer duplicates the token input. This is application storage behavior, not a claim that provider requests or browser network tooling cannot observe the public token.
+
+Current local acceptance: 15 site contract/data/style tests passed; both new examples passed two tests, typecheck and production build; the static site typecheck/build passed. Browser readback showed 1,174 airport points, 281 cable features and 50 GDP areas on one MapLibre canvas. Each scene switch re-collapsed the parameter panel; changing cable width/color and GDP opacity/palette/border updated the rendered layer. No commit, push or deployment was performed for this batch.

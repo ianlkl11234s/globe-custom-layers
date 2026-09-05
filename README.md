@@ -2,13 +2,13 @@
 
 **A Mapbox-first cookbook for developers and AI agents building custom globe effects, from glowing points to thousands of animated tracks.**
 
-**[Try the live demo](https://globe-custom-layers.zeabur.app/)** — choose an effect, adjust it, then open its recipe, source, or Agent prompt. Bring your own public Mapbox token, or explore the MapLibre preview without one.
+**[Published demo](https://globe-custom-layers.zeabur.app/)** — choose an element, adjust it, then open its recipe, source, or Agent prompt. The published site can lag the current `main` branch; the current six-scene atlas is verified locally and awaits a separate deployment. Bring your own public Mapbox token, or explore the MapLibre preview without one.
 
-![1,174 airports rendered as glowing points hugging a Mapbox globe](examples/01-points-on-globe/screenshots/globe.png)
+![Current English atlas showing the native global-airport point layer](site/screenshots/atlas-en-light.png)
 
-<sup>1,174 airports as a Three.js custom layer on a Mapbox globe. Points sit on the sphere, the far side is culled, and the whole thing blends back to flat Web Mercator as you zoom in. Runnable: [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
+<sup>Current website entry point: six globe elements, English by default, with a token-free MapLibre preview and complete Mapbox counterparts. This screenshot shows 1,174 OurAirports locations in the native point scene; colors are presentational, not traffic or category data. The historical Mapbox shader evidence remains with [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
 
-> Throughout these pages, *globe-hugging* means geometry that sits on the sphere's surface rather than floating beside it on a flat plane. The runnable examples target Mapbox. The site also has a 🔬 locally reproduced MapLibre 5.24 prelude-based Three.js preview for scenes 01/02/05; its direct ECEF/mainMatrix path, terrain/depth behaviour, and all-nine port remain unverified.
+> Throughout these pages, *globe-hugging* means geometry that sits on the sphere's surface rather than floating beside it on a flat plane. The standalone examples target Mapbox. The site also has native MapLibre point/line/fill scenes and a 🔬 locally reproduced MapLibre 5.24 prelude-based Three.js preview for scenes 01/02/05; its direct ECEF/mainMatrix path, terrain/depth behaviour, and portability to the remaining standalone examples are unverified.
 
 This is a cookbook, not a library. There is nothing to `npm install`. Every recipe is a page of docs plus a standalone runnable example you can read end to end in one sitting, copy, and adapt.
 
@@ -26,9 +26,18 @@ Two facts define the gap this repo fills:
 
 This cookbook records the additional work from production projects: Mapbox's undocumented globe render arguments, batched animation, picking, and the failures that standalone examples can reproduce. Performance measurements describe their stated scene and environment, not a general frame-rate guarantee.
 
-## Explore an effect
+## Explore a globe element
 
-The [demo website](site/README.md) introduces three scenes: glowing airport points, global arcs, and mass trajectory playback. The default Mapbox mode is token-gated. The free mode is a clearly labelled MapLibre 5.24 custom-layer preview using the prelude adapter and local data; it keeps the original scene geometry/fragment shaders, but its horizon/limb, blending and depth behaviour differ from Mapbox and are not pixel-identical. Each scene links to its recipe and source and provides a task prompt for your agent. See the [implementation plan](docs/demo-implementation-plan.md) for current acceptance and publication status.
+The [demo website](site/README.md) is organized by what a globe application can show: a point layer illustrated by global airports, a line layer illustrated by real North Atlantic submarine cables, and an area layer illustrated by European countries shaded by 2023 GDP. Data supplies context; the reusable point, line, fill, glow, arc, and trajectory element is the subject. Each scene links to a token-free MapLibre preview, a complete Mapbox example, its recipe, source, and an Agent prompt. The MapLibre custom-layer port keeps the original Three.js geometry and fragment shaders, but its horizon/limb, blending and depth behaviour differ from Mapbox and are not pixel-identical. See the [implementation plan](docs/demo-implementation-plan.md) for current acceptance and publication status.
+
+| Element | Demo context | Implementation |
+|---|---|---|
+| Point layer | 1,174 global airports | Native `circle` |
+| Line layer | 281 North Atlantic submarine-cable segments | Native `line` |
+| Area layer | 50 European map units by 2023 GDP | Native `fill` |
+| Glow field | Airport fixture | Three.js custom layer |
+| Great-circle arcs | Synthetic routes | Three.js custom layer |
+| Mass tracks | Synthetic moving data | Batched Three.js custom layer |
 
 ## Use with an agent
 
@@ -115,12 +124,12 @@ Check the linked project's current compatibility notes before choosing an engine
 
 ## Prerequisites and licensing
 
-**You need your own map token.** None is included here, and none of the recipes will run without one.
+**Mapbox examples need your own public token.** None is included here. The website's bundled MapLibre preview runs without a token; it is a separate implementation with explicitly narrower verification claims.
 
 - **Mapbox GL JS is not open source.** Since v2.0.0 it ships under a [proprietary Mapbox license](https://raw.githubusercontent.com/mapbox/mapbox-gl-js/main/LICENSE.txt) and requires a Mapbox account. It is a normal npm dependency of the examples that use it, but nothing in this repo redistributes its source, and its terms are yours to comply with.
 - **MapLibre GL JS is BSD-3-Clause** and needs no account — though you still need a tile source.
 - **Everything in this repo is MIT** (see [LICENSE](LICENSE)).
-- **Sample data is public domain.** Airport positions come from [OurAirports](https://ourairports.com/data/) (*"All data is released to the Public Domain"*). Trajectories are synthesised at runtime, so you can turn the object count up until your machine complains without asking anyone's permission.
+- **Sample data keeps its own licence.** Airport positions from [OurAirports](https://ourairports.com/data/) and Natural Earth boundaries are public domain; the cable extract is © OpenStreetMap contributors under ODbL 1.0; World Bank GDP is CC BY 4.0. Trajectories are synthesised at runtime. See [bundled data sources](docs/data-sources.md).
 
 ## Verification status
 

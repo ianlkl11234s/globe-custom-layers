@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Native submarine cable lines</title>
+    <style>
+      html, body, #map { margin: 0; width: 100%; height: 100%; font-family: system-ui; }
+      body { background: #fff; }
+      #panel { position: absolute; z-index: 1; top: 12px; left: 12px; width: min(330px, calc(100% - 48px)); background: #ffffffed; color: #222; border: 1px solid #cfcfcf; box-shadow: 0 8px 24px #00000014; }
+      summary { padding: 11px 13px; font-weight: 700; cursor: pointer; }
+      .controls { padding: 0 13px 13px; }
+      label { display: block; margin-top: 10px; }
+      input { width: 100%; accent-color: #555; }
+      small { display: block; line-height: 1.45; color: #5d5d5d; }
+      #status { margin-bottom: 0; font: 12px ui-monospace, monospace; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <details id="panel" open>
+      <summary id="title">Line layer · North Atlantic submarine cables</summary>
+      <div class="controls">
+        <small id="description">Real OSM/ODbL-derived geometry. Coverage is incomplete and not engineering-grade.</small>
+        <label><span id="width-label">Width</span> <input id="width" type="range" min="0.5" max="12" step="0.5" value="2" /></label>
+        <label><span id="opacity-label">Opacity</span> <input id="opacity" type="range" min="0.05" max="1" step="0.05" value="0.8" /></label>
+        <label><span id="color-label">Color</span> <input id="color" type="color" value="#43d6c7" /></label>
+        <p id="status" role="status">Loading…</p>
+      </div>
+    </details>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

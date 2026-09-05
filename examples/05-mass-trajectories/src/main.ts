@@ -48,7 +48,7 @@ function setupHudToggle() {
     toggle.setAttribute("aria-expanded", String(!collapsed));
     toggle.textContent = preferences.lang === "zh-TW" ? (collapsed ? "顯示控制項" : "隱藏控制項") : (collapsed ? "Show controls" : "Hide controls");
   };
-  setCollapsed(window.innerWidth < 520);
+  setCollapsed(true);
   toggle.addEventListener("click", () => setCollapsed(!hud.classList.contains("hud-collapsed")));
 }
 
@@ -182,7 +182,7 @@ function startMap() {
   });
 
   map.on("load", () => {
-    map.setFog(preferences.theme === "light" ? { color: "#f4f8f7", "high-color": "#ffffff", "space-color": "#dcebea", "horizon-blend": 0.08 } : { color: "#202020", "high-color": "#292929", "space-color": "#202020", "horizon-blend": 0.12 });
+    map.setFog(preferences.theme === "light" ? { color: "#f2f2f2", "high-color": "#ffffff", "space-color": "#ffffff", "horizon-blend": 0.08 } : { color: "#202020", "high-color": "#292929", "space-color": "#202020", "horizon-blend": 0.12 });
     map.addLayer(layer);
     reportEmbedMapStatus("loaded");
   });

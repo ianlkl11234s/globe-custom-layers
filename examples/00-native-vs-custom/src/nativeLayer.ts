@@ -16,7 +16,7 @@ export const NATIVE_LAYER_ID = "airports-native-circle";
  * in its own shaders -- there is no ECEF math, no custom shader, and no
  * `render()` plumbing to write here. This genuinely is all the code a
  * `circle` layer needs to hug the globe; compare against globeProject.ts +
- * glowPointsScene.ts + glowLayer.ts (680 lines combined) for the custom
+ * glowPointsScene.ts + glowLayer.ts (693 lines combined) for the custom
  * layer that reproduces the same globe-hugging behavior by hand.
  */
 export function addNativeAirportsLayer(map: MapboxMap, data: AirportFeatureCollection): void {

@@ -1,6 +1,6 @@
 # 02-arcs-on-globe
 
-> Status: 🔬 **Reproduced** — builds clean, 35/35 unit tests, and visually verified with a real token: 190 arcs (8,740 vertices) follow the sphere at `transition` 0.00, and the far side is culled.
+> Status: 🔬 **Reproduced** — builds clean, 37/37 unit tests, and visually verified with a real token: 190 arcs follow the sphere at `transition` 0.00, and the far side is culled. The current 53-sample default produces 19,760 vertices.
 
 ![190 great-circle arcs hugging the globe](screenshots/globe.png)
 
@@ -49,7 +49,7 @@ This example was built and verified without ever opening it in a browser (no Map
 ```bash
 npm install          # 111 packages, 0 vulnerabilities
 npx tsc --noEmit      # 0 errors
-npx vitest run        # 35/35 tests pass
+npx vitest run        # 37/37 tests pass
 npm run build          # succeeds (vite build)
 ```
 
@@ -57,7 +57,7 @@ The unit tests split across three files:
 
 - `src/globeProject.test.ts` (13 tests) — copied verbatim from `01-points-on-globe`, unchanged; it tests the shared `globeProject.ts` module, which is also copied verbatim (see "Where the math comes from").
 - `src/slerp.test.ts` (11 tests) — the spherical-interpolation math in isolation: endpoint exactness, staying on the unit sphere across a range of `t`, antipodal inputs never producing `NaN`, and `unwrapLongitude`'s antimeridian correction.
-- `src/arcs.test.ts` (11 tests) — the arc-sampling and route-building logic: vertex counts, the height profile, and a concrete Taipei → Los Angeles antimeridian case (see "Slerp vs. lerp" below) including a direct comparison against a deliberately naive lon/lat-lerp reference.
+- `src/arcs.test.ts` (13 tests) — the arc-sampling, route-building and deterministic palette logic: vertex counts, the height profile, route-color variety, and a concrete Taipei → Los Angeles antimeridian case (see "Slerp vs. lerp" below) including a direct comparison against a deliberately naive lon/lat-lerp reference.
 
 None of this verifies that the shader compiles and looks right in an actual WebGL context, or that 190 additively-blended arcs at `ARC_ALPHA = 0.28` (see `arcsScene.ts`) look good rather than either too faint or blown out at busy hubs — that alpha value is a reasoned guess, not something visually tuned. If you run this with a real token and it looks wrong, trust your eyes over this README.
 
@@ -65,17 +65,19 @@ None of this verifies that the shader compiles and looks right in an actual WebG
 
 | Control | Where | Default | Range | Effect |
 |---|---|---|---|---|
-| Segments per arc | HUD slider | 24 | 2–128 | Vertex count sampled along each arc's great circle — see "The bug this example is about" |
-| Arc height | HUD slider | 0.02 | 0–0.08 (mercator-Z units) | Peak radial lift at each arc's midpoint |
+| Segments per arc | HUD slider | 53 | 2–128 | Vertex count sampled along each arc's great circle — see "The bug this example is about" |
+| Arc height | HUD slider | 0.028 | 0–0.08 (mercator-Z units) | Peak radial lift at each arc's midpoint |
+| Arc palette | HUD select | Plasma | Spectrum / Solar / Aurora / Plasma / Ice | Stable synthetic per-route colors for visual separation; no route category or traffic meaning |
 | `MAX_ARC_COUNT` | `src/arcsScene.ts` constant | 256 | — | Fixed buffer capacity in routes — raise if you add more hubs |
 | `MAX_SEGMENTS_PER_ARC` | `src/arcsScene.ts` constant | 128 | — | Must match (or exceed) the segments slider's max |
-| `ARC_COLOR` / `ARC_ALPHA` | `src/arcsScene.ts` constants | `#ffb454` / 0.28 | — | Fixed accent color and per-arc alpha — see "Deliberate simplifications" for why these aren't sliders |
+| `ARC_ALPHA` | `src/arcsScene.ts` constant | 0.28 | — | Per-arc alpha; color comes from the selected palette |
 | Backface cull thresholds | `smoothstep(-0.08, 0.02, d)` in `src/globeProject.ts` | fixed | — | Same as 01-points-on-globe — how wide/soft the horizon fade is |
 
 ## Data: what's real and what's synthetic
 
 - **Airport positions are real.** `public/airports.json` is the same file, produced by the same script (`scripts/fetch-airports.mjs`), as [01-points-on-globe](../01-points-on-globe/) — see that example's README for full provenance (OurAirports, public domain, `large_airport` rows, 1,174 airports). It's copied here rather than shared, per this repo's "every example is self-contained" rule (see `examples/README.md`).
 - **Which 20 airports are "hubs" is a curated pick, not a ranking.** `src/airports.ts`'s `HUB_IDENTS` was hand-picked for continent-level spread (East/Southeast Asia, the Middle East, Europe, Africa, North America, South America, Oceania) so the arcs fan out across the whole globe. OurAirports doesn't publish traffic figures — this is not a "20 busiest airports" list, and no airport's presence or absence here implies anything about how busy it actually is.
+- **Arc colors are synthetic.** Each origin/destination identifier pair receives a stable hash into the selected palette. The hue only separates overlapping routes visually; it does not encode carrier, route class, traffic, risk, or another measured value.
 - **The 190 arcs are not real flight routes.** `buildArcRoutes` draws every unordered pair among the 20 hubs — C(20,2) = 190 — not an actual O-D traffic dataset. Don't read "airline X flies between these two cities" into any single arc; it's "these two cities are both in the hand-picked hub list."
 - **Arc height is a stylistic exaggeration, not a physical altitude.** A real airliner's cruise altitude (~10km) is about 0.16% of Earth's radius — at true scale it would be visually indistinguishable from the surface. Like essentially every flight-arc visualization, the height slider's default (and its whole range) is picked purely so arcs read clearly as arcs, not for physical accuracy.
 
@@ -111,7 +113,7 @@ The one wrinkle: `segmentsPerArc` and `arcHeight` are **live sliders**, so "neve
 Compared to a more complete version of this technique, this example leaves out:
 
 - **A smarter geometry/height split.** As described above, this example fully re-samples every arc's great-circle path whenever segments *or* height changes, even though only height actually needs `arcHeight`'s current value — the geographic path itself never changes once a route is picked. Splitting these would avoid redundant slerp calls on a pure height-slider drag, at the cost of a second precomputed buffer and more state to keep in sync. Skipped for readability; the redundant work is fast enough not to matter at this scale (~190 arcs).
-- **A tunable opacity/color.** `ARC_COLOR` and `ARC_ALPHA` are fixed constants, not HUD sliders, chosen by reasoning (not by looking at a rendered frame — see the Status line) about how bright up to 19 additively-blended arcs converging on one hub would get. A production version would very likely want these adjustable, and might want per-route color (e.g. by great-circle distance) rather than one flat accent color for every arc.
+- **Tunable opacity.** The palette is adjustable and colors are per-route, but `ARC_ALPHA` remains a fixed constant chosen to keep converging additive arcs from blowing out. A production version would likely expose opacity too and could replace the synthetic hue with an explicitly documented real variable.
 - **Real line width.** `THREE.LineSegments` here uses raw `GL_LINES`, which most browsers/GPUs render at a fixed ~1px regardless of any `linewidth` you set — this example doesn't fight that. A version wanting visibly thicker arcs would need a triangle-strip "ribbon" approach instead, which is a materially bigger undertaking than this example's scope.
 - **Repaint throttling.** Same simplification `glowLayer.ts` documents in 01-points-on-globe: `arcLayer.ts` calls `map.triggerRepaint()` unconditionally every frame so slider changes show up immediately with no extra event wiring. Production code throttles this via a shared scheduler across layers. Don't copy the "always repaint" line into something with a real GPU budget.
 - **Popups / hit-testing.** Same as 01-points-on-globe: custom layers don't participate in `queryRenderedFeatures`. This example has no interactivity beyond the two sliders.

@@ -1,6 +1,7 @@
 import type { CustomLayerInterface, Map as MapboxMap } from "mapbox-gl";
 import { GlowPointsScene } from "./glowPointsScene";
 import { loadAirports } from "./airports";
+import type { EmbedTheme } from "./embedBridge";
 
 export const GLOW_LAYER_ID = "01-points-on-globe";
 
@@ -8,6 +9,7 @@ export interface GlowLayerControls {
   getSizeMul: () => number;
   getOpacity: () => number;
   getCoreBoost: () => number;
+  theme: EmbedTheme;
   /**
    * Called once per render() frame with the raw globe state Mapbox reported
    * this frame. Purely for main.ts's HUD readout -- not needed for the
@@ -62,6 +64,7 @@ export function createGlowLayer(controls: GlowLayerControls): CustomLayerInterfa
 
       scene.setOpacity(controls.getOpacity());
       scene.setCoreBoost(controls.getCoreBoost());
+      scene.setTheme(controls.theme);
       scene.setSizeMul(controls.getSizeMul());
       if (map) scene.setZoom(map.getZoom());
 

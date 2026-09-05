@@ -1,6 +1,6 @@
 # 1.2 Hugging the globe: MapLibre GL JS
 
-> **Status:** mixed, deliberately. MapLibre's official projection API is 📋 **Reported**. The site's prelude-based Three.js adapter for examples 01/02/05 is 🔬 **Reproduced** in a local browser without a token. The direct ECEF/mainMatrix path below remains ⚠️ **Unverified**. This does not verify terrain, depth interaction, or all nine example ports.
+> **Status:** mixed, deliberately. MapLibre's official projection API is 📋 **Reported**. The site's prelude-based Three.js adapter for examples 01/02/05 is 🔬 **Reproduced** in a local browser without a token. The direct ECEF/mainMatrix path below remains ⚠️ **Unverified**. This does not verify terrain, depth interaction, or ports of the remaining standalone examples.
 >
 > The mercator half of this story *is* measured — see [1.3 Porting](porting.md).
 
@@ -59,7 +59,7 @@ Vertices are projected; the segments between them are not. Two vertices give you
 `site/maplibreCustom.ts` keeps the original Three.js scene geometry and fragment shaders, then replaces only the vertex projection with MapLibre's `shaderData.vertexShaderPrelude` and `projectTileWithElevation()`. The local browser reproduction covers:
 
 - 01 points: original point-size path, `vCull = 1`, and MapLibre's official horizon clip;
-- 02 arcs: 190 raised arcs / 8,740 vertices, with normal blending in light mode and additive blending in dark mode;
+- 02 arcs: 190 raised arcs / 19,760 vertices at the current 53-sample default, with normal blending in light mode and additive blending in dark mode;
 - 05 tracks: 5,000 tracks in 4,096 slots and one draw call.
 
 The adapter keeps custom-layer coordinates in `[0,1]` for x/y and passes height in metres. MapLibre 5.24's `defaultProjectionData.projectionTransition` is only binary in this callback, so the adapter obtains the basemap coefficient from `map.transform.getProjectionData({overscaledTileID: null, applyGlobeMatrix: true}).projectionTransition`; this is pinned internal integration, not a public portability contract. The prelude's horizon clip plus `vCull = 1` does not reproduce Mapbox's soft limb fade pixel-for-pixel. `projectTileWithElevation()` is used with `depthTest: false`; measured depth-tested 3D rendering cut points, so terrain/depth correctness is not claimed.

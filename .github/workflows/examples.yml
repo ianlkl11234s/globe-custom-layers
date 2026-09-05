@@ -33,6 +33,8 @@ jobs:
       matrix:
         example:
           - 00-native-vs-custom
+          - 00-native-lines
+          - 00-native-choropleth
           - 01-points-on-globe
           - 02-arcs-on-globe
           - 03-areas-on-globe
@@ -69,12 +71,18 @@ jobs:
           cache: npm
           cache-dependency-path: |
             site/package-lock.json
+            examples/00-native-vs-custom/package-lock.json
+            examples/00-native-lines/package-lock.json
+            examples/00-native-choropleth/package-lock.json
             examples/01-points-on-globe/package-lock.json
             examples/02-arcs-on-globe/package-lock.json
             examples/05-mass-trajectories/package-lock.json
       - name: Install site example dependencies
         run: |
           npm ci --prefix site
+          npm ci --prefix examples/00-native-vs-custom
+          npm ci --prefix examples/00-native-lines
+          npm ci --prefix examples/00-native-choropleth
           npm ci --prefix examples/01-points-on-globe
           npm ci --prefix examples/02-arcs-on-globe
           npm ci --prefix examples/05-mass-trajectories

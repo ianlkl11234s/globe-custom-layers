@@ -6,11 +6,17 @@ WORKDIR /app
 # layers remain cacheable. The site build intentionally imports the selected
 # example source without making the examples share a package.
 COPY site/package.json site/package-lock.json ./site/
+COPY examples/00-native-vs-custom/package.json examples/00-native-vs-custom/package-lock.json ./examples/00-native-vs-custom/
+COPY examples/00-native-lines/package.json examples/00-native-lines/package-lock.json ./examples/00-native-lines/
+COPY examples/00-native-choropleth/package.json examples/00-native-choropleth/package-lock.json ./examples/00-native-choropleth/
 COPY examples/01-points-on-globe/package.json examples/01-points-on-globe/package-lock.json ./examples/01-points-on-globe/
 COPY examples/02-arcs-on-globe/package.json examples/02-arcs-on-globe/package-lock.json ./examples/02-arcs-on-globe/
 COPY examples/05-mass-trajectories/package.json examples/05-mass-trajectories/package-lock.json ./examples/05-mass-trajectories/
 
 RUN npm ci --prefix site \
+  && npm ci --prefix examples/00-native-vs-custom \
+  && npm ci --prefix examples/00-native-lines \
+  && npm ci --prefix examples/00-native-choropleth \
   && npm ci --prefix examples/01-points-on-globe \
   && npm ci --prefix examples/02-arcs-on-globe \
   && npm ci --prefix examples/05-mass-trajectories
@@ -18,9 +24,20 @@ RUN npm ci --prefix site \
 # Explicit allowlist: neither local .env files nor unrelated cookbook examples
 # enter the build context image.
 COPY site/index.html site/styles.css site/app.js site/i18n.js site/bridgeState.js ./site/
-COPY site/freeGlobe.js site/mapboxMathCompat.ts site/maplibreCustom.ts ./site/
+COPY site/freeGlobe.js site/nativeStyles.js site/mapboxMathCompat.ts site/maplibreCustom.ts ./site/
 COPY site/land.json site/airports.json ./site/
+COPY site/data ./site/data
 COPY site/scripts/build.mjs ./site/scripts/build.mjs
+COPY examples/00-native-vs-custom/index.html examples/00-native-vs-custom/tsconfig.json examples/00-native-vs-custom/vite.config.ts ./examples/00-native-vs-custom/
+COPY examples/00-native-vs-custom/public ./examples/00-native-vs-custom/public
+COPY examples/00-native-vs-custom/screenshots ./examples/00-native-vs-custom/screenshots
+COPY examples/00-native-vs-custom/src ./examples/00-native-vs-custom/src
+COPY examples/00-native-lines/index.html examples/00-native-lines/tsconfig.json examples/00-native-lines/vite.config.ts ./examples/00-native-lines/
+COPY examples/00-native-lines/public ./examples/00-native-lines/public
+COPY examples/00-native-lines/src ./examples/00-native-lines/src
+COPY examples/00-native-choropleth/index.html examples/00-native-choropleth/tsconfig.json examples/00-native-choropleth/vite.config.ts ./examples/00-native-choropleth/
+COPY examples/00-native-choropleth/public ./examples/00-native-choropleth/public
+COPY examples/00-native-choropleth/src ./examples/00-native-choropleth/src
 COPY examples/01-points-on-globe/index.html examples/01-points-on-globe/tsconfig.json examples/01-points-on-globe/vite.config.ts ./examples/01-points-on-globe/
 COPY examples/01-points-on-globe/public ./examples/01-points-on-globe/public
 COPY examples/01-points-on-globe/screenshots ./examples/01-points-on-globe/screenshots

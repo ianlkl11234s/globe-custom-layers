@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import mapboxgl from "mapbox-gl";
 import { GLOBE_PROJECT_GLSL, lonLatToEcef } from "./globeProject";
-import { sampleArc, type ArcRoute, type ArcSample } from "./arcs";
+import { arcColorForRoute, sampleArc, type ArcPalette, type ArcRoute, type ArcSample } from "./arcs";
 
 /**
  * A single `THREE.LineSegments` draw call rendering every origin-destination
@@ -30,31 +30,29 @@ const MAX_SEGMENTS_PER_ARC = 128;
 // repeated, not indexed) buffer vertices.
 const MAX_LINE_VERTICES = MAX_ARC_COUNT * (MAX_SEGMENTS_PER_ARC - 1) * 2;
 
-export const DEFAULT_SEGMENTS_PER_ARC = 24;
+export const DEFAULT_SEGMENTS_PER_ARC = 53;
 // Deliberately exaggerated: a real airliner's cruise altitude (~10km) is
 // about 0.16% of Earth's radius -- rendered at true scale it would be
 // visually indistinguishable from the surface. Like most flight-arc
 // visualizations, the height here is a stylistic "read as a flight path" cue,
 // not a physical altitude. See README.
-export const DEFAULT_ARC_HEIGHT_MERC_Z = 0.02;
+export const DEFAULT_ARC_HEIGHT_MERC_Z = 0.028;
 export const MAX_ARC_HEIGHT_MERC_Z = 0.08;
 
-// A single fixed accent color/alpha for every arc -- see README's "deliberate
-// simplifications" for why this isn't a per-route or user-adjustable value.
 // Alpha is kept low deliberately: with 20 hubs fully interconnected, up to 19
 // arcs converge on any one hub, and additive blending stacks their alpha --
 // a high per-arc value would blow every hub out to solid white.
-const ARC_COLOR = "#ffb454";
 const ARC_ALPHA = 0.28;
-const LIGHT_ARC_COLOR = "#007f86";
 const LIGHT_ARC_ALPHA = 0.5;
 
 const VERT = /* glsl */ `
 ${GLOBE_PROJECT_GLSL}
 
 attribute vec3 aEcef; // precomputed at buffer-build time, see rebuildGeometry()
+attribute vec3 aColor; // deterministic synthetic route color, see arcs.ts
 
 varying float vCull;
+varying vec3 vColor;
 
 void main() {
   float cull;
@@ -63,6 +61,7 @@ void main() {
   // blends it with aEcef per the current sphere<->flat transition.
   vec3 world = globeWorldPosition(position, aEcef, cull);
   vCull = cull;
+  vColor = aColor;
 
   vec4 mvPos = modelViewMatrix * vec4(world, 1.0);
   gl_Position = projectionMatrix * mvPos;
@@ -72,15 +71,15 @@ void main() {
 const FRAG = /* glsl */ `
 precision highp float;
 
-uniform vec3 uColor;
 uniform float uAlpha;
 
 varying float vCull;
+varying vec3 vColor;
 
 void main() {
   // vCull multiplies alpha (never a hard discard) so the globe's horizon
   // fades like atmosphere instead of hard-clipping -- see globeProject.ts.
-  gl_FragColor = vec4(uColor, uAlpha * vCull);
+  gl_FragColor = vec4(vColor, uAlpha * vCull);
 }
 `;
 
@@ -100,9 +99,11 @@ void main() {
 function writeVertex(
   posAttr: THREE.BufferAttribute,
   ecefAttr: THREE.BufferAttribute,
+  colorAttr: THREE.BufferAttribute,
   index: number,
   sample: ArcSample,
   mercatorLon: number,
+  color: THREE.Color,
 ) {
   const mc = mapboxgl.MercatorCoordinate.fromLngLat([mercatorLon, sample.lat], 0);
   posAttr.setXYZ(index, mc.x, mc.y, sample.heightMercZ);
@@ -112,6 +113,7 @@ function writeVertex(
   // ECEF doesn't care which "copy" of the longitude it's handed.
   const ecef = lonLatToEcef(sample.lon, sample.lat, sample.heightMercZ);
   ecefAttr.setXYZ(index, ecef.x, ecef.y, ecef.z);
+  colorAttr.setXYZ(index, color.r, color.g, color.b);
 }
 
 /**
@@ -136,6 +138,7 @@ export class ArcsScene {
   private material: THREE.ShaderMaterial | null = null;
 
   private routes: ArcRoute[] = [];
+  private palette: ArcPalette = "plasma";
   // -1 is an intentionally invalid sentinel (real values are >=2 and >=0
   // respectively) so the FIRST setParams() call after setRoutes() always
   // rebuilds, even if it happens to be called with values that equal
@@ -175,8 +178,10 @@ export class ArcsScene {
     this.geometry = new THREE.BufferGeometry();
     const position = new Float32Array(MAX_LINE_VERTICES * 3);
     const aEcef = new Float32Array(MAX_LINE_VERTICES * 3);
+    const aColor = new Float32Array(MAX_LINE_VERTICES * 3);
     this.geometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
     this.geometry.setAttribute("aEcef", new THREE.BufferAttribute(aEcef, 3));
+    this.geometry.setAttribute("aColor", new THREE.BufferAttribute(aColor, 3));
     this.geometry.setDrawRange(0, 0);
     // Custom layers don't participate in Mapbox's frustum culling, and a
     // finite bounding sphere computed from mercator-space positions would be
@@ -187,7 +192,6 @@ export class ArcsScene {
       vertexShader: VERT,
       fragmentShader: FRAG,
       uniforms: {
-        uColor: { value: new THREE.Color(ARC_COLOR) },
         uAlpha: { value: ARC_ALPHA },
         uGlobeToMerc: { value: new THREE.Matrix4() },
         uTransition: { value: 1 }, // 1 = flat mercator until the first setGlobe() call
@@ -230,12 +234,20 @@ export class ArcsScene {
 
   setTheme(theme: "light" | "dark") {
     if (!this.material) return;
-    this.material.uniforms.uColor!.value.set(theme === "light" ? LIGHT_ARC_COLOR : ARC_COLOR);
     this.material.uniforms.uAlpha!.value = theme === "light" ? LIGHT_ARC_ALPHA : ARC_ALPHA;
     // Additive RGB cannot read as dark teal over a light basemap. Preserve
     // the fragment shader's alpha/horizon fade and use source-over only in
     // light mode; dark mode keeps its original additive hub glow.
     this.material.blending = theme === "light" ? THREE.NormalBlending : THREE.AdditiveBlending;
+  }
+
+  setPalette(palette: ArcPalette) {
+    if (palette === this.palette) return;
+    this.palette = palette;
+    // setRoutes() deliberately resets both geometry parameters to invalid
+    // sentinels. A palette chosen before the first setParams() should be
+    // remembered, then applied by that first valid rebuild.
+    if (this.segmentsPerArc >= 2 && this.arcHeightMercZ >= 0) this.rebuildGeometry();
   }
 
   /**
@@ -267,9 +279,11 @@ export class ArcsScene {
     if (!this.geometry || this.routes.length === 0) return;
     const posAttr = this.geometry.getAttribute("position") as THREE.BufferAttribute;
     const ecefAttr = this.geometry.getAttribute("aEcef") as THREE.BufferAttribute;
+    const colorAttr = this.geometry.getAttribute("aColor") as THREE.BufferAttribute;
 
     let vi = 0; // next free vertex slot in the LineSegments buffer
     routeLoop: for (const route of this.routes) {
+      const color = new THREE.Color(arcColorForRoute(route, this.palette));
       const samples = sampleArc(route.origin, route.dest, this.segmentsPerArc, this.arcHeightMercZ);
       for (let i = 0; i < samples.length - 1; i++) {
         if (vi + 2 > MAX_LINE_VERTICES) {
@@ -298,13 +312,14 @@ export class ArcsScene {
         // landing a hair outside (-180, 180] here is expected, not a bug.
         const lon0 = wrapLongitude(s0.lon);
         const lon1 = lon0 + (s1.lon - s0.lon);
-        writeVertex(posAttr, ecefAttr, vi++, s0, lon0);
-        writeVertex(posAttr, ecefAttr, vi++, s1, lon1);
+        writeVertex(posAttr, ecefAttr, colorAttr, vi++, s0, lon0, color);
+        writeVertex(posAttr, ecefAttr, colorAttr, vi++, s1, lon1, color);
       }
     }
 
     posAttr.needsUpdate = true;
     ecefAttr.needsUpdate = true;
+    colorAttr.needsUpdate = true;
     this.geometry.setDrawRange(0, vi);
     this.lastVertexCount = vi;
   }

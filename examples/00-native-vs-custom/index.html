@@ -148,47 +148,104 @@
       #token-warning a {
         color: #6cb6ff;
       }
+      html[data-theme="light"] body,
+      html[data-theme="light"] #token-warning {
+        background: #f4f8f7;
+        color: #1f2d2e;
+      }
+      html[data-theme="light"] #panel {
+        background: rgba(255, 255, 255, 0.9);
+        color: #1f2d2e;
+        box-shadow: 0 8px 24px rgba(20, 51, 51, 0.14);
+      }
+      html[data-theme="light"] #panel h1,
+      html[data-theme="light"] #panel .row .value,
+      html[data-theme="light"] #loc-table td.num {
+        color: #123c3d;
+      }
+      html[data-theme="light"] #mode-switch button,
+      html[data-theme="light"] #click-info {
+        background: #edf3f1;
+        border-color: #c4d4d1;
+        color: #2f4546;
+      }
+      html[data-theme="light"] #loc-table th,
+      html[data-theme="light"] #loc-table td {
+        border-color: #d8e2e0;
+        color: #506465;
+      }
+      #panel-toggle {
+        display: none;
+      }
+      html[data-embed="true"] #panel-toggle {
+        display: block;
+        margin: 0 0 8px auto;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        background: transparent;
+        color: inherit;
+        padding: 3px 9px;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      html[data-embed="true"] #panel.panel-collapsed {
+        width: auto;
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        gap: 12px;
+        overflow: hidden;
+      }
+      html[data-embed="true"] #panel.panel-collapsed h1,
+      html[data-embed="true"] #panel.panel-collapsed #panel-toggle {
+        margin: 0;
+      }
+      html[data-embed="true"] #panel.panel-collapsed > :not(h1):not(#panel-toggle) {
+        display: none;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
 
     <div id="panel">
-      <h1>Native vs custom layers</h1>
-      <div class="row"><span>mode</span><span class="value" id="mode-value">--</span></div>
-      <div class="row"><span>zoom</span><span class="value" id="zoom-value">--</span></div>
-      <div class="row"><span>projection</span><span class="value" id="projection-value">--</span></div>
-      <div class="row"><span>transition</span><span class="value" id="transition-value">--</span></div>
+      <h1 data-i18n="title">Native vs custom layers</h1>
+      <button id="panel-toggle" type="button" data-i18n="controls" aria-expanded="false">Controls</button>
+      <div class="row"><span data-i18n="mode">mode</span><span class="value" id="mode-value">--</span></div>
+      <div class="row"><span data-i18n="zoom">zoom</span><span class="value" id="zoom-value">--</span></div>
+      <div class="row"><span data-i18n="projection">projection</span><span class="value" id="projection-value">--</span></div>
+      <div class="row"><span data-i18n="transition">transition</span><span class="value" id="transition-value">--</span></div>
 
       <div id="mode-switch">
-        <button data-mode="native" id="mode-btn-native">native</button>
-        <button data-mode="custom" id="mode-btn-custom">custom</button>
-        <button data-mode="both" id="mode-btn-both">both</button>
+        <button data-mode="native" id="mode-btn-native" data-i18n="native" aria-pressed="false">native</button>
+        <button data-mode="custom" id="mode-btn-custom" data-i18n="custom" aria-pressed="false">custom</button>
+        <button data-mode="both" id="mode-btn-both" data-i18n="both" aria-pressed="false">both</button>
       </div>
 
       <table id="loc-table">
         <thead>
           <tr>
-            <th></th>
-            <th>native circle</th>
-            <th>custom Three.js</th>
+            <th data-i18n="loc"></th>
+            <th data-i18n="circle">native circle</th>
+            <th data-i18n="three">custom Three.js</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>lines of code</td>
+            <td data-i18n="loc">lines of code</td>
             <td class="num" id="native-loc"></td>
             <td class="num" id="custom-loc"></td>
           </tr>
         </tbody>
       </table>
 
-      <div id="click-info">Click a point on the map to see the difference.</div>
+      <div id="click-info" data-i18n="hint">Click a point on the map to see the difference.</div>
     </div>
 
     <div id="token-warning">
       <div class="box">
-        <p>
+        <p id="token-warning-message">
           No Mapbox access token found. Copy <code>.env.example</code> to <code>.env</code>,
           set <code>VITE_MAPBOX_TOKEN</code> to a token from your
           <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noreferrer"

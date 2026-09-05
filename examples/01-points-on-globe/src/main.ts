@@ -2,6 +2,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { getEmbedPreferences, getEmbeddedRuntimeToken, reportEmbedMapStatus } from "./embedBridge";
 import { createGlowLayer } from "./glowLayer";
+import type { PointPalette } from "./airports";
 
 /**
  * Wires up the map + custom layer + a handful of sliders. No framework, no
@@ -18,7 +19,7 @@ function byId<T extends HTMLElement>(id: string): T {
 const tokenWarning = byId<HTMLDivElement>("token-warning");
 const tokenWarningMessage = byId<HTMLParagraphElement>("token-warning-message");
 const preferences = getEmbedPreferences();
-const zh = { title: "貼合地球的點", zoom: "縮放", projection: "投影", transition: "轉換", size: "點大小 ×", opacity: "不透明度", core: "核心亮度", controls: "控制項" };
+const zh = { title: "貼合地球的點", zoom: "縮放", projection: "投影", transition: "轉換", color: "發光配色", spectrum: "繽紛", solar: "日耀", aurora: "極光", plasma: "等離子", ice: "冰藍", size: "點大小 ×", opacity: "不透明度", core: "核心亮度", controls: "控制項" };
 
 document.documentElement.dataset.theme = preferences.theme;
 document.documentElement.dataset.embed = String(preferences.embed);
@@ -39,7 +40,7 @@ function setupHudToggle() {
     toggle.setAttribute("aria-expanded", String(!collapsed));
     toggle.textContent = preferences.lang === "zh-TW" ? (collapsed ? "顯示控制項" : "隱藏控制項") : (collapsed ? "Show controls" : "Hide controls");
   };
-  setCollapsed(window.innerWidth < 520);
+  setCollapsed(true);
   toggle.addEventListener("click", () => setCollapsed(!hud.classList.contains("hud-collapsed")));
 }
 
@@ -91,6 +92,7 @@ function startMap() {
   const sizeMulEl = byId<HTMLInputElement>("size-mul");
   const opacityEl = byId<HTMLInputElement>("opacity");
   const coreBoostEl = byId<HTMLInputElement>("core-boost");
+  const paletteEl = byId<HTMLSelectElement>("point-palette");
   const sizeMulValueEl = byId<HTMLSpanElement>("size-mul-value");
   const opacityValueEl = byId<HTMLSpanElement>("opacity-value");
   const coreBoostValueEl = byId<HTMLSpanElement>("core-boost-value");
@@ -112,6 +114,7 @@ function startMap() {
     getSizeMul: () => Number(sizeMulEl.value),
     getOpacity: () => Number(opacityEl.value),
     getCoreBoost: () => Number(coreBoostEl.value),
+    getPalette: () => paletteEl.value as PointPalette,
     theme: preferences.theme,
     // HUD readout of the exact globe state this frame -- see globeLayer's
     // render() for where isGlobe/transition actually come from.
@@ -122,7 +125,7 @@ function startMap() {
   });
 
   map.on("load", () => {
-    map.setFog(preferences.theme === "light" ? { color: "#f4f8f7", "high-color": "#ffffff", "space-color": "#dcebea", "horizon-blend": 0.08 } : { color: "#202020", "high-color": "#292929", "space-color": "#202020", "horizon-blend": 0.12 });
+    map.setFog(preferences.theme === "light" ? { color: "#f2f2f2", "high-color": "#ffffff", "space-color": "#ffffff", "horizon-blend": 0.08 } : { color: "#202020", "high-color": "#292929", "space-color": "#202020", "horizon-blend": 0.12 });
     map.addLayer(layer);
     reportEmbedMapStatus("loaded");
   });

@@ -29,6 +29,37 @@ export interface ArcSample {
   heightMercZ: number;
 }
 
+export type ArcPalette = "spectrum" | "solar" | "aurora" | "plasma" | "ice";
+
+const ARC_PALETTE_STOPS: Record<ArcPalette, Array<[number, number, number]>> = {
+  spectrum: [[0, 153, 255], [0, 220, 200], [255, 196, 0], [255, 88, 32], [255, 25, 94], [168, 35, 255], [0, 153, 255]],
+  solar: [[255, 255, 255], [255, 140, 26], [255, 30, 30]],
+  aurora: [[224, 255, 245], [0, 224, 182], [0, 122, 174]],
+  plasma: [[255, 232, 255], [229, 69, 255], [72, 198, 255]],
+  ice: [[239, 252, 255], [92, 202, 255], [54, 91, 255]],
+};
+
+function hashToUnitFloat(value: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0) / 0xffffffff;
+}
+
+/** Stable synthetic route color for visual separation; it carries no category meaning. */
+export function arcColorForRoute(route: ArcRoute, palette: ArcPalette): string {
+  const stops = ARC_PALETTE_STOPS[palette];
+  const scaled = hashToUnitFloat(`${route.originIdent}:${route.destIdent}:color`) * (stops.length - 1);
+  const index = Math.min(stops.length - 2, Math.floor(scaled));
+  const local = scaled - index;
+  const from = stops[index]!;
+  const to = stops[index + 1]!;
+  const color = from.map((value, channel) => Math.round(value + (to[channel]! - value) * local));
+  return `rgb(${color[0]},${color[1]},${color[2]})`;
+}
+
 /**
  * Every unordered pair of hubs, once each -- C(hubs.length, 2) routes. With
  * this example's 20 hubs (see airports.ts) that's 190 arcs, which is why

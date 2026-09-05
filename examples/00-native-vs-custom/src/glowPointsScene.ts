@@ -66,6 +66,7 @@ precision highp float;
 
 uniform float uOpacity;
 uniform float uCoreBoost;
+uniform float uLightTheme;
 
 varying vec3 vColor;
 varying float vCull;
@@ -89,6 +90,8 @@ void main() {
 
   // Push the very center toward white for a "hot core" look.
   vec3 col = mix(vColor, vec3(1.0), core * uCoreBoost);
+  // Preserve contrast on pale basemaps; dark mode keeps additive bloom.
+  col = mix(col, col * 0.44, uLightTheme);
   gl_FragColor = vec4(col, a);
 }
 `;
@@ -156,6 +159,7 @@ export class GlowPointsScene {
       uniforms: {
         uOpacity: { value: 0.9 },
         uCoreBoost: { value: 0.7 },
+        uLightTheme: { value: 0 },
         uTime: { value: 0 },
         uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 2) },
         uZoomScale: { value: 1 },
@@ -236,6 +240,12 @@ export class GlowPointsScene {
   setCoreBoost(b: number) {
     if (!this.material) return;
     this.material.uniforms.uCoreBoost!.value = Math.max(0, Math.min(1, b));
+  }
+
+  setTheme(theme: "light" | "dark") {
+    if (!this.material) return;
+    this.material.uniforms.uLightTheme!.value = theme === "light" ? 1 : 0;
+    this.material.blending = theme === "light" ? THREE.NormalBlending : THREE.AdditiveBlending;
   }
 
   setSizeMul(m: number) {

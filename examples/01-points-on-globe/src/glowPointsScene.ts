@@ -90,9 +90,10 @@ void main() {
 
   // Push the very center toward white for a "hot core" look.
   vec3 col = mix(vColor, vec3(1.0), core * uCoreBoost);
-  // The light basemap needs a darker teal edge to retain the same visual
-  // weight as the warm additive glow has against the dark basemap.
-  col = mix(col, mix(col * 0.5, vec3(0.0, 0.58, 0.58), 0.65), uLightTheme);
+  // Keep the selected hue almost fully saturated on the neutral light map.
+  // Normal alpha blending already softens the glow; extra darkening made the
+  // spectrum look muddy instead of lively.
+  col = mix(col, col * 0.94, uLightTheme);
   gl_FragColor = vec4(col, a);
 }
 `;

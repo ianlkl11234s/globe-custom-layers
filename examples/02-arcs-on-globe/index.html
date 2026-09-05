@@ -60,6 +60,15 @@
       #hud input[type="range"] {
         width: 100%;
       }
+      #hud select {
+        width: 100%;
+        margin-top: 4px;
+        padding: 7px 8px;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #292929;
+        color: #ededed;
+      }
       #hud .hint {
         margin-top: 10px;
         font-size: 11px;
@@ -96,22 +105,25 @@
       #token-warning a {
         color: #6cb6ff;
       }
-      html[data-theme="light"] body, html[data-theme="light"] #token-warning { background: #f4f8f7; color: #1f2d2e; }
-      html[data-theme="light"] #hud { background: rgba(255, 255, 255, .9); color: #1f2d2e; box-shadow: 0 8px 24px rgba(20, 51, 51, .14); }
-      html[data-theme="light"] #hud h1 { color: #123c3d; }
-      html[data-theme="light"] #hud label, html[data-theme="light"] #hud .hint { color: #426568; }
-      html[data-theme="light"] #hud .hint strong, html[data-theme="light"] #token-warning a { color: #007f86; }
-      html[data-theme="light"] #token-warning code { background: #dcebea; }
+      html[data-theme="light"] body, html[data-theme="light"] #token-warning { background: #fff; color: #202020; }
+      html[data-theme="light"] #hud { background: rgba(255, 255, 255, .94); color: #202020; box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
+      html[data-theme="light"] #hud h1 { color: #202020; }
+      html[data-theme="light"] #hud label, html[data-theme="light"] #hud .hint { color: #6a6a6a; }
+      html[data-theme="light"] #hud select { background: #fff; color: #202020; border-color: #c8c8c8; }
+      html[data-theme="light"] #hud .hint strong, html[data-theme="light"] #token-warning a { color: #4c4c4c; }
+      html[data-theme="light"] #token-warning code { background: #eeeeee; }
       html[data-embed="true"] #hud { width: min(calc(100% - 48px), 300px); max-width: none; min-width: 0; font-size: 14px; }
       html[data-embed="true"] #hud h1 { font-size: 14px; }
       html[data-embed="true"] #hud label, html[data-embed="true"] #hud .hint { font-size: 12px; }
       html[data-embed="true"] input { accent-color: #008b8b; }
       #hud-toggle { display: none; }
+      html[data-embed="true"] #hud-toggle { display: block; position: static; margin: 0 0 8px auto; border: 1px solid currentColor; border-radius: 999px; background: transparent; color: inherit; padding: 3px 9px; font: inherit; font-size: 12px; cursor: pointer; }
+      html[data-embed="true"] #hud.hud-collapsed { width: auto; min-width: 0; display: grid; grid-template-columns: auto auto; align-items: center; gap: 12px; overflow: hidden; }
+      html[data-embed="true"] #hud.hud-collapsed h1 { margin: 0; }
+      html[data-embed="true"] #hud.hud-collapsed #hud-toggle { margin: 0; }
+      html[data-embed="true"] #hud.hud-collapsed > :not(h1):not(#hud-toggle) { display: none; }
       @media (max-width: 520px) {
         html[data-embed="true"] #hud { max-height: calc(100% - 48px); overflow: auto; }
-        html[data-embed="true"] #hud-toggle { display: block; position: static; margin: 0 0 8px auto; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: inherit; padding: 2px 6px; font: inherit; font-size: 12px; cursor: pointer; }
-        html[data-embed="true"] #hud.hud-collapsed { width: auto; min-width: 0; }
-        html[data-embed="true"] #hud.hud-collapsed > :not(h1):not(#hud-toggle) { display: none; }
       }
     </style>
   </head>
@@ -128,10 +140,19 @@
       <div class="row"><span data-i18n="vertices">vertices</span><span id="vertices-value">--</span></div>
 
       <label for="segments"><span data-i18n="segments">segments per arc</span> <span id="segments-value"></span></label>
-      <input id="segments" type="range" min="2" max="128" step="1" value="24" />
+      <input id="segments" type="range" min="2" max="128" step="1" value="53" />
 
       <label for="arc-height"><span data-i18n="height">arc height</span> <span id="arc-height-value"></span></label>
-      <input id="arc-height" type="range" min="0" max="0.08" step="0.002" value="0.02" />
+      <input id="arc-height" type="range" min="0" max="0.08" step="0.002" value="0.028" />
+
+      <label for="arc-palette" data-i18n="color">arc palette</label>
+      <select id="arc-palette">
+        <option value="spectrum" data-i18n="spectrum">Spectrum</option>
+        <option value="solar" data-i18n="solar">Solar</option>
+        <option value="aurora" data-i18n="aurora">Aurora</option>
+        <option value="plasma" data-i18n="plasma" selected>Plasma</option>
+        <option value="ice" data-i18n="ice">Ice</option>
+      </select>
 
       <div class="hint" data-i18n="hint">
         Drag <strong>segments</strong> down to 2 to see the bug this example is

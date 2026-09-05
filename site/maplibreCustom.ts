@@ -1,13 +1,15 @@
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap } from "maplibre-gl";
 import * as THREE from "three";
 import { GlowPointsScene } from "../examples/01-points-on-globe/src/glowPointsScene";
+import { syntheticColorRamp, type PointPalette } from "../examples/01-points-on-globe/src/airports";
 import { ArcsScene, DEFAULT_ARC_HEIGHT_MERC_Z, DEFAULT_SEGMENTS_PER_ARC } from "../examples/02-arcs-on-globe/src/arcsScene";
-import { buildArcRoutes } from "../examples/02-arcs-on-globe/src/arcs";
+import { buildArcRoutes, type ArcPalette } from "../examples/02-arcs-on-globe/src/arcs";
 import { TrajectoryScene, type TrailPalette } from "../examples/05-mass-trajectories/src/trajectoryScene";
 
 export type CustomSceneName = "points" | "arcs" | "tracks";
 export type CustomTheme = "light" | "dark";
 export type TrajectoryPalette = TrailPalette;
+export type GlowPalette = PointPalette;
 
 export interface AirportFixture {
   airports: Array<[string, string, number, number]>;
@@ -36,13 +38,20 @@ export interface CustomLayerOptions {
   activeCount?: number;
   opacity?: number;
   palette?: TrajectoryPalette;
+  pointSize?: number;
+  pointOpacity?: number;
+  coreBoost?: number;
+  glowPalette?: GlowPalette;
+  arcPalette?: ArcPalette;
   onFrameInfo?: (info: FrameInfo) => void;
 }
 
 export interface CustomLayerControls {
   setTheme(theme: CustomTheme): void;
-  setOptions(options: Partial<{ segments: number; height: number; paused: boolean; speed: number; activeCount: number; opacity: number }>): void;
+  setOptions(options: Partial<{ segments: number; height: number; paused: boolean; speed: number; activeCount: number; opacity: number; pointSize: number; pointOpacity: number; coreBoost: number }>): void;
   setPalette(palette: TrajectoryPalette): void;
+  setPointPalette(palette: GlowPalette): void;
+  setArcPalette(palette: ArcPalette): void;
 }
 
 export type GlobeCustomLayer = CustomLayerInterface & CustomLayerControls;
@@ -101,6 +110,7 @@ function installMapLibreProjection(scene: SceneInternals, input: CustomRenderMet
   float pulse = 0.9 + 0.1 * sin(uTime * 1.8 + position.x * 200.0);
   gl_PointSize = aSize * uPixelRatio * pulse * uZoomScale * uSizeMul;`
         : `
+  vColor = aColor;
   float elevation = elevationFromStatic(aEcef);
   vCull = 1.0;
   gl_Position = projectTileWithElevation(position.xy, elevation);`;
@@ -142,17 +152,16 @@ function updateProjectionUniforms(scene: SceneInternals, input: CustomRenderMeth
   });
 }
 
-function pointRows(airports: AirportFixture) {
+function pointRows(airports: AirportFixture, palette: GlowPalette = "plasma") {
   return airports.airports.map(([ident, , lon, lat]) => {
     let hash = 0x811c9dc5;
     for (let i = 0; i < ident.length; i++) { hash ^= ident.charCodeAt(i); hash = Math.imul(hash, 0x01000193); }
     const sizeNorm = Math.sqrt((hash >>> 0) / 0xffffffff);
-    const t = Math.max(0, Math.min(1, sizeNorm));
-    const [from, to, local] = t < 0.5
-      ? [[255, 255, 255], [255, 140, 26], t * 2]
-      : [[255, 140, 26], [255, 30, 30], (t - 0.5) * 2];
-    const color = from.map((value, index) => Math.round(value + (to[index]! - value) * local));
-    return { lon, lat, sizeNorm, colorHex: `rgb(${color[0]},${color[1]},${color[2]})` };
+    let colorHash = 0x811c9dc5;
+    const colorKey = `${ident}:color`;
+    for (let i = 0; i < colorKey.length; i++) { colorHash ^= colorKey.charCodeAt(i); colorHash = Math.imul(colorHash, 0x01000193); }
+    const colorNorm = (colorHash >>> 0) / 0xffffffff;
+    return { lon, lat, sizeNorm, colorNorm, colorHex: syntheticColorRamp(colorNorm, palette) };
   });
 }
 
@@ -168,10 +177,15 @@ export function createCustomLayer(sceneName: CustomSceneName, initial: CustomLay
   let theme = initial.theme;
   let segments = initial.segments ?? DEFAULT_SEGMENTS_PER_ARC;
   let height = initial.height ?? DEFAULT_ARC_HEIGHT_MERC_Z;
-  let activeCount = initial.activeCount ?? 1500;
-  let opacity = initial.opacity ?? 0.9;
-  let speed = initial.speed ?? 1;
-  let palette: TrajectoryPalette = initial.palette ?? "multicolor";
+  let activeCount = initial.activeCount ?? 600;
+  let opacity = initial.opacity ?? 0.7;
+  let speed = initial.speed ?? 0.3;
+  let palette: TrajectoryPalette = initial.palette ?? "warm";
+  let pointPalette: GlowPalette = initial.glowPalette ?? "plasma";
+  let arcPalette: ArcPalette = initial.arcPalette ?? "plasma";
+  let pointSize = initial.pointSize ?? .6;
+  let pointOpacity = initial.pointOpacity ?? initial.opacity ?? .65;
+  let coreBoost = initial.coreBoost ?? .85;
   let paused = initial.paused ?? false;
   // A reduced-motion / initially paused view needs an existing trail window,
   // not time zero where every synthetic leg has only one point.
@@ -193,10 +207,11 @@ export function createCustomLayer(sceneName: CustomSceneName, initial: CustomLay
       lastClockMs = performance.now();
 
       if (!initial.airports && sceneName !== "tracks") throw new Error("MapLibre custom points/arcs require options.airports");
-      if (sceneName === "points") (scene as unknown as GlowPointsScene).setData(pointRows(initial.airports!));
+      if (sceneName === "points") (scene as unknown as GlowPointsScene).setData(pointRows(initial.airports!, pointPalette));
       if (sceneName === "arcs") {
         const arcs = scene as unknown as ArcsScene;
         arcs.setRoutes(buildArcRoutes(hubs(initial.airports!)));
+        arcs.setPalette(arcPalette);
         arcs.setParams(segments, height);
       }
       if (sceneName === "tracks") (scene as unknown as TrajectoryScene).setPalette(palette);
@@ -220,10 +235,13 @@ export function createCustomLayer(sceneName: CustomSceneName, initial: CustomLay
 
       if (sceneName === "points") {
         const points = scene as unknown as GlowPointsScene;
-        points.setOpacity(opacity);
+        points.setOpacity(pointOpacity);
+        points.setSizeMul(pointSize);
+        points.setCoreBoost(coreBoost);
         points.setZoom(map?.getZoom() ?? 0);
       } else if (sceneName === "arcs") {
         const arcs = scene as unknown as ArcsScene;
+        arcs.setPalette(arcPalette);
         arcs.setParams(segments, height);
       } else {
         const tracks = scene as unknown as TrajectoryScene;
@@ -256,6 +274,9 @@ export function createCustomLayer(sceneName: CustomSceneName, initial: CustomLay
       if (typeof next.height === "number") height = Math.max(0, Math.min(0.08, next.height));
       if (typeof next.activeCount === "number") activeCount = Math.max(100, Math.min(12000, Math.round(next.activeCount)));
       if (typeof next.opacity === "number") opacity = Math.max(0.1, Math.min(1, next.opacity));
+      if (typeof next.pointSize === "number") pointSize = Math.max(.25, Math.min(3, next.pointSize));
+      if (typeof next.pointOpacity === "number") pointOpacity = Math.max(.1, Math.min(1, next.pointOpacity));
+      if (typeof next.coreBoost === "number") coreBoost = Math.max(0, Math.min(1, next.coreBoost));
       if (typeof next.speed === "number") speed = Math.max(0.1, Math.min(4, next.speed));
       if (typeof next.paused === "boolean") { paused = next.paused; lastClockMs = performance.now(); }
       map?.triggerRepaint();
@@ -263,6 +284,16 @@ export function createCustomLayer(sceneName: CustomSceneName, initial: CustomLay
     setPalette(next) {
       palette = next === "cool" || next === "warm" ? next : "multicolor";
       (scene as unknown as TrajectoryScene | null)?.setPalette(palette);
+      map?.triggerRepaint();
+    },
+    setPointPalette(next) {
+      pointPalette = next === "solar" || next === "aurora" || next === "plasma" || next === "ice" ? next : "spectrum";
+      if (sceneName === "points" && initial.airports) (scene as unknown as GlowPointsScene | null)?.setData(pointRows(initial.airports, pointPalette));
+      map?.triggerRepaint();
+    },
+    setArcPalette(next) {
+      arcPalette = next === "solar" || next === "aurora" || next === "plasma" || next === "ice" ? next : "spectrum";
+      if (sceneName === "arcs") (scene as unknown as ArcsScene | null)?.setPalette(arcPalette);
       map?.triggerRepaint();
     },
   };

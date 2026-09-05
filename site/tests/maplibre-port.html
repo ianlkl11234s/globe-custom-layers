@@ -14,11 +14,11 @@ async function hash(){await settled();const bytes=new TextEncoder().encode(map.g
 try{
 await new Promise(r=>map.once('load',r));
 selectProof('arcs');await settled();
-record('190 arcs / default subdivision',stats.arcCount===190&&stats.vertexCount===8740,{...stats});
+record('190 arcs / default subdivision',stats.arcCount===190&&stats.vertexCount===19760,{...stats});
 const globeError=alignment();record('globe ground positions match map.project',Math.max(...globeError)<.1,globeError);
 layer.setOptions({height:0});const zero=await hash();layer.setOptions({height:.08,segments:64});const raised=await hash();
 record('height changes GPU image / subdivision changes vertices',zero!==raised&&stats.vertexCount===23940,{vertexCount:stats.vertexCount,imagesDiffer:zero!==raised});
-selectProof('tracks');await settled();record('default 1500 objects / one draw',stats.activeCount===1500&&stats.slotsUsed===1500&&stats.drawCalls===1,{...stats});
+selectProof('tracks');await settled();record('default 600 objects / one draw',stats.activeCount===600&&stats.slotsUsed===600&&stats.drawCalls===1,{...stats});
 layer.setOptions({activeCount:5000});await settled();record('paused count increase / 4096 slots / one draw',stats.activeCount===5000&&stats.slotsUsed===4096&&stats.drawCalls===1,{...stats});
 layer.setOptions({activeCount:1000});await settled();record('paused count decrease updates buffers',stats.activeCount===1000&&stats.slotsUsed===1000,{...stats});
 for(const theme of ['light','dark']){layer.setTheme(theme);layer.setPalette('multicolor');const multi=await hash();layer.setPalette('warm');const warm=await hash();layer.setPalette('cool');const cool=await hash();record(`${theme} palettes change GPU output`,multi!==warm&&warm!==cool&&multi!==cool);}
