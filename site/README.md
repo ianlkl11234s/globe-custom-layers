@@ -58,7 +58,7 @@ docker run --rm -p 8080:8080 globe-custom-layers
 
 The multi-stage image uses Node 22 to run `npm ci` independently for the site and all six embedded examples, then runs a token-neutral site build with an empty `VITE_MAPBOX_TOKEN`. Its final Nginx image contains only `site/dist` and the port-8080 static-server configuration. The Docker allowlist and `.dockerignore` exclude local `.env` files, so no deployment token or runtime API is required.
 
-On Zeabur, deploy this repository's `main` branch with the service Root Directory left empty. Its [Dockerfile deployment](https://zeabur.com/docs/en-US/deploy/methods/dockerfile) detects the root Dockerfile and exposed port 8080. Do not configure `VITE_MAPBOX_TOKEN`: this static site needs no service environment variables, and visitors supply their own public token in the browser. The currently published URL can lag `main`; deployment is a separate release action.
+On Zeabur, deploy this repository's `main` branch with the service Root Directory left empty. Its [Dockerfile deployment](https://zeabur.com/docs/en-US/deploy/methods/dockerfile) detects the root Dockerfile and exposed port 8080. Do not configure `VITE_MAPBOX_TOKEN`: this static site needs no service environment variables, and visitors supply their own public token in the browser. The production deployment of merge commit `cb7dc0f` was verified on 2026-09-06; future commits still require their own deployment readback.
 
 ## Preview and deployment base path
 
@@ -80,7 +80,7 @@ The demo does not submit the token to an application backend. `sessionStorage` i
 
 The 15 site tests cover handshake origin/source checks, session-token retention and forgetting, plus the static DOM/data/style contracts for the local basemaps, native layers, and custom-effect controls. Typechecking and the build cover the selected iframe bundles, including their relative fixture paths. They do not prove real Mapbox tiles, a valid visitor token, actual GPU palette rendering, or visual globe/shader behavior. Those require browser inspection (and a deliberately supplied runtime token for Mapbox).
 
-The [implementation record](../docs/demo-implementation-plan.md) separates completed local browser checks with a synthetic offline style from unverified real Mapbox tile access and public deployment. That test-only Mapbox style interception is not shipped. Free MapLibre mode is a locally reproduced custom-layer port preview; it does not verify the direct ECEF/mainMatrix hypothesis, terrain/depth behaviour, or the remaining standalone examples.
+The [implementation record](../docs/demo-implementation-plan.md) separates completed local/browser checks and the verified production shell from unverified real Mapbox tile access. The test-only Mapbox style interception is not shipped. Free MapLibre mode is a locally and publicly reproduced custom-layer port preview; it does not verify the direct ECEF/mainMatrix hypothesis, terrain/depth behaviour, or the remaining standalone examples.
 
 
 To repeat the token-free GPU checks after building, copy `site/tests/maplibre-port.html` to `site/dist/port-check.html`, serve `site/dist`, and open `/port-check.html`. The page reports geometry counts, changed height, paused/resumed GPU image hashes, front/back clipping, projection endpoints and the 0.5 transition coefficient. Remove that copied test page before publication. These browser checks require WebGL; the Node contract tests do not. Initially paused/reduced-motion tracks display a synthetic time-five-seconds snapshot so existing trails are visible.
