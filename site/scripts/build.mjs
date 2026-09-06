@@ -8,16 +8,26 @@ const projectRoot = resolve(scriptDir, "../..");
 const siteRoot = resolve(projectRoot, "site");
 const outputRoot = resolve(siteRoot, "dist");
 const emptyEnvDir = await mkdtemp(join(tmpdir(), "gcl-empty-env-"));
-const examples = [
+const manifest = JSON.parse(await readFile(join(projectRoot, "examples/manifest.json"), "utf8"));
+const manifestExamples = new Map(manifest.examples.map((example) => [example.id, example]));
+const sceneCatalog = manifest.siteScenes.map((scene) => {
+  const example = manifestExamples.get(scene.exampleId);
+  if (!example) throw new Error(`Unknown site scene example: ${scene.exampleId}`);
+  return {
+    ...scene,
+    path: example.path.replace(/^examples\//, "").replace(/\/$/, ""),
+    recipe: example.readFirst,
+    status: example.status,
+    data: example.data,
+  };
+});
+const previewByExample = new Map([
   ["00-native-vs-custom", "native-vs-custom.png"],
-  ["00-native-lines", null],
-  ["00-native-choropleth", null],
   ["01-points-on-globe", "points-globe.png"],
   ["02-arcs-on-globe", "arcs-globe.png"],
   ["05-mass-trajectories", "tracks-globe.png"],
-  ["09-satellite-orbits", null],
-  ["10-adiz-walls", null],
-];
+]);
+const examples = sceneCatalog.map((scene) => [scene.exampleId, previewByExample.get(scene.exampleId) ?? null]);
 const priorToken = process.env.VITE_MAPBOX_TOKEN;
 const fontFaces = [
   ["@ibm/plex-sans-tc/fonts/split/woff2/hinted", ["IBMPlexSansTC-Regular", "IBMPlexSansTC-Medium", "IBMPlexSansTC-SemiBold"]],
@@ -43,6 +53,10 @@ try {
     cp(join(siteRoot, "data"), join(outputRoot, "data"), { recursive: true }),
     mkdir(join(outputRoot, "previews"), { recursive: true }),
   ]);
+  await writeFile(
+    join(outputRoot, "sceneCatalog.js"),
+    `// Generated from examples/manifest.json by site/scripts/build.mjs.\nexport const sceneCatalog = ${JSON.stringify(sceneCatalog, null, 2)};\n`,
+  );
   await mkdir(join(outputRoot, "vendor"), { recursive: true });
   const fontOutput = join(outputRoot, "fonts");
   await mkdir(fontOutput, { recursive: true });

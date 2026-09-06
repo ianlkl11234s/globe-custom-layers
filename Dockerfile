@@ -30,6 +30,7 @@ RUN npm ci --prefix site \
 COPY site/index.html site/styles.css site/app.js site/i18n.js site/bridgeState.js ./site/
 COPY site/freeGlobe.js site/nativeStyles.js site/mapboxMathCompat.ts site/maplibreCustom.ts site/specialScenes.ts ./site/
 COPY site/land.json site/airports.json ./site/
+COPY examples/manifest.json ./examples/manifest.json
 COPY site/assets ./site/assets
 COPY site/data ./site/data
 COPY site/scripts/build.mjs ./site/scripts/build.mjs

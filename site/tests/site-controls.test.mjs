@@ -35,20 +35,31 @@ test("atlas navigation leads with element names and keeps data as subtitles", as
 
 test("static build bundles a Mapbox counterpart for every map element", async () => {
   const build = await read("scripts/build.mjs");
-  for (const name of ["00-native-vs-custom", "00-native-lines", "00-native-choropleth", "09-satellite-orbits", "10-adiz-walls"]) assert.match(build, new RegExp(name));
+  const manifest = JSON.parse(await readFile(new URL("../../examples/manifest.json", import.meta.url), "utf8"));
+  assert.equal(manifest.siteScenes.length, 8);
+  assert.match(build, /manifest\.siteScenes\.map/);
+  assert.match(build, /sceneCatalog\.js/);
+  assert.match(build, /examples\/manifest\.json/);
+  for (const scene of manifest.siteScenes) assert.ok(manifest.examples.some((example) => example.id === scene.exampleId));
 });
 
-test("satellite orbit and ADIZ wall scenes keep schematic semantics explicit", async () => {
+test("satellite orbit and vertical boundary wall scenes keep component and fixture semantics separate", async () => {
   const app = await read("app.js");
   const copy = await read("i18n.js");
   const free = await read("freeGlobe.js");
   const special = await read("specialScenes.ts");
+  const manifest = JSON.parse(await readFile(new URL("../../examples/manifest.json", import.meta.url), "utf8"));
   for (const scene of ["satelliteOrbits", "adizWalls"]) {
-    assert.match(app, new RegExp(scene));
+    assert.ok(manifest.siteScenes.some((entry) => entry.sceneId === scene));
     assert.match(copy, new RegExp(scene));
     assert.match(free, new RegExp(scene));
     assert.match(special, new RegExp(scene));
   }
+  assert.match(app, /sceneCatalog/);
+  assert.match(app, /TARGET REPOSITORY OR WORKSPACE/);
+  assert.match(app, /Replace the demonstration fixture/);
+  assert.match(app, /real WebGL\/browser behavior/);
+  assert.equal(manifest.siteScenes.find((scene) => scene.sceneId === "adizWalls").component, "vertical boundary walls");
   assert.match(copy, /不是即時 TLE/);
   assert.match(copy, /ADIZ 不等於主權領空/);
   assert.match(copy, /"adizWalls": "立體邊界牆"/);

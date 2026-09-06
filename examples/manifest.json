@@ -1,7 +1,7 @@
 {
   "$comment": "Machine-readable index of the examples. Written for agents deciding which example to copy. Human version: ./README.md",
-  "version": 1,
-  "generated": "2026-09-05",
+  "version": 2,
+  "generated": "2026-09-06",
   "checkedAgainst": {
     "mapbox-gl": "3.30.0",
     "three": "0.172.0",
@@ -23,6 +23,96 @@
       "unverified": "Reasoned from source or typings, never run"
     }
   },
+  "siteScenes": [
+    {
+      "sceneId": "nativePoints",
+      "exampleId": "00-native-vs-custom",
+      "kind": "native",
+      "component": "native point layer",
+      "mapLibreImplementation": "site/freeGlobe.js"
+    },
+    {
+      "sceneId": "nativeLines",
+      "exampleId": "00-native-lines",
+      "kind": "native",
+      "component": "native line layer",
+      "mapLibreImplementation": "site/freeGlobe.js"
+    },
+    {
+      "sceneId": "nativeAreas",
+      "exampleId": "00-native-choropleth",
+      "kind": "native",
+      "component": "native fill layer",
+      "mapLibreImplementation": "site/freeGlobe.js"
+    },
+    {
+      "sceneId": "points",
+      "exampleId": "01-points-on-globe",
+      "kind": "custom",
+      "component": "globe-aware glow points",
+      "mapLibreImplementation": "site/maplibreCustom.ts"
+    },
+    {
+      "sceneId": "arcs",
+      "exampleId": "02-arcs-on-globe",
+      "kind": "custom",
+      "component": "raised globe arcs",
+      "mapLibreImplementation": "site/maplibreCustom.ts"
+    },
+    {
+      "sceneId": "tracks",
+      "exampleId": "05-mass-trajectories",
+      "kind": "custom",
+      "component": "batched moving trajectories",
+      "mapLibreImplementation": "site/maplibreCustom.ts"
+    },
+    {
+      "sceneId": "satelliteOrbits",
+      "exampleId": "09-satellite-orbits",
+      "kind": "custom",
+      "component": "satellite orbital rings",
+      "fixture": "three locally generated schematic circular orbits",
+      "mapLibreImplementation": "site/specialScenes.ts",
+      "requiredFiles": {
+        "mapbox": ["examples/09-satellite-orbits/", "LICENSE"],
+        "maplibre": ["site/specialScenes.ts", "examples/09-satellite-orbits/src/orbitMath.ts", "LICENSE"]
+      },
+      "inputContract": {
+        "accepted": ["schematic circular-orbit definitions", "pre-sampled positions with timestamp, longitude, latitude, and altitudeMeters"],
+        "coordinateOrder": "longitude, latitude",
+        "altitudeUnit": "metres at the renderer boundary",
+        "missingData": "Reject non-finite coordinates or altitude; do not coerce missing altitude to the Earth surface.",
+        "notIncluded": "TLE parsing or orbital propagation"
+      },
+      "acceptance": {
+        "en": "Use a non-fixture orbit set. Verify closed elevated paths, inclination, animated markers, high-altitude visibility beyond the surface horizon, antimeridian continuity, pause/resume, and globe-to-Mercator transition.",
+        "zh-TW": "使用一組非內建 fixture 的軌道資料，驗證閉合離地路徑、傾角、移動標記、高空越過地表地平線後的可見性、換日線連續性、暫停／播放與 globe-to-Mercator 過渡。"
+      }
+    },
+    {
+      "sceneId": "adizWalls",
+      "exampleId": "10-adiz-walls",
+      "kind": "custom",
+      "component": "vertical boundary walls",
+      "fixture": "locally authored illustrative Taiwan-area ADIZ schematic",
+      "mapLibreImplementation": "site/specialScenes.ts",
+      "requiredFiles": {
+        "mapbox": ["examples/10-adiz-walls/", "LICENSE"],
+        "maplibre": ["site/specialScenes.ts", "examples/10-adiz-walls/src/wallGeometry.ts", "LICENSE"]
+      },
+      "inputContract": {
+        "accepted": ["GeoJSON Polygon", "GeoJSON MultiPolygon"],
+        "coordinateOrder": "longitude, latitude",
+        "heightUnit": "metres; a display property, never an inferred legal ceiling",
+        "missingData": "Reject empty rings, non-finite coordinates, and coordinates outside the supported Web Mercator latitude range.",
+        "notIncluded": "authoritative ADIZ data, sovereignty, airspace classification, or a solid top fill"
+      },
+      "acceptance": {
+        "en": "Use a non-ADIZ Polygon or MultiPolygon. Verify exterior and interior rings form subdivided bottom-to-top side walls without a top fill, remain continuous at the antimeridian, survive remove/re-add, and never present display height as a legal ceiling.",
+        "zh-TW": "使用一組非 ADIZ 的 Polygon 或 MultiPolygon，驗證外環與內環都形成經細分、由底至頂的側牆且沒有頂蓋，跨換日線仍連續、移除後可重新掛載，並且不把顯示高度描述成法定上限。"
+      }
+    }
+  ],
   "examples": [
     {
       "id": "00-native-vs-custom",
