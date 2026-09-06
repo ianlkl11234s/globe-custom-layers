@@ -2,7 +2,7 @@
 
 > A cookbook for rendering your own geometry — Three.js scenes, hand-written WebGL, particle systems, tens of thousands of animated objects — on a Mapbox or MapLibre map in globe projection, so it sits on the sphere instead of floating beside it on a flat plane. Docs plus standalone runnable examples; not a library, nothing to install.
 
-The 11 standalone globe examples target Mapbox. Pinned example baseline: `mapbox-gl` 3.30.0 and `three` 0.172.0. Historical recipe investigations used Mapbox 3.18.1 and MapLibre 5.24.0. The six-scene site adds native MapLibre point/line/fill scenes and a 🔬 locally browser-reproduced MapLibre 5.24 prelude-based Three.js adapter for scenes 01/02/05; direct ECEF/mainMatrix, terrain/depth, and portability to the remaining standalone examples are unverified. Pin versions and keep installation/build evidence separate from browser evidence.
+The 13 standalone globe examples target Mapbox. Pinned example baseline: `mapbox-gl` 3.30.0 and `three` 0.172.0. Historical recipe investigations used Mapbox 3.18.1 and MapLibre 5.24.0. The eight-scene site adds native MapLibre point/line/fill scenes, a locally browser-reproduced prelude-based Three.js adapter for 01/02/05, and focused MapLibre adapters for 09/10. Direct ECEF/mainMatrix and terrain/depth remain unverified. Pin versions and keep installation/build evidence separate from browser evidence.
 
 Read [AGENTS.md](AGENTS.md) first: it carries the scope boundary, the task-to-recipe routing table, and the rules for using this code. Then [the decision tree](docs/00-start-here/decision-tree.md), which will often tell you that a native layer does what you need and that none of the rest applies.
 
@@ -10,7 +10,7 @@ Every recipe opens with a verification marker — Verified, Reproduced, Reported
 
 ## Start here
 
-- [Demo website](site/README.md): Bilingual light/dark six-scene atlas with native point/line/fill elements, three selected custom effects, complete Mapbox examples, a token-free MapLibre preview, adjustable parameters and copyable Agent task prompts.
+- [Demo website](site/README.md): Bilingual light/dark eight-scene atlas with native point/line/fill elements, five custom effects, complete Mapbox examples, a token-free MapLibre preview, adjustable parameters and generated Agent task contracts.
 - [Implementation plan](docs/demo-implementation-plan.md): Scope decisions, task ownership, acceptance gates and publication status.
 - [AGENTS.md](AGENTS.md): Entry point. Scope, what is deliberately not covered and where to go instead, task routing, status markers, conventions.
 - [Decision tree](docs/00-start-here/decision-tree.md): Five ordered questions. Most importantly the first — whether a native layer already does this, in which case stop.
@@ -18,7 +18,7 @@ Every recipe opens with a verification marker — Verified, Reproduced, Reported
 ## Hugging the globe
 
 - [Mapbox GL JS](docs/01-hugging-the-globe/mapbox.md): The render arguments the typings under-document, the ECEF maths, why every material needs depthTest:false, ECEF-space backface culling, subdivision, and the static-versus-moving fork for where ECEF comes from.
-- [MapLibre GL JS](docs/01-hugging-the-globe/maplibre.md): Official projection support plus the 🔬 locally reproduced prelude-based Three.js adapter for site scenes 01/02/05; direct ECEF/mainMatrix, terrain/depth, and portability to the remaining standalone examples are unverified.
+- [MapLibre GL JS](docs/01-hugging-the-globe/maplibre.md): Official projection support plus locally reproduced custom scenes 01/02/05/09/10; direct ECEF/mainMatrix and terrain/depth remain unverified.
 - [Porting between the two](docs/01-hugging-the-globe/porting.md): Measured difference table. The projection-transition coefficient runs in opposite directions; read before porting anything.
 
 ## Effects
@@ -50,6 +50,10 @@ Every recipe opens with a verification marker — Verified, Reproduced, Reported
 - [02-arcs-on-globe](examples/02-arcs-on-globe/): Great-circle arcs, with a subdivision slider that reproduces the chord-through-the-planet failure on demand.
 - [03-areas-on-globe](examples/03-areas-on-globe/): Filled areas and outlines; a fixed-radius circle looks different at every latitude.
 - [04-moving-trajectory](examples/04-moving-trajectory/): Moving geometry — ECEF derived in the vertex shader — with timeline scrubbing.
+- [09-satellite-orbits](examples/09-satellite-orbits/): Complete elevated orbit paths with independently moving markers; the component accepts injected orbit definitions and keeps schematic data separate.
+- [10-adiz-walls](examples/10-adiz-walls/): A generic vertical polygon-boundary-wall component demonstrated with a Taiwan ADIZ schematic fixture; ADIZ is not the component name.
+
+For an implementation task, treat `examples/manifest.json` `siteScenes` as the machine-readable contract. Copy every `requiredFiles` entry, preserve `inputContract`, distinguish component from fixture, and report tests/typecheck/build separately from WebGL browser and production evidence.
 
 ## Optional
 

@@ -58,6 +58,9 @@ test("satellite orbit and vertical boundary wall scenes keep component and fixtu
   assert.match(app, /sceneCatalog/);
   assert.match(app, /TARGET REPOSITORY OR WORKSPACE/);
   assert.match(app, /Replace the demonstration fixture/);
+  assert.match(app, /read and copy every item/);
+  assert.match(app, /separate application-owned module/);
+  assert.match(app, /do not embed data in the renderer/);
   assert.match(app, /real WebGL\/browser behavior/);
   assert.equal(manifest.siteScenes.find((scene) => scene.sceneId === "boundaryWalls").component, "vertical boundary walls");
   assert.match(copy, /不是即時 TLE/);

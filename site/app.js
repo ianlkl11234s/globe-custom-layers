@@ -64,7 +64,7 @@ function contractText(scene) {
 function requiredSourceText(scene, selectedEngine) {
   const files = scene.requiredFiles?.[selectedEngine];
   if (!files?.length) return "";
-  const heading = language === "zh-TW" ? "必要來源（全部閱讀並只複製實際使用的部分）：" : "Required sources (read all; copy only the parts actually used):";
+  const heading = language === "zh-TW" ? "必要來源集合（全部閱讀並複製；只有替換 import 後才能移除未使用的 fixture）：" : "Required source set (read and copy every item; remove an unused fixture only after replacing its import):";
   return `${heading}\n${files.map((target) => `- ${githubFileUrl(target)}`).join("\n")}`;
 }
 function promptForScene() {
@@ -74,7 +74,7 @@ function promptForScene() {
   const fallbackAcceptance = language === "zh-TW" ? nativeScenes.has(selected) ? `確認「${title}」只顯示自己的 geometry type，參數可立即更新且來源語意不被誤讀。` : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : nativeScenes.has(selected) ? `Verify that ${title} displays only its own geometry type, updates immediately, and preserves source meaning.` : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
   const acceptance = scene.acceptance?.[language] ?? fallbackAcceptance;
   const contract = contractText(scene);
-  const commonEvidence = language === "zh-TW" ? "分別回報 install、unit test、typecheck、build、真實 WebGL/browser 與資料 readback；map load 或 HTTP 200 不算 shader 驗證。記錄使用的來源 commit SHA，保留根 LICENSE、來源、授權、fixture 與 missing-data 語意，未驗證項目維持原狀態。" : "Report install, unit tests, typecheck, build, real WebGL/browser behavior, and data readback separately; a map load or HTTP 200 is not shader verification. Record the source commit SHA, retain the root LICENSE, provenance, fixture, and missing-data semantics, and do not upgrade unverified claims.";
+  const commonEvidence = language === "zh-TW" ? "把目標資料放在獨立的應用資料模組，透過元件 API 注入；不得把資料寫進 renderer。分別回報 install、unit test、typecheck、build、真實 WebGL/browser 與資料 readback；map load 或 HTTP 200 不算 shader 驗證。記錄使用的來源 commit SHA，保留根 LICENSE、來源、授權、fixture 與 missing-data 語意，未驗證項目維持原狀態。" : "Put target data in a separate application-owned module and inject it through the component API; do not embed data in the renderer. Report install, unit tests, typecheck, build, real WebGL/browser behavior, and data readback separately; a map load or HTTP 200 is not shader verification. Record the source commit SHA, retain the root LICENSE, provenance, fixture, and missing-data semantics, and do not upgrade unverified claims.";
   if (nativeScenes.has(selected)) {
     const usingMapLibre = engine === "free";
     const engineName = usingMapLibre ? "MapLibre GL JS 5.24.0" : "Mapbox GL JS 3.30.0";
