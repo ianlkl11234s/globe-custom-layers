@@ -7,7 +7,7 @@
     "three": "0.172.0",
     "node": "23.10.0"
   },
-  "verificationNote": "Pinned examples passed isolated installation, typecheck, math tests and build. Examples 09 and 10 were also reproduced locally with a supplied public token against real Mapbox tiles on 2026-09-06. Recorded screenshots retain their historical provenance; see docs/demo-implementation-plan.md for the exact browser scope and remaining gates.",
+  "verificationNote": "Pinned examples passed isolated installation, typecheck, math tests and build. Examples 09 and 10 were reproduced with a supplied public token against real Mapbox tiles locally and through the production atlas on 2026-09-06. Recorded screenshots retain their historical provenance; see docs/demo-implementation-plan.md for the exact browser scope and remaining gates.",
   "historicalRecipeInvestigations": {
     "mapbox-gl": "3.18.1",
     "maplibre-gl": "5.24.0"
