@@ -15,8 +15,8 @@ test("atlas navigation leads with element names and keeps data as subtitles", as
   const area = html.indexOf('data-scene="nativeAreas"');
   const custom = html.indexOf('data-scene="points"');
   const satellite = html.indexOf('data-scene="satelliteOrbits"');
-  const adiz = html.indexOf('data-scene="adizWalls"');
-  assert.ok(point >= 0 && point < line && line < area && area < custom && custom < satellite && satellite < adiz);
+  const boundary = html.indexOf('data-scene="boundaryWalls"');
+  assert.ok(point >= 0 && point < line && line < area && area < custom && custom < satellite && satellite < boundary);
   assert.match(html, /<html lang="en">/);
   assert.match(app, /let language = "en";/);
   assert.match(html, /data-i18n="nativeFoundations"/);
@@ -49,7 +49,7 @@ test("satellite orbit and vertical boundary wall scenes keep component and fixtu
   const free = await read("freeGlobe.js");
   const special = await read("specialScenes.ts");
   const manifest = JSON.parse(await readFile(new URL("../../examples/manifest.json", import.meta.url), "utf8"));
-  for (const scene of ["satelliteOrbits", "adizWalls"]) {
+  for (const scene of ["satelliteOrbits", "boundaryWalls"]) {
     assert.ok(manifest.siteScenes.some((entry) => entry.sceneId === scene));
     assert.match(copy, new RegExp(scene));
     assert.match(free, new RegExp(scene));
@@ -59,11 +59,11 @@ test("satellite orbit and vertical boundary wall scenes keep component and fixtu
   assert.match(app, /TARGET REPOSITORY OR WORKSPACE/);
   assert.match(app, /Replace the demonstration fixture/);
   assert.match(app, /real WebGL\/browser behavior/);
-  assert.equal(manifest.siteScenes.find((scene) => scene.sceneId === "adizWalls").component, "vertical boundary walls");
+  assert.equal(manifest.siteScenes.find((scene) => scene.sceneId === "boundaryWalls").component, "vertical boundary walls");
   assert.match(copy, /不是即時 TLE/);
   assert.match(copy, /ADIZ 不等於主權領空/);
-  assert.match(copy, /"adizWalls": "立體邊界牆"/);
-  assert.match(copy, /"adizWalls": "Vertical boundary walls"/);
+  assert.match(copy, /"boundaryWalls": "垂直邊界牆"/);
+  assert.match(copy, /"boundaryWalls": "Vertical boundary walls"/);
   assert.match(copy, /台灣 ADIZ・示意資料/);
   assert.match(copy, /display height, not a published ceiling/);
 });
@@ -112,6 +112,7 @@ test("the medium-width element rail remains scrollable without trapping the mobi
 test("free globe keeps scene-specific native controls and visible glow swatches", async () => {
   const source = await read("freeGlobe.js");
   for (const id of ["free-basemap", "free-point-size", "free-point-opacity", "free-core-boost", "free-glow-palette"]) assert.match(source, new RegExp(id));
+  for (const id of ["free-orbit-altitude", "free-orbit-speed", "free-boundary-wall-height"]) assert.match(source, new RegExp(id));
   for (const palette of ["spectrum", "solar", "aurora", "plasma", "ice"]) assert.match(source, new RegExp(palette));
   assert.match(source, /glow-palette-choice/);
   assert.match(source, /setArcPalette/);
@@ -121,6 +122,10 @@ test("free globe keeps scene-specific native controls and visible glow swatches"
   assert.match(source, /scene === 'nativePoints' \? 'visible' : 'none'/);
   assert.match(source, /scene === 'nativeLines' \? 'visible' : 'none'/);
   assert.match(source, /scene === 'nativeAreas' \? 'visible' : 'none'/);
+  assert.match(source, /scene !== 'satelliteOrbits'/);
+  assert.match(source, /scene !== 'boundaryWalls'/);
+  assert.match(source, /orbitAltitudeScale: options\.orbitAltitudeScale/);
+  assert.match(source, /boundaryWallHeightKm: options\.boundaryWallHeightKm/);
 });
 
 test("screenshot-aligned defaults stay wired in the free controller", async () => {
@@ -130,6 +135,7 @@ test("screenshot-aligned defaults stay wired in the free controller", async () =
   assert.match(source, /pointSize: \.6, pointOpacity: \.65, coreBoost: \.85, glowPalette: 'plasma'/);
   assert.match(source, /arcPalette: 'plasma'/);
   assert.match(source, /height: \.028, segments: 53/);
+  assert.match(source, /orbitSpeed: 1, orbitAltitudeScale: 1, boundaryWallHeightKm: 500/);
 });
 
 test("native demonstrations preserve source meaning and uncertainty", async () => {

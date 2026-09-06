@@ -26,7 +26,7 @@ const nativeCameras = {
   nativeAreas: { center: [12, 52], zoom: 2.55 },
 };
 const isNativeScene = value => value === 'nativePoints' || value === 'nativeLines' || value === 'nativeAreas';
-const isSpecialScene = value => value === 'satelliteOrbits' || value === 'adizWalls';
+const isSpecialScene = value => value === 'satelliteOrbits' || value === 'boundaryWalls';
 function airportPointFixture(airports) {
   return { type: 'FeatureCollection', features: airports.map(([ident, name, lon, lat]) => ({
     type: 'Feature',
@@ -44,7 +44,7 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
   let map = null, layer = null, scene = 'nativePoints', theme = 'light', language = 'zh-TW', basemap = 'blueprint';
   let wanted = false, generation = 0, assets = null, camera = null, lastInfo = {}, lastHudAt = 0;
   let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const options = { height: .028, segments: 53, paused, activeCount: 600, speed: .3, opacity: .7, palette: 'warm', pointSize: .6, pointOpacity: .65, coreBoost: .85, glowPalette: 'plasma', arcPalette: 'plasma', nativePointSize: 4, nativePointOpacity: .82, nativePointPalette: 'spectrum', nativeLineWidth: 2.5, nativeLineOpacity: .84, nativeLineColor: 'cyan', nativeAreaOpacity: .72, nativeAreaPalette: 'blue', nativeAreaBorderWidth: .7 };
+  const options = { height: .028, segments: 53, paused, orbitSpeed: 1, orbitAltitudeScale: 1, boundaryWallHeightKm: 500, activeCount: 600, speed: .3, opacity: .7, palette: 'warm', pointSize: .6, pointOpacity: .65, coreBoost: .85, glowPalette: 'plasma', arcPalette: 'plasma', nativePointSize: 4, nativePointOpacity: .82, nativePointPalette: 'spectrum', nativeLineWidth: 2.5, nativeLineOpacity: .84, nativeLineColor: 'cyan', nativeAreaOpacity: .72, nativeAreaPalette: 'blue', nativeAreaBorderWidth: .7 };
   const hud = document.createElement('details');
   hud.className = 'free-custom-hud';
   hud.open = false;
@@ -52,23 +52,29 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
   const stats = document.createElement('p'); stats.className = 'custom-stats';
   const controls = document.createElement('div');
   const heightLabel = document.createElement('label'), segmentsLabel = document.createElement('label');
+  const orbitAltitudeLabel = document.createElement('label'), orbitSpeedLabel = document.createElement('label'), boundaryWallHeightLabel = document.createElement('label');
   const activeCountLabel = document.createElement('label'), speedLabel = document.createElement('label'), opacityLabel = document.createElement('label'), paletteLabel = document.createElement('label');
   const pointSizeLabel = document.createElement('label'), pointOpacityLabel = document.createElement('label'), coreBoostLabel = document.createElement('label'), glowPaletteLabel = document.createElement('fieldset'), basemapLabel = document.createElement('label');
   const nativePointSizeLabel = document.createElement('label'), nativePointOpacityLabel = document.createElement('label'), nativePointPaletteLabel = document.createElement('label');
   const nativeLineWidthLabel = document.createElement('label'), nativeLineOpacityLabel = document.createElement('label'), nativeLineColorLabel = document.createElement('label');
   const nativeAreaOpacityLabel = document.createElement('label'), nativeAreaPaletteLabel = document.createElement('label'), nativeAreaBorderWidthLabel = document.createElement('label');
   const heightText = document.createElement('span'), segmentsText = document.createElement('span');
+  const orbitAltitudeText = document.createElement('span'), orbitSpeedText = document.createElement('span'), boundaryWallHeightText = document.createElement('span');
   const activeCountText = document.createElement('span'), speedText = document.createElement('span'), opacityText = document.createElement('span'), paletteText = document.createElement('span'), pointSizeText = document.createElement('span'), pointOpacityText = document.createElement('span'), coreBoostText = document.createElement('span'), glowPaletteText = document.createElement('span'), basemapText = document.createElement('span');
   const nativePointSizeText = document.createElement('span'), nativePointOpacityText = document.createElement('span'), nativePointPaletteText = document.createElement('span');
   const nativeLineWidthText = document.createElement('span'), nativeLineOpacityText = document.createElement('span'), nativeLineColorText = document.createElement('span');
   const nativeAreaOpacityText = document.createElement('span'), nativeAreaPaletteText = document.createElement('span'), nativeAreaBorderWidthText = document.createElement('span');
   const height = document.createElement('input'), segments = document.createElement('input');
+  const orbitAltitude = document.createElement('input'), orbitSpeed = document.createElement('input'), boundaryWallHeight = document.createElement('input');
   const activeCount = document.createElement('input'), speed = document.createElement('input'), opacity = document.createElement('input'), palette = document.createElement('select'), pointSize = document.createElement('input'), pointOpacity = document.createElement('input'), coreBoost = document.createElement('input'), glowPaletteChoices = document.createElement('div'), basemapSelect = document.createElement('select');
   const nativePointSize = document.createElement('input'), nativePointOpacity = document.createElement('input'), nativePointPalette = document.createElement('select');
   const nativeLineWidth = document.createElement('input'), nativeLineOpacity = document.createElement('input'), nativeLineColor = document.createElement('select');
   const nativeAreaOpacity = document.createElement('input'), nativeAreaPalette = document.createElement('select'), nativeAreaBorderWidth = document.createElement('input');
   Object.assign(height, { type: 'range', min: '0', max: '.08', step: '.002', value: '.028' });
   Object.assign(segments, { type: 'range', min: '2', max: '128', step: '1', value: '53' });
+  Object.assign(orbitAltitude, { type: 'range', min: '.5', max: '3', step: '.1', value: '1' });
+  Object.assign(orbitSpeed, { type: 'range', min: '.1', max: '4', step: '.1', value: '1' });
+  Object.assign(boundaryWallHeight, { type: 'range', min: '50', max: '1500', step: '50', value: '500' });
   Object.assign(activeCount, { type: 'range', min: '100', max: '12000', step: '100', value: '600' });
   Object.assign(speed, { type: 'range', min: '.1', max: '4', step: '.1', value: '.3' });
   Object.assign(opacity, { type: 'range', min: '.1', max: '1', step: '.05', value: '.7' });
@@ -77,6 +83,7 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
   Object.assign(nativeLineWidth, { type: 'range', min: '.5', max: '8', step: '.5', value: '2.5' }); Object.assign(nativeLineOpacity, { type: 'range', min: '.1', max: '1', step: '.05', value: '.84' });
   Object.assign(nativeAreaOpacity, { type: 'range', min: '.1', max: '1', step: '.05', value: '.72' }); Object.assign(nativeAreaBorderWidth, { type: 'range', min: '0', max: '3', step: '.25', value: '.7' });
   height.id = 'free-arc-height'; segments.id = 'free-arc-segments';
+  orbitAltitude.id = 'free-orbit-altitude'; orbitSpeed.id = 'free-orbit-speed'; boundaryWallHeight.id = 'free-boundary-wall-height';
   activeCount.id = 'free-track-count'; speed.id = 'free-track-speed'; opacity.id = 'free-track-opacity'; palette.id = 'free-track-palette';
   pointSize.id = 'free-point-size'; pointOpacity.id = 'free-point-opacity'; coreBoost.id = 'free-core-boost'; glowPaletteChoices.id = 'free-glow-palette'; glowPaletteChoices.className = 'glow-palette-choices'; basemapSelect.id = 'free-basemap';
   nativePointSize.id = 'free-native-point-size'; nativePointOpacity.id = 'free-native-point-opacity'; nativePointPalette.id = 'free-native-point-palette';
@@ -94,6 +101,7 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
     button.style.setProperty('--swatch-a', glowPalettes[value][0]); button.style.setProperty('--swatch-b', glowPalettes[value][1]); glowPaletteChoices.append(button); return button;
   });
   heightLabel.append(heightText, height); segmentsLabel.append(segmentsText, segments);
+  orbitAltitudeLabel.append(orbitAltitudeText, orbitAltitude); orbitSpeedLabel.append(orbitSpeedText, orbitSpeed); boundaryWallHeightLabel.append(boundaryWallHeightText, boundaryWallHeight);
   activeCountLabel.append(activeCountText, activeCount); speedLabel.append(speedText, speed); opacityLabel.append(opacityText, opacity); paletteLabel.append(paletteText, palette);
   pointSizeLabel.append(pointSizeText, pointSize); pointOpacityLabel.append(pointOpacityText, pointOpacity); coreBoostLabel.append(coreBoostText, coreBoost); glowPaletteLabel.append(glowPaletteText, glowPaletteChoices); basemapLabel.append(basemapText, basemapSelect);
   nativePointSizeLabel.append(nativePointSizeText, nativePointSize); nativePointOpacityLabel.append(nativePointOpacityText, nativePointOpacity); nativePointPaletteLabel.append(nativePointPaletteText, nativePointPalette);
@@ -101,10 +109,10 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
   nativeAreaOpacityLabel.append(nativeAreaOpacityText, nativeAreaOpacity); nativeAreaPaletteLabel.append(nativeAreaPaletteText, nativeAreaPalette); nativeAreaBorderWidthLabel.append(nativeAreaBorderWidthText, nativeAreaBorderWidth);
   const play = document.createElement('button'); play.type = 'button'; play.id = 'free-playback';
   controls.className = 'custom-controls';
-  controls.append(basemapLabel, heightLabel, segmentsLabel, pointSizeLabel, pointOpacityLabel, coreBoostLabel, glowPaletteLabel, activeCountLabel, speedLabel, opacityLabel, paletteLabel, nativePointSizeLabel, nativePointOpacityLabel, nativePointPaletteLabel, nativeLineWidthLabel, nativeLineOpacityLabel, nativeLineColorLabel, nativeAreaOpacityLabel, nativeAreaPaletteLabel, nativeAreaBorderWidthLabel, play); hud.append(summary, stats, controls);
+  controls.append(basemapLabel, heightLabel, segmentsLabel, orbitAltitudeLabel, orbitSpeedLabel, boundaryWallHeightLabel, pointSizeLabel, pointOpacityLabel, coreBoostLabel, glowPaletteLabel, activeCountLabel, speedLabel, opacityLabel, paletteLabel, nativePointSizeLabel, nativePointOpacityLabel, nativePointPaletteLabel, nativeLineWidthLabel, nativeLineOpacityLabel, nativeLineColorLabel, nativeAreaOpacityLabel, nativeAreaPaletteLabel, nativeAreaBorderWidthLabel, play); hud.append(summary, stats, controls);
   function announce(state, reason) {
     container.dataset.state = state;
-    const featureCount = isNativeScene(scene) ? assets?.[scene]?.features.length : scene === 'satelliteOrbits' ? 3 : scene === 'adizWalls' ? 1 : undefined;
+    const featureCount = isNativeScene(scene) ? assets?.[scene]?.features.length : scene === 'satelliteOrbits' ? 3 : scene === 'boundaryWalls' ? 1 : undefined;
     onStatus({ state, engine: isNativeScene(scene) ? 'maplibre-native' : 'maplibre-custom', airportCount: isSpecialScene(scene) ? undefined : assets?.airports.airports.length, featureCount, dataKind: scene, ...(reason ? { reason } : {}) });
   }
   function renderHud() {
@@ -113,6 +121,9 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
     summary.textContent = t(isNativeScene(scene) ? 'maplibreLayerControls' : 'maplibreControls');
     heightText.textContent = `${t('arcHeight')} · ${options.height.toFixed(3)}`;
     segmentsText.textContent = `${t('samplesPerArc')} · ${options.segments}`;
+    orbitAltitudeText.textContent = `${t('orbitAltitudeScale')} · ${options.orbitAltitudeScale.toFixed(1)}×`;
+    orbitSpeedText.textContent = `${t('orbitSpeed')} · ${options.orbitSpeed.toFixed(1)}×`;
+    boundaryWallHeightText.textContent = `${t('boundaryWallHeight')} · ${options.boundaryWallHeightKm.toFixed(0)} km`;
     activeCountText.textContent = `${t('activeCount')} · ${options.activeCount.toLocaleString()}`;
     speedText.textContent = `${t('trackSpeed')} · ${options.speed.toFixed(1)}×`;
     opacityText.textContent = `${t('trackOpacity')} · ${options.opacity.toFixed(2)}`;
@@ -137,6 +148,8 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
     [...palette.options].forEach(option => { option.textContent = t(`palette${option.value[0].toUpperCase()}${option.value.slice(1)}`); });
     palette.value = options.palette;
     heightLabel.hidden = segmentsLabel.hidden = scene !== 'arcs';
+    orbitAltitudeLabel.hidden = orbitSpeedLabel.hidden = scene !== 'satelliteOrbits';
+    boundaryWallHeightLabel.hidden = scene !== 'boundaryWalls';
     pointSizeLabel.hidden = pointOpacityLabel.hidden = coreBoostLabel.hidden = scene !== 'points';
     glowPaletteLabel.hidden = scene !== 'points' && scene !== 'arcs';
     activeCountLabel.hidden = speedLabel.hidden = opacityLabel.hidden = paletteLabel.hidden = scene !== 'tracks';
@@ -156,11 +169,14 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
       scene === 'arcs' ? `${info.arcCount ?? '—'} ${zh ? '條弧線' : 'arcs'} · ${info.vertexCount ?? '—'} vertices` : '',
       scene === 'tracks' ? `${info.activeCount ?? options.activeCount} ${t('trackObjects')} · ${info.drawCalls ?? '—'} ${t('drawCalls')}` : '',
       scene === 'satelliteOrbits' ? `${info.orbitCount ?? 3} ${zh ? '條示意環軌' : 'schematic orbital rings'} · ${info.satelliteCount ?? 3} ${zh ? '個移動標記' : 'moving markers'}` : '',
-      scene === 'adizWalls' ? `${info.wallEdges ?? 5} ${zh ? '面直立牆' : 'vertical wall faces'} · ${info.displayHeightKm ?? 500} km ${zh ? '示意高度' : 'display height'}` : '',
+      scene === 'boundaryWalls' ? `${info.wallSegments ?? 5} ${zh ? '段垂直牆面' : 'vertical wall segments'} · ${info.displayHeightKm ?? 500} km ${zh ? '示意高度' : 'display height'}` : '',
     ].filter(Boolean).join('\n');
   }
   height.addEventListener('input', () => { options.height = +height.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
   segments.addEventListener('input', () => { options.segments = +segments.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
+  orbitAltitude.addEventListener('input', () => { options.orbitAltitudeScale = +orbitAltitude.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
+  orbitSpeed.addEventListener('input', () => { options.orbitSpeed = +orbitSpeed.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
+  boundaryWallHeight.addEventListener('input', () => { options.boundaryWallHeightKm = +boundaryWallHeight.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
   activeCount.addEventListener('input', () => { options.activeCount = +activeCount.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
   speed.addEventListener('input', () => { options.speed = +speed.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
   opacity.addEventListener('input', () => { options.opacity = +opacity.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
@@ -213,7 +229,7 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
     if (layer && map.getLayer(layer.id)) map.removeLayer(layer.id);
     lastInfo = {};
     applyNativeControls();
-    const view = isNativeScene(scene) ? nativeCameras[scene] : scene === 'adizWalls' ? { center: [120.2, 25], zoom: 3.35 } : scene === 'satelliteOrbits' ? { center: [121, 24], zoom: 1.05 } : { center: [20, 20], zoom: Math.log2(Math.max(160, Math.min(container.clientWidth, container.clientHeight) * .82) / (512 / Math.PI)) };
+    const view = isNativeScene(scene) ? nativeCameras[scene] : scene === 'boundaryWalls' ? { center: [120.2, 25], zoom: 3.35 } : scene === 'satelliteOrbits' ? { center: [121, 24], zoom: 1.05 } : { center: [20, 20], zoom: Math.log2(Math.max(160, Math.min(container.clientWidth, container.clientHeight) * .82) / (512 / Math.PI)) };
     map.easeTo({ center: view.center, zoom: view.zoom, duration: 550 });
     if (isNativeScene(scene)) { renderHud(); announce('ready'); return; }
     const sceneOptions = scene === 'points' ? options : scene === 'tracks' ? options : { ...options, opacity: .9 };
@@ -222,9 +238,9 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
       if (performance.now() - lastHudAt > 250) { lastHudAt = performance.now(); renderHud(); }
     };
     layer = isSpecialScene(scene)
-      ? createSpecialLayer(scene, { theme, adizHeightKm: 500, onFrameInfo })
+      ? createSpecialLayer(scene, { theme, boundaryWallHeightKm: options.boundaryWallHeightKm, onFrameInfo })
       : createCustomLayer(scene, { theme, airports: assets.airports, ...sceneOptions, onFrameInfo });
-    if (scene === 'satelliteOrbits') layer.setOptions({ paused });
+    if (scene === 'satelliteOrbits') layer.setOptions({ paused, orbitSpeed: options.orbitSpeed, orbitAltitudeScale: options.orbitAltitudeScale });
     map.addLayer(layer); renderHud(); announce('ready');
   }
   function applyNativeControls() {

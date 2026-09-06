@@ -75,10 +75,10 @@
       "mapLibreImplementation": "site/specialScenes.ts",
       "requiredFiles": {
         "mapbox": ["examples/09-satellite-orbits/", "LICENSE"],
-        "maplibre": ["site/specialScenes.ts", "examples/09-satellite-orbits/src/orbitMath.ts", "LICENSE"]
+        "maplibre": ["site/specialScenes.ts", "examples/09-satellite-orbits/src/orbitMath.ts", "examples/09-satellite-orbits/src/orbitFixture.ts", "LICENSE"]
       },
       "inputContract": {
-        "accepted": ["schematic circular-orbit definitions", "pre-sampled positions with timestamp, longitude, latitude, and altitudeMeters"],
+        "accepted": ["schematic circular-orbit definitions", "closed pre-sampled paths with longitudeDeg, latitudeDeg, altitudeMeters, and an optional satelliteAt(simSec) marker provider"],
         "coordinateOrder": "longitude, latitude",
         "altitudeUnit": "metres at the renderer boundary",
         "missingData": "Reject non-finite coordinates or altitude; do not coerce missing altitude to the Earth surface.",
@@ -90,7 +90,7 @@
       }
     },
     {
-      "sceneId": "adizWalls",
+      "sceneId": "boundaryWalls",
       "exampleId": "10-adiz-walls",
       "kind": "custom",
       "component": "vertical boundary walls",
@@ -98,7 +98,7 @@
       "mapLibreImplementation": "site/specialScenes.ts",
       "requiredFiles": {
         "mapbox": ["examples/10-adiz-walls/", "LICENSE"],
-        "maplibre": ["site/specialScenes.ts", "examples/10-adiz-walls/src/wallGeometry.ts", "LICENSE"]
+        "maplibre": ["site/specialScenes.ts", "examples/10-adiz-walls/src/wallGeometry.ts", "examples/10-adiz-walls/src/adizBoundary.ts", "LICENSE"]
       },
       "inputContract": {
         "accepted": ["GeoJSON Polygon", "GeoJSON MultiPolygon"],
@@ -832,7 +832,7 @@
       "readFirst": "docs/01-hugging-the-globe/mapbox.md",
       "implements": ["docs/01-hugging-the-globe/mapbox.md"],
       "status": "unverified",
-      "tests": 9,
+      "tests": 13,
       "screenshot": "examples/09-satellite-orbits/screenshots/schematic.svg",
       "screenshotScope": "Labelled schematic illustration; not browser or Mapbox service evidence.",
       "usesApis": ["CustomLayerInterface", "THREE.Line", "THREE.Points", "projectionToMercatorMatrix"],
@@ -872,6 +872,6 @@
   ],
   "totals": {
     "examples": 13,
-    "tests": 323
+    "tests": 327
   }
 }
