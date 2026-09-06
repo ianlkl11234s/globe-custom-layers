@@ -13,8 +13,6 @@
   .atlas-layout { height: auto !important; grid-template-rows: minmax(620px, 75vh) auto !important; }
   .topbar-meta { display: none; }
   .top-actions { margin-left: auto; }
-  #scene-label { font-size: 10px; letter-spacing: .04em; }
-  .engine-switch button { padding-inline: 8px; font-size: 10px; }
 }
 @media (max-width: 720px) {
   .atlas-layout { grid-template-rows: auto minmax(600px, 76svh) auto !important; }
@@ -598,6 +596,35 @@ input {
   }
   .inspector-pane pre {
     max-height: 220px;
+  }
+}
+@media (min-width: 821px) and (max-width: 1080px) {
+  #scene-label {
+    font-size: 10px;
+    letter-spacing: .04em;
+  }
+  .engine-switch button {
+    padding-inline: 8px;
+    font-size: 10px;
+  }
+}
+@media (min-width: 721px) and (max-width: 820px) {
+  .map-toolbar {
+    display: block;
+    min-height: 78px;
+  }
+  #scene-label {
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .engine-switch {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .engine-switch button {
+    flex: 1;
+    padding-inline: 8px;
+    font-size: 10px;
   }
 }
 @media (max-width: 720px) {

@@ -61,11 +61,13 @@ test("site uses the self-hosted IBM Plex family for Latin, Traditional Chinese, 
   for (const face of ["IBMPlexSansTC-Regular", "IBMPlexSansTC-Medium", "IBMPlexSansTC-SemiBold", "IBMPlexSans-Regular", "IBMPlexSans-Medium", "IBMPlexSans-SemiBold", "IBMPlexMono-Regular", "IBMPlexMono-Medium"]) assert.match(build, new RegExp(face));
 });
 
-test("long example titles do not push the engine switch onto another desktop row", async () => {
+test("long example titles use stable toolbar layouts at every breakpoint", async () => {
   const styles = await read("styles.css");
   assert.match(styles, /\.map-toolbar \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/);
   assert.match(styles, /\.map-toolbar > div:first-child \{[\s\S]*?min-width: 0;/);
   assert.match(styles, /#scene-label \{[\s\S]*?text-overflow: ellipsis;[\s\S]*?white-space: nowrap;/);
+  assert.match(styles, /@media \(min-width: 821px\) and \(max-width: 1080px\)[\s\S]*?#scene-label \{[\s\S]*?font-size: 10px;/);
+  assert.match(styles, /@media \(min-width: 721px\) and \(max-width: 820px\)[\s\S]*?\.map-toolbar \{[\s\S]*?display: block;[\s\S]*?\.engine-switch \{[\s\S]*?width: 100%;/);
   assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.map-toolbar \{[\s\S]*?display: block;/);
 });
 
