@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Taiwan ADIZ · schematic wall</title>
+    <title>Vertical boundary walls · Taiwan fixture</title>
     <style>
       :root { color: #e7e5dc; background: #07131c; font-family: Georgia, "Noto Serif TC", serif; }
       body, #map { margin: 0; width: 100vw; height: 100vh; overflow: hidden; }
@@ -21,14 +21,14 @@
   <body>
     <div id="map"></div>
     <aside id="hud">
-      <h1>TAIWAN ADIZ / WALL</h1>
-      <p>直立圍界示範：不是平面 fill。</p>
-      <p class="warning"><strong>ADIZ 並非主權領空。</strong> 此輪廓為 illustrative / schematic boundary，非 AIP 精確邊界，也不適合作為航行、法律或作戰判讀。</p>
+      <h1>VERTICAL BOUNDARY WALLS</h1>
+      <p>Reusable side-wall component, not a flat fill. This page injects a Taiwan ADIZ schematic fixture.</p>
+      <p class="warning"><strong>An ADIZ is not sovereign airspace.</strong> This illustrative schematic is not an AIP-accurate boundary and must not support navigation, legal, or operational decisions.</p>
       <label for="height">SCHEMATIC DISPLAY HEIGHT · <span id="height-value"></span> km</label>
       <input id="height" type="range" min="80" max="600" value="280" step="10" />
-      <p>高度只為視覺呈現；來源未提供可驗證 ceiling，故不把 unknown 當作 0 或真實上限。</p>
+      <p>Height is visual only. The fixture has no verified ceiling, so unknown is not presented as zero or an operational limit.</p>
     </aside>
-    <div id="token-warning">需要自己的 Mapbox token。<br />複製 <code>.env.example</code> 為 <code>.env</code>，填入 <code>VITE_MAPBOX_TOKEN</code>。</div>
+    <div id="token-warning">A public Mapbox token is required.<br />Copy <code>.env.example</code> to <code>.env</code> and set <code>VITE_MAPBOX_TOKEN</code>.</div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -855,7 +855,7 @@
       "readFirst": "docs/01-hugging-the-globe/mapbox.md",
       "implements": ["docs/01-hugging-the-globe/mapbox.md"],
       "status": "unverified",
-      "tests": 9,
+      "tests": 20,
       "screenshot": "examples/10-adiz-walls/screenshots/schematic.svg",
       "screenshotScope": "Labelled schematic illustration; not browser, legal-boundary or Mapbox service evidence.",
       "usesApis": ["CustomLayerInterface", "THREE.Mesh", "projectionToMercatorMatrix"],
@@ -872,6 +872,6 @@
   ],
   "totals": {
     "examples": 13,
-    "tests": 312
+    "tests": 323
   }
 }
