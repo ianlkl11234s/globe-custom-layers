@@ -26,6 +26,7 @@ RUN npm ci --prefix site \
 COPY site/index.html site/styles.css site/app.js site/i18n.js site/bridgeState.js ./site/
 COPY site/freeGlobe.js site/nativeStyles.js site/mapboxMathCompat.ts site/maplibreCustom.ts ./site/
 COPY site/land.json site/airports.json ./site/
+COPY site/assets ./site/assets
 COPY site/data ./site/data
 COPY site/scripts/build.mjs ./site/scripts/build.mjs
 COPY examples/00-native-vs-custom/index.html examples/00-native-vs-custom/tsconfig.json examples/00-native-vs-custom/vite.config.ts ./examples/00-native-vs-custom/

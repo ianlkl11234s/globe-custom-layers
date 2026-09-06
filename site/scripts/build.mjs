@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { tmpdir } from "node:os";
@@ -17,6 +17,11 @@ const examples = [
   ["05-mass-trajectories", "tracks-globe.png"],
 ];
 const priorToken = process.env.VITE_MAPBOX_TOKEN;
+const fontFaces = [
+  ["@ibm/plex-sans-tc/fonts/split/woff2/hinted", ["IBMPlexSansTC-Regular", "IBMPlexSansTC-Medium", "IBMPlexSansTC-SemiBold"]],
+  ["@ibm/plex-sans/fonts/split/woff2", ["IBMPlexSans-Regular", "IBMPlexSans-Medium", "IBMPlexSans-SemiBold"]],
+  ["@ibm/plex-mono/fonts/split/woff2", ["IBMPlexMono-Regular", "IBMPlexMono-Medium"]],
+];
 
 try {
   // Empty process env plus an empty envDir prevents a local example .env from
@@ -32,10 +37,30 @@ try {
     cp(join(siteRoot, "bridgeState.js"), join(outputRoot, "bridgeState.js")),
     cp(join(siteRoot, "land.json"), join(outputRoot, "land.json")),
     cp(join(siteRoot, "airports.json"), join(outputRoot, "airports.json")),
+    cp(join(siteRoot, "assets"), join(outputRoot, "assets"), { recursive: true }),
     cp(join(siteRoot, "data"), join(outputRoot, "data"), { recursive: true }),
     mkdir(join(outputRoot, "previews"), { recursive: true }),
   ]);
   await mkdir(join(outputRoot, "vendor"), { recursive: true });
+  const fontOutput = join(outputRoot, "fonts");
+  await mkdir(fontOutput, { recursive: true });
+  let fontCss = "/* IBM Plex OFL-1.1 · generated from pinned npm packages */\n";
+  for (const [packagePath, faces] of fontFaces) {
+    const sourceRoot = join(siteRoot, "node_modules", packagePath);
+    const entries = await readdir(sourceRoot);
+    for (const face of faces) {
+      const css = await readFile(join(sourceRoot, `${face}.css`), "utf8");
+      fontCss += `${css.replaceAll("font-style: normal;", "font-style: normal;\n\tfont-display: swap;")}\n`;
+      const files = entries.filter((name) => name.startsWith(`${face}-`) && name.endsWith(".woff2"));
+      await Promise.all(files.map((name) => cp(join(sourceRoot, name), join(fontOutput, name))));
+    }
+  }
+  await writeFile(join(fontOutput, "plex.css"), fontCss);
+  await Promise.all([
+    cp(join(siteRoot, "node_modules/@ibm/plex-sans-tc/LICENSE.txt"), join(fontOutput, "IBMPlexSansTC-LICENSE.txt")),
+    cp(join(siteRoot, "node_modules/@ibm/plex-sans/LICENSE.txt"), join(fontOutput, "IBMPlexSans-LICENSE.txt")),
+    cp(join(siteRoot, "node_modules/@ibm/plex-mono/LICENSE.txt"), join(fontOutput, "IBMPlexMono-LICENSE.txt")),
+  ]);
   await Promise.all([
     cp(join(siteRoot, "node_modules/maplibre-gl/dist/maplibre-gl.js"), join(outputRoot, "vendor/maplibre-gl.js")),
     cp(join(siteRoot, "node_modules/maplibre-gl/dist/maplibre-gl.css"), join(outputRoot, "vendor/maplibre-gl.css")),
