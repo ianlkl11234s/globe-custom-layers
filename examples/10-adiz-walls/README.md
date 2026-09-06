@@ -1,6 +1,6 @@
 # 10 — Vertical boundary walls
 
-> Status: ⚠️ **Unverified in browser** — globe projection, antimeridian-safe wall geometry, GPU cleanup, typecheck and unit checks are included. Browser visual verification still requires a real Mapbox token.
+> Status: 🔬 **Reproduced locally** — a supplied public token loaded real Mapbox tiles on 2026-09-06. The open-top side walls rendered around the Taiwan-area fixture, responded to display-height changes, and remained visible at the high-zoom flat endpoint without new browser warnings or errors.
 
 ![Labelled schematic of the vertical boundary wall component using Taiwan ADIZ data](screenshots/schematic.svg)
 
@@ -50,4 +50,4 @@ npm test
 npm run build
 ```
 
-The unit tests prove multi-ring/multi-polygon side generation, closed final edges, antimeridian unwrapping, densification, invalid-input rejection, and disposal helper behavior. They cannot prove real WebGL appearance, Mapbox projection internals, or make the schematic fixture authoritative.
+The unit tests prove multi-ring/multi-polygon side generation, closed final edges, antimeridian unwrapping, densification, invalid-input rejection, GLSL ES 3.0 reserved-identifier safety, and disposal helper behavior. The real-token browser run caught and fixed a shader compile failure caused by using `flat` as an identifier, then verified the 280 km and 600 km display states plus the high-zoom flat endpoint. Because it used the bundled Taiwan-area fixture, non-fixture holes/antimeridian appearance and remove/re-add GPU lifecycle remain unit-tested rather than browser-proven. None of these checks makes the schematic fixture authoritative.

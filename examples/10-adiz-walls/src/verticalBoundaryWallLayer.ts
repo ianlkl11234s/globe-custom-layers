@@ -3,13 +3,13 @@ import * as THREE from "three";
 import { buildWallVertices, type BoundaryGeometry } from "./wallGeometry";
 
 const GLOBE_RADIUS = 8192 / (2 * Math.PI);
-const VERTEX_SHADER = /* glsl */ `
+export const WALL_VERTEX_SHADER = /* glsl */ `
   const float GLOBE_RADIUS = ${GLOBE_RADIUS.toFixed(12)};
   uniform mat4 uGlobeToMerc; uniform float uTransition; uniform vec3 uCameraEcef; uniform float uHeightMeters;
   attribute vec3 aDirection; attribute float aHeightRatio; attribute float aMercatorMeters; attribute float aEcefMeters;
   varying float vVisibility; varying float vHeight;
   void main() {
-    vec3 flat = position; flat.z += aHeightRatio * uHeightMeters * aMercatorMeters;
+    vec3 mercatorPosition = position; mercatorPosition.z += aHeightRatio * uHeightMeters * aMercatorMeters;
     vec3 ecef = aDirection * (GLOBE_RADIUS + aHeightRatio * uHeightMeters * aEcefMeters);
     vec3 segment = ecef - uCameraEcef;
     float nearest = clamp(dot(-uCameraEcef, segment) / max(dot(segment, segment), 0.000001), 0.0, 1.0);
@@ -17,7 +17,7 @@ const VERTEX_SHADER = /* glsl */ `
     vVisibility = mix(smoothstep(GLOBE_RADIUS - 0.005, GLOBE_RADIUS, clearance), 1.0, uTransition);
     vHeight = aHeightRatio;
     vec3 globe = (uGlobeToMerc * vec4(ecef, 1.0)).xyz;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(mix(globe, flat, uTransition), 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(mix(globe, mercatorPosition, uTransition), 1.0);
   }`;
 const FRAGMENT_SHADER = /* glsl */ `
   uniform float uOpacity; varying float vVisibility; varying float vHeight;
@@ -35,7 +35,7 @@ export function createVerticalBoundaryWallLayer(data: BoundaryGeometry, controls
     const vertices = buildWallVertices(data, controls.maxSegmentMeters); const position = new Float32Array(vertices.length * 3), direction = new Float32Array(vertices.length * 3), ratio = new Float32Array(vertices.length), mercatorMeters = new Float32Array(vertices.length), ecefMeters = new Float32Array(vertices.length);
     vertices.forEach((vertex, index) => { const mercator = mapboxgl.MercatorCoordinate.fromLngLat([vertex.lon, vertex.lat], 0), oneMeter = mapboxgl.MercatorCoordinate.fromLngLat([vertex.lon, vertex.lat], 1).z, longitude = vertex.lon * Math.PI / 180, latitude = vertex.lat * Math.PI / 180, cosLatitude = Math.cos(latitude); position.set([mercator.x, mercator.y, 0], index * 3); direction.set([cosLatitude * Math.sin(longitude), -Math.sin(latitude), cosLatitude * Math.cos(longitude)], index * 3); ratio[index] = vertex.heightRatio; mercatorMeters[index] = oneMeter; ecefMeters[index] = oneMeter * 8192 * cosLatitude; });
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute("position", new THREE.BufferAttribute(position, 3)); geometry.setAttribute("aDirection", new THREE.BufferAttribute(direction, 3)); geometry.setAttribute("aHeightRatio", new THREE.BufferAttribute(ratio, 1)); geometry.setAttribute("aMercatorMeters", new THREE.BufferAttribute(mercatorMeters, 1)); geometry.setAttribute("aEcefMeters", new THREE.BufferAttribute(ecefMeters, 1));
-    material = new THREE.ShaderMaterial({ vertexShader: VERTEX_SHADER, fragmentShader: FRAGMENT_SHADER, transparent: true, depthTest: false, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, uniforms: { uGlobeToMerc: { value: new THREE.Matrix4() }, uTransition: { value: 1 }, uCameraEcef: { value: new THREE.Vector3(0, 0, GLOBE_RADIUS * 2) }, uHeightMeters: { value: height() }, uOpacity: { value: controls.opacity ?? 0.82 } } });
+    material = new THREE.ShaderMaterial({ vertexShader: WALL_VERTEX_SHADER, fragmentShader: FRAGMENT_SHADER, transparent: true, depthTest: false, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, uniforms: { uGlobeToMerc: { value: new THREE.Matrix4() }, uTransition: { value: 1 }, uCameraEcef: { value: new THREE.Vector3(0, 0, GLOBE_RADIUS * 2) }, uHeightMeters: { value: height() }, uOpacity: { value: controls.opacity ?? 0.82 } } });
     mesh = new THREE.Mesh(geometry, material); mesh.frustumCulled = false; scene.add(mesh);
   }
   return { id: "vertical-boundary-wall", type: "custom", renderingMode: "3d",

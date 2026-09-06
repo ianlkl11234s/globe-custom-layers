@@ -7,7 +7,7 @@
     "three": "0.172.0",
     "node": "23.10.0"
   },
-  "verificationNote": "Pinned examples passed isolated installation, typecheck, math tests and build. Recorded screenshots retain their historical provenance. See docs/demo-implementation-plan.md for current browser checks and remaining gates.",
+  "verificationNote": "Pinned examples passed isolated installation, typecheck, math tests and build. Examples 09 and 10 were also reproduced locally with a supplied public token against real Mapbox tiles on 2026-09-06. Recorded screenshots retain their historical provenance; see docs/demo-implementation-plan.md for the exact browser scope and remaining gates.",
   "historicalRecipeInvestigations": {
     "mapbox-gl": "3.18.1",
     "maplibre-gl": "5.24.0"
@@ -831,7 +831,7 @@
       "settles": "How a complete inclined orbit differs from a two-point great-circle route or a surface trajectory.",
       "readFirst": "docs/01-hugging-the-globe/mapbox.md",
       "implements": ["docs/01-hugging-the-globe/mapbox.md"],
-      "status": "unverified",
+      "status": "reproduced",
       "tests": 13,
       "screenshot": "examples/09-satellite-orbits/screenshots/schematic.svg",
       "screenshotScope": "Labelled schematic illustration; not browser or Mapbox service evidence.",
@@ -854,8 +854,8 @@
       "settles": "How to turn a polygon boundary into globe-aware vertical side walls without implying a solid jurisdiction or measured ceiling.",
       "readFirst": "docs/01-hugging-the-globe/mapbox.md",
       "implements": ["docs/01-hugging-the-globe/mapbox.md"],
-      "status": "unverified",
-      "tests": 20,
+      "status": "reproduced",
+      "tests": 21,
       "screenshot": "examples/10-adiz-walls/screenshots/schematic.svg",
       "screenshotScope": "Labelled schematic illustration; not browser, legal-boundary or Mapbox service evidence.",
       "usesApis": ["CustomLayerInterface", "THREE.Mesh", "projectionToMercatorMatrix"],
@@ -872,6 +872,6 @@
   ],
   "totals": {
     "examples": 13,
-    "tests": 327
+    "tests": 328
   }
 }

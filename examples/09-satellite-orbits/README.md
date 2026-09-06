@@ -1,6 +1,6 @@
 # 09-satellite-orbits
 
-> Status: ⚠️ **Unverified in browser** — unit geometry checks, TypeScript, and build are provided; browser validation still requires a real Mapbox token.
+> Status: 🔬 **Reproduced locally** — a supplied public token loaded real Mapbox tiles on 2026-09-06. Three elevated rings, moving markers, controls, pause/resume and the high-zoom flat endpoint were exercised without browser warnings or errors.
 
 ![Labelled schematic of three elevated orbital rings](screenshots/schematic.svg)
 
@@ -29,4 +29,4 @@ npm run dev
 
 ## Checks
 
-`npm run test` checks closed/elevated/inclined fixture geometry, injected-data validation, Earth-ray occlusion, high-altitude horizon visibility, and antimeridian segmentation. `npm run typecheck` and `npm run build` are separate checks. The custom layer disables depth testing, resets shared WebGL state before and after render, and disposes all Three.js geometry/material/renderer resources in `onRemove`; remove/re-add rebuilds those resources safely.
+`npm run test` checks closed/elevated/inclined fixture geometry, injected-data validation, Earth-ray occlusion, high-altitude horizon visibility, and antimeridian segmentation. `npm run typecheck` and `npm run build` are separate checks. The real-token browser run changed altitude and speed, held identical frames while paused, changed again after resume, and retained a continuous ring at the high-zoom flat endpoint. It used the bundled fixture, so non-fixture antimeridian appearance and remove/re-add GPU lifecycle remain unit-tested rather than browser-proven. The custom layer disables depth testing, resets shared WebGL state before and after render, and disposes all Three.js geometry/material/renderer resources in `onRemove`; remove/re-add rebuilds those resources safely.
