@@ -61,6 +61,20 @@ test("site uses the self-hosted IBM Plex family for Latin, Traditional Chinese, 
   for (const face of ["IBMPlexSansTC-Regular", "IBMPlexSansTC-Medium", "IBMPlexSansTC-SemiBold", "IBMPlexSans-Regular", "IBMPlexSans-Medium", "IBMPlexSans-SemiBold", "IBMPlexMono-Regular", "IBMPlexMono-Medium"]) assert.match(build, new RegExp(face));
 });
 
+test("long example titles do not push the engine switch onto another desktop row", async () => {
+  const styles = await read("styles.css");
+  assert.match(styles, /\.map-toolbar \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/);
+  assert.match(styles, /\.map-toolbar > div:first-child \{[\s\S]*?min-width: 0;/);
+  assert.match(styles, /#scene-label \{[\s\S]*?text-overflow: ellipsis;[\s\S]*?white-space: nowrap;/);
+  assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.map-toolbar \{[\s\S]*?display: block;/);
+});
+
+test("the medium-width element rail remains scrollable without trapping the mobile page", async () => {
+  const styles = await read("styles.css");
+  assert.match(styles, /\.effects-panel \{[\s\S]*?min-height: 0;[\s\S]*?overflow-y: auto;[\s\S]*?scrollbar-gutter: stable;/);
+  assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.effects-panel \{[\s\S]*?overflow: visible;[\s\S]*?scrollbar-gutter: auto;/);
+});
+
 test("free globe keeps scene-specific native controls and visible glow swatches", async () => {
   const source = await read("freeGlobe.js");
   for (const id of ["free-basemap", "free-point-size", "free-point-opacity", "free-core-boost", "free-glow-palette"]) assert.match(source, new RegExp(id));

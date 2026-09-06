@@ -3,16 +3,18 @@
 }
 
 .scene-tab small { grid-column: 2; }
-.map-toolbar { flex-wrap: wrap; padding-bottom: 14px; }
+.map-toolbar { padding-bottom: 14px; }
 .engine-switch { flex-shrink: 0; }
 .gate-card { max-height: 100%; overflow: auto; }
-.map-reset { flex-basis: 100%; text-align: left; }
+.map-reset { grid-column: 1 / -1; text-align: left; }
 .globe-stage:has(#token-gate:not([hidden])) .zoom-controls { display: none; }
 
 @media (min-width: 721px) and (max-width: 1080px) {
   .atlas-layout { height: auto !important; grid-template-rows: minmax(620px, 75vh) auto !important; }
   .topbar-meta { display: none; }
   .top-actions { margin-left: auto; }
+  #scene-label { font-size: 10px; letter-spacing: .04em; }
+  .engine-switch button { padding-inline: 8px; font-size: 10px; }
 }
 @media (max-width: 720px) {
   .atlas-layout { grid-template-rows: auto minmax(600px, 76svh) auto !important; }
@@ -151,6 +153,9 @@ a {
 .effects-panel {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
   padding: 26px 16px;
   border-right: 1px solid var(--line);
 }
@@ -280,11 +285,19 @@ h3 {
   padding: 20px 20px 12px;
 }
 .map-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 18px;
   min-height: 50px;
+}
+.map-toolbar > div:first-child {
+  min-width: 0;
+}
+#scene-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .free-note {
   margin: 0 0 12px;
@@ -617,6 +630,8 @@ input {
   }
   .effects-panel {
     grid-row: 2;
+    overflow: visible;
+    scrollbar-gutter: auto;
     border: 0;
     border-top: 1px solid var(--line);
     padding: 18px 10px;
