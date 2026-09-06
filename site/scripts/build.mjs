@@ -15,6 +15,8 @@ const examples = [
   ["01-points-on-globe", "points-globe.png"],
   ["02-arcs-on-globe", "arcs-globe.png"],
   ["05-mass-trajectories", "tracks-globe.png"],
+  ["09-satellite-orbits", null],
+  ["10-adiz-walls", null],
 ];
 const priorToken = process.env.VITE_MAPBOX_TOKEN;
 const fontFaces = [

@@ -12,6 +12,8 @@ COPY examples/00-native-choropleth/package.json examples/00-native-choropleth/pa
 COPY examples/01-points-on-globe/package.json examples/01-points-on-globe/package-lock.json ./examples/01-points-on-globe/
 COPY examples/02-arcs-on-globe/package.json examples/02-arcs-on-globe/package-lock.json ./examples/02-arcs-on-globe/
 COPY examples/05-mass-trajectories/package.json examples/05-mass-trajectories/package-lock.json ./examples/05-mass-trajectories/
+COPY examples/09-satellite-orbits/package.json examples/09-satellite-orbits/package-lock.json ./examples/09-satellite-orbits/
+COPY examples/10-adiz-walls/package.json examples/10-adiz-walls/package-lock.json ./examples/10-adiz-walls/
 
 RUN npm ci --prefix site \
   && npm ci --prefix examples/00-native-vs-custom \
@@ -19,12 +21,14 @@ RUN npm ci --prefix site \
   && npm ci --prefix examples/00-native-choropleth \
   && npm ci --prefix examples/01-points-on-globe \
   && npm ci --prefix examples/02-arcs-on-globe \
-  && npm ci --prefix examples/05-mass-trajectories
+  && npm ci --prefix examples/05-mass-trajectories \
+  && npm ci --prefix examples/09-satellite-orbits \
+  && npm ci --prefix examples/10-adiz-walls
 
 # Explicit allowlist: neither local .env files nor unrelated cookbook examples
 # enter the build context image.
 COPY site/index.html site/styles.css site/app.js site/i18n.js site/bridgeState.js ./site/
-COPY site/freeGlobe.js site/nativeStyles.js site/mapboxMathCompat.ts site/maplibreCustom.ts ./site/
+COPY site/freeGlobe.js site/nativeStyles.js site/mapboxMathCompat.ts site/maplibreCustom.ts site/specialScenes.ts ./site/
 COPY site/land.json site/airports.json ./site/
 COPY site/assets ./site/assets
 COPY site/data ./site/data
@@ -50,6 +54,10 @@ COPY examples/02-arcs-on-globe/src ./examples/02-arcs-on-globe/src
 COPY examples/05-mass-trajectories/index.html examples/05-mass-trajectories/tsconfig.json examples/05-mass-trajectories/vite.config.ts ./examples/05-mass-trajectories/
 COPY examples/05-mass-trajectories/screenshots ./examples/05-mass-trajectories/screenshots
 COPY examples/05-mass-trajectories/src ./examples/05-mass-trajectories/src
+COPY examples/09-satellite-orbits/index.html examples/09-satellite-orbits/tsconfig.json examples/09-satellite-orbits/vite.config.ts ./examples/09-satellite-orbits/
+COPY examples/09-satellite-orbits/src ./examples/09-satellite-orbits/src
+COPY examples/10-adiz-walls/index.html examples/10-adiz-walls/tsconfig.json examples/10-adiz-walls/vite.config.ts ./examples/10-adiz-walls/
+COPY examples/10-adiz-walls/src ./examples/10-adiz-walls/src
 
 RUN npm run build --prefix site
 

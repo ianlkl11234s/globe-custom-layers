@@ -32,8 +32,10 @@ Read them in order if you are new here. `00` tells you whether you need any of t
 | [`06-particle-field`](06-particle-field/) | Wind/current streaks from a synthetic flow field, in raw WebGL2 with no Three.js. Needs no tiling service. | [3.3 Vector field particles](../docs/03-scaling-up/vector-field-particles.md) | 48 |
 | [`07-picking-and-popups`](07-picking-and-popups/) | Clicks on a layer that cannot be hit-tested. Two working strategies, and the candidate count that proves why backface culling matters. | [0.1 Q5](../docs/00-start-here/decision-tree.md) | 45 |
 | [`08-effects-gallery`](08-effects-gallery/) | 68 procedural Three.js effects, each with a prompt template you can hand to an agent. **Mercator, not globe** — see its README. | [2.1 Spark points](../docs/02-effects/spark-points.md) | — |
+| [`09-satellite-orbits`](09-satellite-orbits/) | Elevated orbital rings with inclination and moving markers, visibly distinct from surface great-circle routes. | [1.1 Mapbox](../docs/01-hugging-the-globe/mapbox.md) | 9 |
+| [`10-adiz-walls`](10-adiz-walls/) | A reusable vertical polygon-boundary wall component, demonstrated with a Taiwan ADIZ schematic. | [1.1 Mapbox](../docs/01-hugging-the-globe/mapbox.md) | 9 |
 
-Every one of them passes `npx tsc --noEmit` and `npm run build`; all but the gallery also carry unit tests, **294 in total**. The two new native examples add six focused style, data-contract, token-origin and storage-isolation tests. Website tests are counted separately. These checks run without a browser, a GPU, or a token; live interactions remain a separate browser gate.
+Every one of them passes `npx tsc --noEmit` and `npm run build`; all but the gallery also carry unit tests, **312 in total**. The satellite-orbit and vertical-boundary-wall examples each include three geometry checks plus six runtime-token bridge checks. Website tests are counted separately. These checks run without a browser, a GPU, or a token; live interactions remain a separate browser gate.
 
 The original nine have historical real-token browser evidence. The two new native examples have local data, typecheck, tests and build evidence; their real Mapbox browser gate is recorded separately. Read each status marker rather than assuming.
 
@@ -45,5 +47,7 @@ Examples retain each source's licence and label generated data explicitly:
 - **North Atlantic submarine cables** — a dated, incomplete [OpenStreetMap](https://www.openstreetmap.org/copyright) snapshot under ODbL; not an engineering chart.
 - **Europe GDP 2023** — World Bank GDP (current US$), CC BY 4.0, joined to Natural Earth public-domain boundaries; missing observations remain `null`.
 - **Trajectories** — synthesised at runtime. No licence to honour, and you can raise the object count until your machine complains.
+- **Satellite orbital rings** — generated locally from three schematic circular-orbit parameter sets. They are not live TLE propagation or a satellite catalogue.
+- **Vertical boundary wall fixture** — the current data is a local five-corner Taiwan-area ADIZ schematic. It is not an AIP, a legal or operational boundary, or evidence of sovereign airspace; wall height is a display parameter.
 
 Where a value is synthetic rather than measured (point sizes standing in for traffic volume, for instance), the example's README says so explicitly. A demo that looks like real data but isn't is worse than an obviously fake one.

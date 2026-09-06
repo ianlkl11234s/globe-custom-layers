@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Vertical boundary wall component</title>
+  <desc id="desc">An amber five-sided boundary rises vertically from a globe surface.</desc>
+  <rect width="1200" height="675" fill="#07131c"/>
+  <circle cx="620" cy="390" r="255" fill="#123746" stroke="#7cc6cc" stroke-width="3"/>
+  <path d="M450 420 L735 365 L790 455 L520 520 Z" fill="#d36b1433" stroke="#f5b342" stroke-width="5"/>
+  <path d="M450 420 L450 245 L735 190 L735 365 Z M735 365 L735 190 L790 280 L790 455 Z M790 455 L790 280 L520 345 L520 520 Z M520 520 L520 345 L450 245 L450 420 Z" fill="#d36b1455" stroke="#ffd66b" stroke-width="4"/>
+  <path d="M450 245 L735 190 L790 280 L520 345 Z" fill="none" stroke="#fff0a2" stroke-width="6"/>
+  <text x="54" y="72" fill="#fff" font-family="sans-serif" font-size="34">Vertical boundary walls</text>
+  <text x="54" y="112" fill="#f3c875" font-family="sans-serif" font-size="20">ILLUSTRATIVE · ADIZ IS NOT SOVEREIGN AIRSPACE · HEIGHT IS NOT A CEILING</text>
+</svg>

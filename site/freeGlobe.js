@@ -1,6 +1,7 @@
 // The token-free engine reuses the cookbook's Three.js geometry and effects.
 import maplibregl from 'maplibre-gl';
 import { createCustomLayer } from './maplibreCustom';
+import { createSpecialLayer } from './specialScenes';
 import { translate } from './i18n.js';
 import { categoricalColorExpression, gdpFillExpression, stableBucket } from './nativeStyles.js';
 export { createCustomLayer } from './maplibreCustom';
@@ -25,6 +26,7 @@ const nativeCameras = {
   nativeAreas: { center: [12, 52], zoom: 2.55 },
 };
 const isNativeScene = value => value === 'nativePoints' || value === 'nativeLines' || value === 'nativeAreas';
+const isSpecialScene = value => value === 'satelliteOrbits' || value === 'adizWalls';
 function airportPointFixture(airports) {
   return { type: 'FeatureCollection', features: airports.map(([ident, name, lon, lat]) => ({
     type: 'Feature',
@@ -102,8 +104,8 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
   controls.append(basemapLabel, heightLabel, segmentsLabel, pointSizeLabel, pointOpacityLabel, coreBoostLabel, glowPaletteLabel, activeCountLabel, speedLabel, opacityLabel, paletteLabel, nativePointSizeLabel, nativePointOpacityLabel, nativePointPaletteLabel, nativeLineWidthLabel, nativeLineOpacityLabel, nativeLineColorLabel, nativeAreaOpacityLabel, nativeAreaPaletteLabel, nativeAreaBorderWidthLabel, play); hud.append(summary, stats, controls);
   function announce(state, reason) {
     container.dataset.state = state;
-    const featureCount = isNativeScene(scene) ? assets?.[scene]?.features.length : undefined;
-    onStatus({ state, engine: isNativeScene(scene) ? 'maplibre-native' : 'maplibre-custom', airportCount: assets?.airports.airports.length, featureCount, dataKind: scene, ...(reason ? { reason } : {}) });
+    const featureCount = isNativeScene(scene) ? assets?.[scene]?.features.length : scene === 'satelliteOrbits' ? 3 : scene === 'adizWalls' ? 1 : undefined;
+    onStatus({ state, engine: isNativeScene(scene) ? 'maplibre-native' : 'maplibre-custom', airportCount: isSpecialScene(scene) ? undefined : assets?.airports.airports.length, featureCount, dataKind: scene, ...(reason ? { reason } : {}) });
   }
   function renderHud() {
     const zh = language === 'zh-TW';
@@ -141,7 +143,7 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
     nativePointSizeLabel.hidden = nativePointOpacityLabel.hidden = nativePointPaletteLabel.hidden = scene !== 'nativePoints';
     nativeLineWidthLabel.hidden = nativeLineOpacityLabel.hidden = nativeLineColorLabel.hidden = scene !== 'nativeLines';
     nativeAreaOpacityLabel.hidden = nativeAreaPaletteLabel.hidden = nativeAreaBorderWidthLabel.hidden = scene !== 'nativeAreas';
-    play.hidden = scene !== 'tracks';
+    play.hidden = scene !== 'tracks' && scene !== 'satelliteOrbits';
     play.textContent = paused ? t('play') : t('pause');
     play.setAttribute('aria-pressed', String(paused));
     const info = lastInfo;
@@ -153,6 +155,8 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
       scene === 'nativeAreas' ? `${assets?.nativeAreas.features.length ?? '—'} ${zh ? '個歐洲國家／地區' : 'European countries / areas'} · GDP 2023` : '',
       scene === 'arcs' ? `${info.arcCount ?? '—'} ${zh ? '條弧線' : 'arcs'} · ${info.vertexCount ?? '—'} vertices` : '',
       scene === 'tracks' ? `${info.activeCount ?? options.activeCount} ${t('trackObjects')} · ${info.drawCalls ?? '—'} ${t('drawCalls')}` : '',
+      scene === 'satelliteOrbits' ? `${info.orbitCount ?? 3} ${zh ? '條示意環軌' : 'schematic orbital rings'} · ${info.satelliteCount ?? 3} ${zh ? '個移動標記' : 'moving markers'}` : '',
+      scene === 'adizWalls' ? `${info.wallEdges ?? 5} ${zh ? '面直立牆' : 'vertical wall faces'} · ${info.displayHeightKm ?? 500} km ${zh ? '示意高度' : 'display height'}` : '',
     ].filter(Boolean).join('\n');
   }
   height.addEventListener('input', () => { options.height = +height.value; layer?.setOptions?.(options); renderHud(); map?.triggerRepaint(); });
@@ -209,14 +213,18 @@ export function createFreeGlobe(container, { onStatus = () => {} } = {}) {
     if (layer && map.getLayer(layer.id)) map.removeLayer(layer.id);
     lastInfo = {};
     applyNativeControls();
-    const view = isNativeScene(scene) ? nativeCameras[scene] : { center: [20, 20], zoom: Math.log2(Math.max(160, Math.min(container.clientWidth, container.clientHeight) * .82) / (512 / Math.PI)) };
+    const view = isNativeScene(scene) ? nativeCameras[scene] : scene === 'adizWalls' ? { center: [120.2, 25], zoom: 3.35 } : scene === 'satelliteOrbits' ? { center: [121, 24], zoom: 1.05 } : { center: [20, 20], zoom: Math.log2(Math.max(160, Math.min(container.clientWidth, container.clientHeight) * .82) / (512 / Math.PI)) };
     map.easeTo({ center: view.center, zoom: view.zoom, duration: 550 });
     if (isNativeScene(scene)) { renderHud(); announce('ready'); return; }
     const sceneOptions = scene === 'points' ? options : scene === 'tracks' ? options : { ...options, opacity: .9 };
-    layer = createCustomLayer(scene, { theme, airports: assets.airports, ...sceneOptions, onFrameInfo(info) {
+    const onFrameInfo = info => {
       lastInfo = info;
       if (performance.now() - lastHudAt > 250) { lastHudAt = performance.now(); renderHud(); }
-    } });
+    };
+    layer = isSpecialScene(scene)
+      ? createSpecialLayer(scene, { theme, adizHeightKm: 500, onFrameInfo })
+      : createCustomLayer(scene, { theme, airports: assets.airports, ...sceneOptions, onFrameInfo });
+    if (scene === 'satelliteOrbits') layer.setOptions({ paused });
     map.addLayer(layer); renderHud(); announce('ready');
   }
   function applyNativeControls() {

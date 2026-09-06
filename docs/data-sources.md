@@ -37,3 +37,14 @@ features, current infrastructure status, or legal boundaries.
 Both generator scripts write their source retrieval timestamp into fixture
 metadata and fail without writing a replacement fixture if their upstream
 source is unavailable.
+
+## Schematic-only geometry
+
+- `examples/09-satellite-orbits` generates three circular orbital rings from
+  local teaching parameters. The names, heights, inclinations, phases and
+  periods are schematic; there is no TLE feed, real satellite catalogue or
+  external data licence to imply.
+- `examples/10-adiz-walls` uses a local five-corner Taiwan-area outline solely
+  to demonstrate vertical wall geometry. It is not an AIP, legal, navigation
+  or operational boundary. An ADIZ is not sovereign airspace, and the wall
+  height is an illustrative display control rather than a published ceiling.

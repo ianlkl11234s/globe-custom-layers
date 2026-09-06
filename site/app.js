@@ -7,10 +7,13 @@ const scenes = {
   nativeAreas: { path: "00-native-choropleth", recipe: "docs/00-start-here/decision-tree.md" },
   points: { path: "01-points-on-globe", recipe: "docs/02-effects/spark-points.md" },
   arcs: { path: "02-arcs-on-globe", recipe: "docs/01-hugging-the-globe/mapbox.md" },
-  tracks: { path: "05-mass-trajectories", recipe: "docs/03-scaling-up/batched-trails.md" }
+  tracks: { path: "05-mass-trajectories", recipe: "docs/03-scaling-up/batched-trails.md" },
+  satelliteOrbits: { path: "09-satellite-orbits", recipe: "docs/01-hugging-the-globe/mapbox.md" },
+  adizWalls: { path: "10-adiz-walls", recipe: "docs/01-hugging-the-globe/mapbox.md" }
 };
-const sceneOrder = ["nativePoints", "nativeLines", "nativeAreas", "points", "arcs", "tracks"];
+const sceneOrder = ["nativePoints", "nativeLines", "nativeAreas", "points", "arcs", "tracks", "satelliteOrbits", "adizWalls"];
 const nativeScenes = new Set(sceneOrder.slice(0, 3));
+const specialScenes = new Set(["satelliteOrbits", "adizWalls"]);
 const $ = (selector) => document.querySelector(selector);
 let language = "en";
 let theme = "light";
@@ -47,7 +50,7 @@ function setMapMessage(key, values) {
 function promptForScene() {
   const title = t(selected);
   const source = t(sceneKey("Source"));
-  const acceptance = language === "zh-TW" ? nativeScenes.has(selected) ? `確認「${title}」只顯示自己的 geometry type，參數可立即更新且來源語意不被誤讀。` : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : nativeScenes.has(selected) ? `Verify that ${title} displays only its own geometry type, updates immediately, and preserves source meaning.` : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
+  const acceptance = language === "zh-TW" ? nativeScenes.has(selected) ? `確認「${title}」只顯示自己的 geometry type，參數可立即更新且來源語意不被誤讀。` : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : selected === "satelliteOrbits" ? "確認軌道為閉合、具離地高度與傾角，移動標記沿環軌而不是沿兩點大圓航線。" : selected === "adizWalls" ? "確認台灣周邊邊界由底部到頂部形成直立牆，示意高度不被解讀為法定上限。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : nativeScenes.has(selected) ? `Verify that ${title} displays only its own geometry type, updates immediately, and preserves source meaning.` : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : selected === "satelliteOrbits" ? "Verify closed, elevated, inclined rings and markers moving around complete orbits rather than a two-point great-circle route." : selected === "adizWalls" ? "Verify the Taiwan-area ring forms bottom-to-top wall faces and that display height is not presented as a legal ceiling." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
   if (nativeScenes.has(selected)) {
     const usingMapLibre = engine === "free";
     const engineName = usingMapLibre ? "MapLibre GL JS 5.24.0" : "Mapbox GL JS 3.30.0";
@@ -67,10 +70,11 @@ Keep source attribution and missing-data semantics. Do not turn incomplete OSM c
   }
   if (engine === "free") {
     const intro = language === "zh-TW" ? `用 MapLibre GL JS 5.24.0 為 [YOUR DATA] 建立「${title}」。不需 Mapbox token。` : `Build ${title} for [YOUR DATA] with MapLibre GL JS 5.24.0, without a Mapbox token.`;
+    const adapter = specialScenes.has(selected) ? `${root}/blob/main/site/specialScenes.ts` : `${root}/blob/main/site/maplibreCustom.ts`;
     return `${intro}
 
 Read ${root}/blob/main/AGENTS.md first; prefer native layers when sufficient.
-Port adapter: ${root}/blob/main/site/maplibreCustom.ts
+Port adapter: ${adapter}
 Setup and limitations: ${root}/blob/main/site/README.md
 Original geometry and fragment shaders: ${root}/tree/main/examples/${scenes[selected].path}
 Recipe: ${root}/blob/main/docs/01-hugging-the-globe/maplibre.md
@@ -78,7 +82,7 @@ Recipe: ${root}/blob/main/docs/01-hugging-the-globe/maplibre.md
 ${source}
 ${acceptance}
 
-Keep the pinned MapLibre projection prelude, meter altitude conversion, actual basemap transition coefficient, horizon clipping, and WebGL context reset. Verify globe/transition/Mercator, antimeridian, elevated arcs and pause/resume in a browser. Preserve local data attribution and distinguish synthetic data. This adapter reuses the original scene files: copy the required source files with it, not only the adapter.`;
+Keep the pinned MapLibre projection prelude, meter altitude conversion, actual basemap transition coefficient, horizon clipping, and WebGL context reset. Verify globe/transition/Mercator, antimeridian and animation where applicable in a browser. Preserve local data attribution and distinguish synthetic or schematic data. Copy the required source files with the adapter, not only the adapter.`;
   }
   if (language === "zh-TW") return `為 [YOUR DATA] 建立 Mapbox globe 上的「${title}」。
 
@@ -106,8 +110,8 @@ function renderFreeStatus() {
     $("#asset-status").textContent = "Mapbox · WebGL";
     return;
   }
-  const recordKey = nativeScenes.has(selected) ? "sourceFeatures" : "sourceRecords";
-  const count = nativeScenes.has(selected) ? freeStatus.featureCount ?? "—" : freeStatus.airportCount ?? "—";
+  const recordKey = nativeScenes.has(selected) || specialScenes.has(selected) ? "sourceFeatures" : "sourceRecords";
+  const count = nativeScenes.has(selected) || specialScenes.has(selected) ? freeStatus.featureCount ?? "—" : freeStatus.airportCount ?? "—";
   const label = freeStatus.state === "ready" ? `${freeStatus.engine ?? "maplibre"} · ${t(recordKey, { count })}` : freeStatus.state === "error" ? t("fallback") : "…";
   $("#asset-status").textContent = label;
 }
@@ -177,7 +181,7 @@ function renderReuseLinks() {
   $("#scene-status").textContent = engine === "free" ? (language === "zh-TW" ? "MapLibre：本機瀏覽器已重現" : "MapLibre: reproduced locally") : t("status");
   const recipe = nativeScenes.has(selected) ? scenes[selected].recipe : engine === "free" ? "docs/01-hugging-the-globe/maplibre.md" : scenes[selected].recipe;
   $("#recipe-link").href = `${root}/blob/main/${recipe}`;
-  $("#source-link").href = engine === "free" ? `${root}/blob/main/site/${nativeScenes.has(selected) ? "freeGlobe.js" : "maplibreCustom.ts"}` : `${root}/tree/main/examples/${scenes[selected].path}`;
+  $("#source-link").href = engine === "free" ? `${root}/blob/main/site/${nativeScenes.has(selected) ? "freeGlobe.js" : specialScenes.has(selected) ? "specialScenes.ts" : "maplibreCustom.ts"}` : `${root}/tree/main/examples/${scenes[selected].path}`;
   $("#agent-prompt").textContent = promptForScene();
 }
 function setEngineButtons() {

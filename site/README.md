@@ -1,12 +1,12 @@
 # Globe Custom Layers atlas demo
 
-The cartographic-lab workspace puts element selection on the left, an interactive globe in the center, and recipes/source/Agent prompts in the inspector. Its first group is **Map elements**: Point layer / global airports, Line layer / North Atlantic submarine cables, and Area layer / European countries by 2023 GDP. The reusable geometry and style controls lead; data is supporting context. A second group covers custom glow, great-circle arc, and mass-trajectory effects.
+The cartographic-lab workspace puts element selection on the left, an interactive globe in the center, and recipes/source/Agent prompts in the inspector. Its first group is **Map elements**: Point layer / global airports, Line layer / North Atlantic submarine cables, and Area layer / European countries by 2023 GDP. The reusable geometry and style controls lead; data is supporting context. A second group covers custom glow, great-circle arc, mass-trajectory, satellite-orbit, and vertical-boundary-wall effects.
 
 ![English light-mode atlas with the native airport point scene](screenshots/atlas-en-light.png)
 
 <sup>Current local atlas baseline. The image is the token-free MapLibre point scene, not evidence of Mapbox service access.</sup>
 
-Every selected element has a **Mapbox full example** and a **MapLibre preview**. The site opens in the token-free MapLibre mode; Mapbox uses the visitor's public token and mounts only the selected standalone example. The three custom MapLibre scenes reuse the original Three.js geometry and fragment shaders for airport glow, raised arcs, and mass tracks; a visible notice explains the horizon/limb, blending, and depth differences. These are different implementations, not an engine capability comparison.
+Every selected element has a **Mapbox full example** and a **MapLibre preview**. The site opens in the token-free MapLibre mode; Mapbox uses the visitor's public token and mounts only the selected standalone example. Five custom MapLibre scenes cover airport glow, raised arcs, mass tracks, elevated satellite rings and vertical boundary walls; the wall component is demonstrated with a Taiwan ADIZ schematic. A visible notice explains the horizon/limb, blending, and depth differences. The first three reuse their standalone Three.js scene sources through `maplibreCustom.ts`; the two schematic geometry scenes use the focused `specialScenes.ts` adapter. These are different implementations, not an engine capability comparison.
 
 The interface opens in English and can switch to Traditional Chinese. The shell and selected custom examples support light/dark themes; the two new native Mapbox line/area examples currently keep Mapbox's light basemap in either shell theme. Parameter panels start collapsed in embedded views and expand only on request; changing the selected free scene collapses the panel again so it does not cover the globe. The light interface and all local light basemap presets use only white and neutral grays so the visualization carries the color. Native point, line, and area scenes expose geometry-specific controls. GDP color represents the documented total-GDP bands; airport point hues and cable color choices are presentation styles rather than measured categories. Glow points default to Plasma at 0.60 size, 0.65 opacity and 0.85 core boost; points and arcs expose five visible palette buttons. Light custom geometry uses normal alpha blending; dark mode retains additive glow.
 
@@ -16,7 +16,7 @@ Both modes support the site's light/dark appearance. The interface offers Tradit
 
 [MapLibre officially supports globe rendering](https://maplibre.org/maplibre-gl-js/docs/examples/display-a-globe-with-an-atmosphere/), including [custom layers through its own projection API](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-simple-custom-layer-on-a-globe/). This website uses the MapLibre projection prelude in `maplibreCustom.ts` to reproduce the selected Three.js scenes locally. The direct ECEF/mainMatrix path remains unverified; terrain, depth-tested 3D and portability to the remaining standalone examples are outside this status. The token-free bundle aliases `mapbox-gl` to a MercatorCoordinate-only shim and contains no Mapbox SDK.
 
-The browser reproduction covers 190 raised arcs / 19,760 vertices at the current 53-sample default and 5,000 tracks in 4,096 slots with one draw call. Points retain the source point-size path; the adapter supplies `vCull = 1` and MapLibre's official horizon clip. Light mode uses normal blending for visibility on white, while dark mode uses additive blending for highlights. The limb soft fade therefore differs from Mapbox and is not pixel-identical. The adapter uses `projectTileWithElevation()` with metre heights and `depthTest: false`; measured depth-tested 3D cut points, so this README makes no terrain/depth claim.
+The browser reproduction covers 190 raised arcs / 19,760 vertices at the current 53-sample default and 5,000 tracks in 4,096 slots with one draw call. It also shows three inclined satellite rings with animated markers and a five-face vertical-boundary-wall component using a Taiwan-area ADIZ schematic at a 500 km display height. Points retain the source point-size path; the adapters rely on MapLibre's official horizon clip. Light mode uses normal blending for visibility on white, while dark mode uses additive blending for highlights. The limb soft fade therefore differs from Mapbox and is not pixel-identical. The adapters use `projectTileWithElevation()` with metre heights and `depthTest: false`; measured depth-tested 3D cut points, so this README makes no terrain/depth claim.
 
 MapLibre's license is bundled in `dist/vendor/maplibre-LICENSE.txt`. Local Natural Earth and OurAirports files avoid dependence on a third party's free tile quota or demo-server policy. Hosting and bandwidth still belong to whoever serves the site; this is not a promise that arbitrary commercial basemap services are free.
 
@@ -27,12 +27,14 @@ MapLibre's license is bundled in `dist/vendor/maplibre-LICENSE.txt`. Local Natur
 - `data/atlantic-submarine-cables.geojson`: 281 generalized North Atlantic communication-cable LineStrings queried from OpenStreetMap through Overpass on 2026-09-05. It retains © OpenStreetMap contributors / ODbL 1.0 attribution and the incomplete-crowdsourced boundary; it is not an engineering chart or complete inventory.
 - `data/europe-gdp-2023.geojson`: 50 Natural Earth 1:50m European map units joined to World Bank 2023 GDP (current US$). Four missing GDP values remain `null` and render as no-data gray, never zero. Natural Earth boundaries are a de facto cartographic representation, not a legal boundary statement.
 - Preview routes and moving tracks are synthetic illustrations. Their appearance/counts are not runtime performance measurements from the WebGL examples.
+- Satellite rings use three local schematic circular-orbit parameter sets; they are not live TLE propagation or a real satellite catalogue.
+- **Vertical boundary wall fixture** — the current data is an illustrative five-corner Taiwan-area ADIZ schematic. An ADIZ is not sovereign airspace, and its 500 km wall is display height rather than an asserted ceiling.
 
 These data files are bundled locally; browsing the free globe does not request Mapbox tiles or require a Mapbox token. Full provenance and generator scripts are recorded in [the data-source note](../docs/data-sources.md).
 
 ## Fresh clone
 
-Install the pinned MapLibre and IBM Plex dependencies for the site and the six independently bundled example dependencies before building:
+Install the pinned MapLibre and IBM Plex dependencies for the site and the eight independently bundled example dependencies before building:
 
 ```sh
 (cd site && npm ci)
@@ -42,6 +44,8 @@ Install the pinned MapLibre and IBM Plex dependencies for the site and the six i
 (cd examples/01-points-on-globe && npm ci)
 (cd examples/02-arcs-on-globe && npm ci)
 (cd examples/05-mass-trajectories && npm ci)
+(cd examples/09-satellite-orbits && npm ci)
+(cd examples/10-adiz-walls && npm ci)
 node site/scripts/build.mjs
 ```
 
@@ -56,7 +60,7 @@ docker build -t globe-custom-layers .
 docker run --rm -p 8080:8080 globe-custom-layers
 ```
 
-The multi-stage image uses Node 22 to run `npm ci` independently for the site and all six embedded examples, then runs a token-neutral site build with an empty `VITE_MAPBOX_TOKEN`. Its final Nginx image contains only `site/dist` and the port-8080 static-server configuration. The Docker allowlist and `.dockerignore` exclude local `.env` files, so no deployment token or runtime API is required.
+The multi-stage image uses Node 22 to run `npm ci` independently for the site and all eight embedded examples, then runs a token-neutral site build with an empty `VITE_MAPBOX_TOKEN`. Its final Nginx image contains only `site/dist` and the port-8080 static-server configuration. The Docker allowlist and `.dockerignore` exclude local `.env` files, so no deployment token or runtime API is required.
 
 On Zeabur, deploy this repository's `main` branch with the service Root Directory left empty. Its [Dockerfile deployment](https://zeabur.com/docs/en-US/deploy/methods/dockerfile) detects the root Dockerfile and exposed port 8080. Do not configure `VITE_MAPBOX_TOKEN`: this static site needs no service environment variables, and visitors supply their own public token in the browser. The production deployment of merge commit `cb7dc0f` was verified on 2026-09-06; future commits still require their own deployment readback.
 
@@ -78,7 +82,7 @@ The demo does not submit the token to an application backend. `sessionStorage` i
 
 ## Verification boundary
 
-The 17 site tests cover handshake origin/source checks, session-token retention and forgetting, plus the static DOM/data/style contracts for local basemaps, native layers, custom-effect controls, favicon/social metadata, and the self-hosted IBM Plex build. Typechecking and the build cover the selected iframe bundles, including their relative fixture paths. They do not prove real Mapbox tiles, a valid visitor token, actual GPU palette rendering, or visual globe/shader behavior. Those require browser inspection (and a deliberately supplied runtime token for Mapbox).
+The 20 site tests cover handshake origin/source checks, session-token retention and forgetting, plus the static DOM/data/style contracts for local basemaps, native layers, custom-effect controls, schematic semantics, favicon/social metadata, and the self-hosted IBM Plex build. Typechecking and the build cover the selected iframe bundles, including their relative fixture paths. They do not prove real Mapbox tiles or a valid visitor token. Token-free MapLibre browser inspection covers the five custom scenes; Mapbox still requires a deliberately supplied runtime token.
 
 The [implementation record](../docs/demo-implementation-plan.md) separates completed local/browser checks and the verified production shell from unverified real Mapbox tile access. The test-only Mapbox style interception is not shipped. Free MapLibre mode is a locally and publicly reproduced custom-layer port preview; it does not verify the direct ECEF/mainMatrix hypothesis, terrain/depth behaviour, or the remaining standalone examples.
 

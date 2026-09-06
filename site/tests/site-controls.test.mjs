@@ -14,7 +14,9 @@ test("atlas navigation leads with element names and keeps data as subtitles", as
   const line = html.indexOf('data-scene="nativeLines"');
   const area = html.indexOf('data-scene="nativeAreas"');
   const custom = html.indexOf('data-scene="points"');
-  assert.ok(point >= 0 && point < line && line < area && area < custom);
+  const satellite = html.indexOf('data-scene="satelliteOrbits"');
+  const adiz = html.indexOf('data-scene="adizWalls"');
+  assert.ok(point >= 0 && point < line && line < area && area < custom && custom < satellite && satellite < adiz);
   assert.match(html, /<html lang="en">/);
   assert.match(app, /let language = "en";/);
   assert.match(html, /data-i18n="nativeFoundations"/);
@@ -33,7 +35,26 @@ test("atlas navigation leads with element names and keeps data as subtitles", as
 
 test("static build bundles a Mapbox counterpart for every map element", async () => {
   const build = await read("scripts/build.mjs");
-  for (const name of ["00-native-vs-custom", "00-native-lines", "00-native-choropleth"]) assert.match(build, new RegExp(name));
+  for (const name of ["00-native-vs-custom", "00-native-lines", "00-native-choropleth", "09-satellite-orbits", "10-adiz-walls"]) assert.match(build, new RegExp(name));
+});
+
+test("satellite orbit and ADIZ wall scenes keep schematic semantics explicit", async () => {
+  const app = await read("app.js");
+  const copy = await read("i18n.js");
+  const free = await read("freeGlobe.js");
+  const special = await read("specialScenes.ts");
+  for (const scene of ["satelliteOrbits", "adizWalls"]) {
+    assert.match(app, new RegExp(scene));
+    assert.match(copy, new RegExp(scene));
+    assert.match(free, new RegExp(scene));
+    assert.match(special, new RegExp(scene));
+  }
+  assert.match(copy, /不是即時 TLE/);
+  assert.match(copy, /ADIZ 不等於主權領空/);
+  assert.match(copy, /"adizWalls": "立體邊界牆"/);
+  assert.match(copy, /"adizWalls": "Vertical boundary walls"/);
+  assert.match(copy, /台灣 ADIZ・示意資料/);
+  assert.match(copy, /display height, not a published ceiling/);
 });
 
 test("site publishes a globe favicon and social sharing preview", async () => {
