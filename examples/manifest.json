@@ -733,10 +733,55 @@
         "source": "fully procedural",
         "licence": "n/a"
       }
+    },
+    {
+      "id": "09-satellite-orbits",
+      "path": "examples/09-satellite-orbits/",
+      "title": "Elevated satellite orbital rings",
+      "settles": "How a complete inclined orbit differs from a two-point great-circle route or a surface trajectory.",
+      "readFirst": "docs/01-hugging-the-globe/mapbox.md",
+      "implements": ["docs/01-hugging-the-globe/mapbox.md"],
+      "status": "unverified",
+      "tests": 9,
+      "screenshot": "examples/09-satellite-orbits/screenshots/schematic.svg",
+      "screenshotScope": "Labelled schematic illustration; not browser or Mapbox service evidence.",
+      "usesApis": ["CustomLayerInterface", "THREE.Line", "THREE.Points", "projectionToMercatorMatrix"],
+      "knobs": [
+        { "id": "altitude", "type": "number", "min": 0.5, "max": 3, "step": 0.1, "default": 1, "effect": "Scales schematic display altitude; it does not alter a real TLE." },
+        { "id": "speed", "type": "number", "min": 0.1, "max": 4, "step": 0.1, "default": 1, "effect": "Changes marker playback speed only." }
+      ],
+      "teaches": [
+        "An orbital ring is a closed, inclined plane around Earth rather than a raised path between two surface endpoints.",
+        "Altitude is a radial offset and moving markers remain outside the globe surface.",
+        "Schematic orbital elements must not be presented as live TLE propagation."
+      ],
+      "data": { "source": "generated locally from three schematic circular-orbit parameter sets", "licence": "n/a", "records": 3 }
+    },
+    {
+      "id": "10-adiz-walls",
+      "path": "examples/10-adiz-walls/",
+      "title": "Vertical boundary walls",
+      "settles": "How to turn a polygon boundary into globe-aware vertical side walls without implying a solid jurisdiction or measured ceiling.",
+      "readFirst": "docs/01-hugging-the-globe/mapbox.md",
+      "implements": ["docs/01-hugging-the-globe/mapbox.md"],
+      "status": "unverified",
+      "tests": 9,
+      "screenshot": "examples/10-adiz-walls/screenshots/schematic.svg",
+      "screenshotScope": "Labelled schematic illustration; not browser, legal-boundary or Mapbox service evidence.",
+      "usesApis": ["CustomLayerInterface", "THREE.Mesh", "projectionToMercatorMatrix"],
+      "knobs": [
+        { "id": "height", "type": "number", "min": 50, "max": 1500, "step": 50, "default": 500, "effect": "Changes illustrative wall height in kilometres; it is not a published ADIZ ceiling." }
+      ],
+      "teaches": [
+        "Two triangles per boundary edge create a side wall while leaving the top open.",
+        "Unwrap longitude per edge before building geometry that may cross the antimeridian.",
+        "ADIZ, sovereign airspace, operational boundary and display height are separate concepts."
+      ],
+      "data": { "source": "locally authored five-corner Taiwan-area illustrative schematic", "licence": "n/a", "records": 1 }
     }
   ],
   "totals": {
-    "examples": 11,
-    "tests": 294
+    "examples": 13,
+    "tests": 312
   }
 }

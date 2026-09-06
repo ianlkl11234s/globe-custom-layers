@@ -9,5 +9,5 @@
       "maplibre-gl": ["site/node_modules/maplibre-gl/dist/maplibre-gl.d.ts"]
     }
   },
-  "include": ["maplibreCustom.ts", "mapboxMathCompat.ts"]
+  "include": ["maplibreCustom.ts", "specialScenes.ts", "mapboxMathCompat.ts"]
 }

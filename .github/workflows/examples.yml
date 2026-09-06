@@ -43,6 +43,8 @@ jobs:
           - 06-particle-field
           - 07-picking-and-popups
           - 08-effects-gallery
+          - 09-satellite-orbits
+          - 10-adiz-walls
 
     defaults:
       run:
@@ -77,6 +79,8 @@ jobs:
             examples/01-points-on-globe/package-lock.json
             examples/02-arcs-on-globe/package-lock.json
             examples/05-mass-trajectories/package-lock.json
+            examples/09-satellite-orbits/package-lock.json
+            examples/10-adiz-walls/package-lock.json
       - name: Install site example dependencies
         run: |
           npm ci --prefix site
@@ -86,6 +90,8 @@ jobs:
           npm ci --prefix examples/01-points-on-globe
           npm ci --prefix examples/02-arcs-on-globe
           npm ci --prefix examples/05-mass-trajectories
+          npm ci --prefix examples/09-satellite-orbits
+          npm ci --prefix examples/10-adiz-walls
       - run: npm --prefix site run typecheck
       - run: npm --prefix site test
       - run: node site/scripts/build.mjs

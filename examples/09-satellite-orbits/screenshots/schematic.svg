@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Schematic satellite orbital rings</title>
+  <desc id="desc">Three inclined rings surround a dark globe, with markers outside the surface.</desc>
+  <rect width="1200" height="675" fill="#07131c"/>
+  <circle cx="600" cy="350" r="210" fill="#123746" stroke="#7cc6cc" stroke-width="3"/>
+  <ellipse cx="600" cy="350" rx="390" ry="116" fill="none" stroke="#7ee7ff" stroke-width="5" transform="rotate(-18 600 350)"/>
+  <ellipse cx="600" cy="350" rx="350" ry="155" fill="none" stroke="#ffb86b" stroke-width="5" transform="rotate(37 600 350)"/>
+  <ellipse cx="600" cy="350" rx="470" ry="205" fill="none" stroke="#df9cff" stroke-width="5" transform="rotate(76 600 350)"/>
+  <circle cx="925" cy="247" r="12" fill="#fff"/><circle cx="351" cy="208" r="12" fill="#fff"/><circle cx="707" cy="573" r="12" fill="#fff"/>
+  <text x="54" y="72" fill="#fff" font-family="sans-serif" font-size="34">Satellite orbital rings</text>
+  <text x="54" y="112" fill="#9ec6cf" font-family="sans-serif" font-size="20">SCHEMATIC · NOT LIVE TLE · NOT A SURFACE GREAT-CIRCLE ROUTE</text>
+</svg>
