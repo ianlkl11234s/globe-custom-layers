@@ -1,19 +1,11 @@
 import { forgetRuntimeToken, isPublicMapboxToken, isTrustedReadyEvent, readRuntimeToken, saveRuntimeToken, unloadFrame } from "./bridgeState.js";
 import { translate } from "./i18n.js";
+import { sceneCatalog } from "./sceneCatalog.js";
 const root = "https://github.com/ianlkl11234s/globe-custom-layers";
-const scenes = {
-  nativePoints: { path: "00-native-vs-custom", recipe: "docs/00-start-here/decision-tree.md" },
-  nativeLines: { path: "00-native-lines", recipe: "docs/00-start-here/decision-tree.md" },
-  nativeAreas: { path: "00-native-choropleth", recipe: "docs/00-start-here/decision-tree.md" },
-  points: { path: "01-points-on-globe", recipe: "docs/02-effects/spark-points.md" },
-  arcs: { path: "02-arcs-on-globe", recipe: "docs/01-hugging-the-globe/mapbox.md" },
-  tracks: { path: "05-mass-trajectories", recipe: "docs/03-scaling-up/batched-trails.md" },
-  satelliteOrbits: { path: "09-satellite-orbits", recipe: "docs/01-hugging-the-globe/mapbox.md" },
-  adizWalls: { path: "10-adiz-walls", recipe: "docs/01-hugging-the-globe/mapbox.md" }
-};
-const sceneOrder = ["nativePoints", "nativeLines", "nativeAreas", "points", "arcs", "tracks", "satelliteOrbits", "adizWalls"];
-const nativeScenes = new Set(sceneOrder.slice(0, 3));
-const specialScenes = new Set(["satelliteOrbits", "adizWalls"]);
+const scenes = Object.fromEntries(sceneCatalog.map((scene) => [scene.sceneId, scene]));
+const sceneOrder = sceneCatalog.map((scene) => scene.sceneId);
+const nativeScenes = new Set(sceneCatalog.filter((scene) => scene.kind === "native").map((scene) => scene.sceneId));
+const specialScenes = new Set(sceneCatalog.filter((scene) => scene.mapLibreImplementation === "site/specialScenes.ts").map((scene) => scene.sceneId));
 const $ = (selector) => document.querySelector(selector);
 let language = "en";
 let theme = "light";
@@ -47,10 +39,42 @@ function setMapMessage(key, values) {
   mapMessage = { key, values };
   status.textContent = statusText();
 }
+function githubFileUrl(target) {
+  const normalized = target.replace(/\/$/, "");
+  return `${root}/${target.endsWith("/") ? "tree" : "blob"}/main/${normalized}`;
+}
+function targetContext() {
+  return language === "zh-TW" ? `目標專案： [TARGET REPOSITORY OR WORKSPACE]\n地圖入口／生命週期擁有者： [TARGET MAP ENTRY OR INSPECT THE REPOSITORY]\n資料來源： [YOUR DATA]\n資料量與更新頻率： [COUNT AND UPDATE RATE]\n必要互動： [INTERACTIONS, PLAYBACK, OR NONE]\n\n若能存取目標專案，先檢查既有 engine、版本、資料流、地圖生命週期與適用 AGENTS.md，再補齊缺漏；只有會實質改變實作的選擇才詢問。` : `Target repository or workspace: [TARGET REPOSITORY OR WORKSPACE]\nMap entry point / lifecycle owner: [TARGET MAP ENTRY OR INSPECT THE REPOSITORY]\nData source: [YOUR DATA]\nData volume and update rate: [COUNT AND UPDATE RATE]\nRequired interaction: [INTERACTIONS, PLAYBACK, OR NONE]\n\nIf the target repository is available, inspect its engine, versions, data flow, map lifecycle, and applicable AGENTS.md before filling gaps. Ask only when a missing choice materially changes the implementation.`;
+}
+function contractText(scene) {
+  if (!scene.inputContract) return "";
+  const contract = scene.inputContract;
+  const labels = language === "zh-TW"
+    ? { accepted: "接受輸入", order: "座標順序", altitude: "高度單位", height: "牆高單位", missing: "無效／缺漏資料", excluded: "不包含" }
+    : { accepted: "Accepted input", order: "Coordinate order", altitude: "Altitude unit", height: "Wall-height unit", missing: "Invalid or missing data", excluded: "Not included" };
+  return [
+    `${labels.accepted}: ${contract.accepted.join("; ")}`,
+    contract.coordinateOrder && `${labels.order}: ${contract.coordinateOrder}`,
+    contract.altitudeUnit && `${labels.altitude}: ${contract.altitudeUnit}`,
+    contract.heightUnit && `${labels.height}: ${contract.heightUnit}`,
+    contract.missingData && `${labels.missing}: ${contract.missingData}`,
+    contract.notIncluded && `${labels.excluded}: ${contract.notIncluded}`,
+  ].filter(Boolean).join("\n");
+}
+function requiredSourceText(scene, selectedEngine) {
+  const files = scene.requiredFiles?.[selectedEngine];
+  if (!files?.length) return "";
+  const heading = language === "zh-TW" ? "必要來源集合（全部閱讀並複製；只有替換 import 後才能移除未使用的 fixture）：" : "Required source set (read and copy every item; remove an unused fixture only after replacing its import):";
+  return `${heading}\n${files.map((target) => `- ${githubFileUrl(target)}`).join("\n")}`;
+}
 function promptForScene() {
+  const scene = scenes[selected];
   const title = t(selected);
   const source = t(sceneKey("Source"));
-  const acceptance = language === "zh-TW" ? nativeScenes.has(selected) ? `確認「${title}」只顯示自己的 geometry type，參數可立即更新且來源語意不被誤讀。` : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : selected === "satelliteOrbits" ? "確認軌道為閉合、具離地高度與傾角，移動標記沿環軌而不是沿兩點大圓航線。" : selected === "adizWalls" ? "確認台灣周邊邊界由底部到頂部形成直立牆，示意高度不被解讀為法定上限。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : nativeScenes.has(selected) ? `Verify that ${title} displays only its own geometry type, updates immediately, and preserves source meaning.` : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : selected === "satelliteOrbits" ? "Verify closed, elevated, inclined rings and markers moving around complete orbits rather than a two-point great-circle route." : selected === "adizWalls" ? "Verify the Taiwan-area ring forms bottom-to-top wall faces and that display height is not presented as a legal ceiling." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
+  const fallbackAcceptance = language === "zh-TW" ? nativeScenes.has(selected) ? `確認「${title}」只顯示自己的 geometry type，參數可立即更新且來源語意不被誤讀。` : selected === "points" ? "確認 ECEF 背面 cull 與 globe→Mercator 過渡的註冊正確性。" : selected === "arcs" ? "將 segments 設成 2 重現穿過地球的 chord，再提高 subdivision。" : "確認 playback 下的一個 draw call、eviction 與 globe/背面/transition。" : nativeScenes.has(selected) ? `Verify that ${title} displays only its own geometry type, updates immediately, and preserves source meaning.` : selected === "points" ? "Verify ECEF far-side culling and globe-to-Mercator registration." : selected === "arcs" ? "Set segments to 2 to reproduce the chord through Earth, then increase subdivision." : "Verify one draw call under playback, eviction, globe, backside, and transition.";
+  const acceptance = scene.acceptance?.[language] ?? fallbackAcceptance;
+  const contract = contractText(scene);
+  const commonEvidence = language === "zh-TW" ? "把目標資料放在獨立的應用資料模組，透過元件 API 注入；不得把資料寫進 renderer。分別回報 install、unit test、typecheck、build、真實 WebGL/browser 與資料 readback；map load 或 HTTP 200 不算 shader 驗證。記錄使用的來源 commit SHA，保留根 LICENSE、來源、授權、fixture 與 missing-data 語意，未驗證項目維持原狀態。" : "Put target data in a separate application-owned module and inject it through the component API; do not embed data in the renderer. Report install, unit tests, typecheck, build, real WebGL/browser behavior, and data readback separately; a map load or HTTP 200 is not shader verification. Record the source commit SHA, retain the root LICENSE, provenance, fixture, and missing-data semantics, and do not upgrade unverified claims.";
   if (nativeScenes.has(selected)) {
     const usingMapLibre = engine === "free";
     const engineName = usingMapLibre ? "MapLibre GL JS 5.24.0" : "Mapbox GL JS 3.30.0";
@@ -58,52 +82,85 @@ function promptForScene() {
     const implementation = usingMapLibre ? `${root}/blob/main/site/freeGlobe.js` : `${root}/tree/main/examples/${scenes[selected].path}`;
     return `${intro}
 
+${targetContext()}
+
 Read ${root}/blob/main/AGENTS.md first; prefer native layers when sufficient.
 Implementation: ${implementation}
 Decision guide: ${root}/blob/main/docs/00-start-here/decision-tree.md
 Data provenance: ${root}/blob/main/docs/data-sources.md
+Manifest scene: ${root}/blob/main/examples/manifest.json (${scene.sceneId} → ${scene.exampleId}, status: ${scene.status})
 
 ${source}
 ${acceptance}
 
-Keep source attribution and missing-data semantics. Do not turn incomplete OSM coverage or null GDP into absence or zero. Verify this geometry type, its controls, camera, and globe projection in a browser.`;
+Keep source attribution and missing-data semantics. Do not turn incomplete OSM coverage or null GDP into absence or zero. Verify this geometry type, its controls, camera, and globe projection in a browser.
+
+${commonEvidence}`;
   }
   if (engine === "free") {
     const intro = language === "zh-TW" ? `用 MapLibre GL JS 5.24.0 為 [YOUR DATA] 建立「${title}」。不需 Mapbox token。` : `Build ${title} for [YOUR DATA] with MapLibre GL JS 5.24.0, without a Mapbox token.`;
-    const adapter = specialScenes.has(selected) ? `${root}/blob/main/site/specialScenes.ts` : `${root}/blob/main/site/maplibreCustom.ts`;
+    const adapter = githubFileUrl(scene.mapLibreImplementation);
     return `${intro}
+
+${targetContext()}
 
 Read ${root}/blob/main/AGENTS.md first; prefer native layers when sufficient.
 Port adapter: ${adapter}
 Setup and limitations: ${root}/blob/main/site/README.md
 Original geometry and fragment shaders: ${root}/tree/main/examples/${scenes[selected].path}
 Recipe: ${root}/blob/main/docs/01-hugging-the-globe/maplibre.md
+Manifest scene: ${root}/blob/main/examples/manifest.json (${scene.sceneId} → ${scene.exampleId}, status: ${scene.status})
+
+Component: ${scene.component}
+${scene.fixture ? `Fixture: ${scene.fixture}` : ""}
+${contract}
+${requiredSourceText(scene, "maplibre")}
 
 ${source}
 ${acceptance}
 
-Keep the pinned MapLibre projection prelude, meter altitude conversion, actual basemap transition coefficient, horizon clipping, and WebGL context reset. Verify globe/transition/Mercator, antimeridian and animation where applicable in a browser. Preserve local data attribution and distinguish synthetic or schematic data. Copy the required source files with the adapter, not only the adapter.`;
+Keep the pinned MapLibre projection prelude, metre altitude conversion, actual basemap transition coefficient, horizon clipping, and WebGL context reset. Verify globe/transition/Mercator, antimeridian and animation where applicable in a browser. Replace the demonstration fixture with the requested data; do not silently keep it. Preserve local data attribution and distinguish synthetic or schematic data.
+
+${commonEvidence}`;
   }
   if (language === "zh-TW") return `為 [YOUR DATA] 建立 Mapbox globe 上的「${title}」。
+
+${targetContext()}
 
 若 native Mapbox layer 可以表達結果，優先使用 native；只有 GPU 專屬 rendering 或獨立物件動畫才使用 custom layer。
 
 Example: ${root}/tree/main/examples/${scenes[selected].path}
 Recipe: ${root}/blob/main/${scenes[selected].recipe}
+Manifest scene: ${root}/blob/main/examples/manifest.json (${scene.sceneId} → ${scene.exampleId}，status: ${scene.status})
+元件：${scene.component}
+${scene.fixture ? `Fixture：${scene.fixture}` : ""}
+${contract}
+${requiredSourceText(scene, "mapbox")}
 資料語意：${source}
 驗收：${acceptance}
 
-確認 projectionToMercatorTransition、transition 1 的 flat-Mercator path、shared renderer reset、精確 Mapbox/Three versions 與視覺證據。map load 不等於 shader 驗證。`;
+以目標資料取代示範 fixture，不得默默保留。確認 projectionToMercatorTransition、transition 1 的 flat-Mercator path、shared renderer reset、精確 Mapbox/Three versions 與視覺證據。
+
+${commonEvidence}`;
   return `Build a ${title} visualization for [YOUR DATA] on a Mapbox globe.
+
+${targetContext()}
 
 Choose a native Mapbox layer first when it can express the result; use a custom layer only for GPU-specific rendering or independent object animation.
 
 Example: ${root}/tree/main/examples/${scenes[selected].path}
 Recipe: ${root}/blob/main/${scenes[selected].recipe}
+Manifest scene: ${root}/blob/main/examples/manifest.json (${scene.sceneId} → ${scene.exampleId}, status: ${scene.status})
+Component: ${scene.component}
+${scene.fixture ? `Fixture: ${scene.fixture}` : ""}
+${contract}
+${requiredSourceText(scene, "mapbox")}
 Data semantics: ${source}
 Acceptance: ${acceptance}
 
-Verify projectionToMercatorTransition, the flat-Mercator path at transition 1, shared renderer reset, exact Mapbox/Three versions, and visual evidence. A map load is not shader verification.`;
+Replace the demonstration fixture with the requested data; do not silently retain it. Verify projectionToMercatorTransition, the flat-Mercator path at transition 1, shared renderer reset, exact Mapbox/Three versions, and visual evidence.
+
+${commonEvidence}`;
 }
 function renderFreeStatus() {
   if (frame) {

@@ -1,10 +1,11 @@
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap } from "maplibre-gl";
 import * as THREE from "three";
-import { EARTH_RADIUS_KM, MAPBOX_GLOBE_RADIUS, SCHEMATIC_ORBITS, orbitPointAt, sampleOrbit } from "../examples/09-satellite-orbits/src/orbitMath";
-import { TAIWAN_ADIZ_SCHEMATIC_RING } from "../examples/10-adiz-walls/src/adizBoundary";
+import { EARTH_RADIUS_METERS, MAPBOX_GLOBE_RADIUS } from "../examples/09-satellite-orbits/src/orbitMath";
+import { SCHEMATIC_ORBITS, orbitPointAt, sampleOrbit } from "../examples/09-satellite-orbits/src/orbitFixture";
+import { TAIWAN_ADIZ_SCHEMATIC_FIXTURE } from "../examples/10-adiz-walls/src/adizBoundary";
 import { buildWallVertices } from "../examples/10-adiz-walls/src/wallGeometry";
 
-export type SpecialSceneName = "satelliteOrbits" | "adizWalls";
+export type SpecialSceneName = "satelliteOrbits" | "boundaryWalls";
 
 export interface SpecialFrameInfo {
   scene: SpecialSceneName;
@@ -12,13 +13,13 @@ export interface SpecialFrameInfo {
   transition: number;
   orbitCount?: number;
   satelliteCount?: number;
-  wallEdges?: number;
+  wallSegments?: number;
   displayHeightKm?: number;
 }
 
 export interface SpecialLayerControls extends CustomLayerInterface {
   setTheme(theme: "light" | "dark"): void;
-  setOptions(options: Partial<{ paused: boolean; orbitSpeed: number; orbitAltitudeScale: number; adizHeightKm: number }>): void;
+  setOptions(options: Partial<{ paused: boolean; orbitSpeed: number; orbitAltitudeScale: number; boundaryWallHeightKm: number }>): void;
 }
 
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -53,7 +54,7 @@ ${body}`;
 }
 
 function orbitElevationMeters(radius: number): number {
-  return Math.max(0, (radius / MAPBOX_GLOBE_RADIUS - 1) * EARTH_RADIUS_KM * 1000);
+  return Math.max(0, (radius / MAPBOX_GLOBE_RADIUS - 1) * EARTH_RADIUS_METERS);
 }
 
 function createOrbitLayer(initialTheme: "light" | "dark", onFrameInfo?: (info: SpecialFrameInfo) => void): SpecialLayerControls {
@@ -160,7 +161,7 @@ function createOrbitLayer(initialTheme: "light" | "dark", onFrameInfo?: (info: S
   };
 }
 
-function createAdizLayer(initialTheme: "light" | "dark", initialHeightKm: number, onFrameInfo?: (info: SpecialFrameInfo) => void): SpecialLayerControls {
+function createBoundaryWallLayer(initialTheme: "light" | "dark", initialHeightKm: number, onFrameInfo?: (info: SpecialFrameInfo) => void): SpecialLayerControls {
   let theme = initialTheme;
   let heightKm = initialHeightKm;
   let map: MapLibreMap | null = null;
@@ -168,10 +169,10 @@ function createAdizLayer(initialTheme: "light" | "dark", initialHeightKm: number
   const scene = new THREE.Scene(); const camera = new THREE.Camera();
   let geometry: THREE.BufferGeometry | null = null; let material: THREE.ShaderMaterial | null = null; let variant: string | null = null;
   return {
-    id: "maplibre-special-adiz-walls", type: "custom", renderingMode: "3d",
+    id: "maplibre-special-boundary-walls", type: "custom", renderingMode: "3d",
     onAdd(mapInstance, gl) {
       map = mapInstance; renderer = new THREE.WebGLRenderer({ canvas: gl.canvas as HTMLCanvasElement, context: gl as WebGL2RenderingContext, antialias: true }); renderer.autoClear = false;
-      const vertices = buildWallVertices(TAIWAN_ADIZ_SCHEMATIC_RING);
+      const vertices = buildWallVertices(TAIWAN_ADIZ_SCHEMATIC_FIXTURE);
       geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices.flatMap(vertex => {
         const x = vertex.lon / 360 + .5; const lat = vertex.lat * Math.PI / 180; const y = (1 - Math.log(Math.tan(Math.PI / 4 + lat / 2)) / Math.PI) / 2; return [x, y, 0];
@@ -188,20 +189,20 @@ function createAdizLayer(initialTheme: "light" | "dark", initialHeightKm: number
       const mesh = new THREE.Mesh(geometry, material); mesh.frustumCulled = false; scene.add(mesh); this.setTheme(theme);
     },
     render(_gl, input) {
-      if (!renderer || !map || !material) return;
+      if (!renderer || !map || !geometry || !material) return;
       const transition = map.transform.getProjectionData({ overscaledTileID: null, applyGlobeMatrix: true }).projectionTransition;
       input = { ...input, defaultProjectionData: { ...input.defaultProjectionData, projectionTransition: transition } };
       if (variant !== input.shaderData.variantName) { installProjection(material, input, "attribute float aHeightRatio;uniform float uHeightMeters;varying float vHeight;void main(){vHeight=aHeightRatio;gl_Position=projectTileWithElevation(position.xy,aElevation*uHeightMeters);}"); variant = input.shaderData.variantName; }
       material.uniforms.uHeightMeters.value = heightKm * 1000; updateProjection([material], input, transition);
       camera.projectionMatrix.fromArray(IDENTITY); renderer.resetState(); renderer.render(scene, camera); renderer.resetState();
-      onFrameInfo?.({ scene: "adizWalls", projection: input.shaderData.variantName, transition, wallEdges: TAIWAN_ADIZ_SCHEMATIC_RING.length - 1, displayHeightKm: heightKm });
+      onFrameInfo?.({ scene: "boundaryWalls", projection: input.shaderData.variantName, transition, wallSegments: geometry.getAttribute("position").count / 6, displayHeightKm: heightKm });
     },
     onRemove() { geometry?.dispose(); material?.dispose(); renderer?.dispose(); geometry = null; material = null; renderer = null; map = null; variant = null; },
     setTheme(next) { theme = next; material?.uniforms.uBase.value.set(theme === "dark" ? "#e17a1a" : "#a64f00"); material?.uniforms.uCrest.value.set(theme === "dark" ? "#ffdc6b" : "#e2a620"); if (material) material.blending = theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending; map?.triggerRepaint(); },
-    setOptions(next) { if (typeof next.adizHeightKm === "number") heightKm = Math.max(50, Math.min(1500, next.adizHeightKm)); map?.triggerRepaint(); },
+    setOptions(next) { if (typeof next.boundaryWallHeightKm === "number") heightKm = Math.max(50, Math.min(1500, next.boundaryWallHeightKm)); map?.triggerRepaint(); },
   };
 }
 
-export function createSpecialLayer(scene: SpecialSceneName, options: { theme: "light" | "dark"; adizHeightKm?: number; onFrameInfo?: (info: SpecialFrameInfo) => void }): SpecialLayerControls {
-  return scene === "satelliteOrbits" ? createOrbitLayer(options.theme, options.onFrameInfo) : createAdizLayer(options.theme, options.adizHeightKm ?? 500, options.onFrameInfo);
+export function createSpecialLayer(scene: SpecialSceneName, options: { theme: "light" | "dark"; boundaryWallHeightKm?: number; onFrameInfo?: (info: SpecialFrameInfo) => void }): SpecialLayerControls {
+  return scene === "satelliteOrbits" ? createOrbitLayer(options.theme, options.onFrameInfo) : createBoundaryWallLayer(options.theme, options.boundaryWallHeightKm ?? 500, options.onFrameInfo);
 }

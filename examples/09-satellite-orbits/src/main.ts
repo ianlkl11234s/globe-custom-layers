@@ -1,6 +1,7 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { createOrbitLayer } from "./orbitLayer";
+import { createSchematicOrbits } from "./orbitFixture";
 import { getEmbedPreferences, getEmbeddedRuntimeToken, reportEmbedMapStatus } from "./embedBridge";
 
 const byId = <T extends HTMLElement>(id: string) => { const element = document.getElementById(id); if (!element) throw new Error(`Missing #${id}`); return element as T; };
@@ -21,6 +22,6 @@ function start() {
   altitude.addEventListener("input", updateLabels); speed.addEventListener("input", updateLabels); updateLabels();
   play.addEventListener("click", () => { playing = !playing; play.textContent = playing ? "Pause orbit" : "Resume orbit"; });
   const getSimSec = () => { const now = performance.now(); const dt = lastMs === null ? 0 : Math.min((now - lastMs) / 1000, .1); lastMs = now; if (playing) simSec += dt * Number(speed.value); return simSec; };
-  map.on("load", () => { map.addLayer(createOrbitLayer({ getSimSec, getAltitudeScale: () => Number(altitude.value), onFrame: (globe) => { state.textContent = globe ? "globe · ECEF" : "mercator transition"; } })); reportEmbedMapStatus("loaded"); });
+  map.on("load", () => { map.addLayer(createOrbitLayer(createSchematicOrbits(), { getSimSec, getAltitudeScale: () => Number(altitude.value), onFrame: (globe) => { state.textContent = globe ? "globe · ECEF" : "mercator transition"; } })); reportEmbedMapStatus("loaded"); });
   map.on("error", (event) => { const status = (event.error as { status?: number } | undefined)?.status; if (status === 401 || status === 403) byId("token-warning").classList.add("visible"); reportEmbedMapStatus("error", status); });
 }

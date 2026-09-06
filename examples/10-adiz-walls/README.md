@@ -6,7 +6,7 @@
 
 <sup>Illustration only; not browser, legal-boundary, or Mapbox-service evidence.</sup>
 
-A Mapbox GL JS + Three.js custom-layer demonstration of a reusable *vertical boundary wall* component. The current fixture uses a Taiwan ADIZ schematic to make the component legible. It renders only the sides and luminous top edge implied by the gradient; it is intentionally **not** a flat area fill.
+A Mapbox GL JS + Three.js custom-layer demonstration of a reusable *Vertical boundary walls* component. `createVerticalBoundaryWallLayer(data, controls)` accepts GeoJSON-like `Polygon` and `MultiPolygon` geometry; every exterior ring and hole becomes side walls, with no top fill. This page injects a Taiwan ADIZ schematic solely as an illustrative fixture.
 
 ## Important interpretation boundary
 
@@ -26,9 +26,20 @@ npm run dev
 
 ## What the custom layer does
 
-- `src/wallGeometry.ts` removes the duplicate closing coordinate, closes the last edge itself, and makes two triangles per edge. It unwraps longitude incrementally, so a future ring crossing ±180° does not streak across a flat map.
-- `src/adizWallLayer.ts` precomputes both Web Mercator and ECEF attributes. On a globe it uses Mapbox's `projectionToMercatorMatrix`, blends through Mapbox's globe-to-mercator transition, disables depth testing, and applies ECEF-space far-side culling.
-- One renderer owns the one custom layer. `onRemove()` disposes the mesh geometry and shader material; it does not leave a second Three renderer attached to Mapbox's shared WebGL context.
+- `src/wallGeometry.ts` validates finite longitude/latitude coordinates and rejects empty rings and latitudes outside Web Mercator. It removes duplicate closing coordinates, unwraps ±180° incrementally, and great-circle densifies long edges before emitting two side triangles per segment.
+- `src/verticalBoundaryWallLayer.ts` precomputes Web Mercator and ECEF attributes. On a globe it blends through Mapbox's globe-to-Mercator transition, disables depth testing, and uses camera-to-wall sphere intersection for far-side visibility (so raised walls are not treated as surface-only geometry).
+- One renderer owns one custom layer. `onRemove()` disposes geometry, material, and renderer resources, allowing remove/re-add without retaining this layer's GPU objects.
+
+## Input contract
+
+```ts
+createVerticalBoundaryWallLayer(
+  { type: "Polygon", coordinates: [[[lon, lat], ...]] },
+  { getDisplayHeightMeters: () => 280_000, maxSegmentMeters: 100_000 },
+);
+```
+
+Coordinates use `[longitude, latitude]` in degrees. Rings may be closed or unclosed. Polygon holes and every MultiPolygon member become vertical side walls; this component does not make a roof. `getDisplayHeightMeters` is meters and is strictly display styling, never a boundary altitude, ceiling, legal limit, or source datum. Empty rings, non-finite coordinates, and latitudes outside ±85.05112878 are rejected explicitly.
 
 ## Checks
 
@@ -39,4 +50,4 @@ npm test
 npm run build
 ```
 
-The unit tests prove the wall's bottom/top layout, closed final edge, and antimeridian unwrapping. They cannot prove real WebGL appearance or make the schematic boundary authoritative.
+The unit tests prove multi-ring/multi-polygon side generation, closed final edges, antimeridian unwrapping, densification, invalid-input rejection, and disposal helper behavior. They cannot prove real WebGL appearance, Mapbox projection internals, or make the schematic fixture authoritative.

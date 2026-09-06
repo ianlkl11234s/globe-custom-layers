@@ -100,6 +100,33 @@ function checkManifest() {
     if (!Number.isInteger(example.tests) || example.tests < 0) fail(`${label}: tests must be a non-negative integer`);
     else testTotal += example.tests;
   }
+  if (!Array.isArray(manifest.siteScenes) || manifest.siteScenes.length === 0) {
+    fail("examples/manifest.json: siteScenes must be a non-empty array");
+  } else {
+    const sceneIds = new Set();
+    for (const [index, scene] of manifest.siteScenes.entries()) {
+      const label = `siteScenes[${index}]`;
+      if (typeof scene.sceneId !== "string" || !scene.sceneId) fail(`${label}: missing sceneId`);
+      else if (sceneIds.has(scene.sceneId)) fail(`${label}: duplicate sceneId ${scene.sceneId}`);
+      else sceneIds.add(scene.sceneId);
+      if (!ids.has(scene.exampleId)) fail(`${label}: unknown exampleId ${scene.exampleId}`);
+      if (!['native', 'custom'].includes(scene.kind)) fail(`${label}: kind must be native or custom`);
+      if (typeof scene.component !== "string" || !scene.component) fail(`${label}: missing component`);
+      if (typeof scene.mapLibreImplementation !== "string" || !fs.existsSync(path.resolve(root, scene.mapLibreImplementation))) {
+        fail(`${label}: missing mapLibreImplementation ${scene.mapLibreImplementation}`);
+      }
+      for (const files of Object.values(scene.requiredFiles ?? {})) {
+        if (!Array.isArray(files) || files.length === 0) fail(`${label}: requiredFiles entries must be non-empty arrays`);
+        else for (const target of files) {
+          if (typeof target !== "string" || !fs.existsSync(path.resolve(root, target))) fail(`${label}: missing required file ${target}`);
+        }
+      }
+      if (scene.inputContract) {
+        if (!Array.isArray(scene.inputContract.accepted) || scene.inputContract.accepted.length === 0) fail(`${label}: inputContract.accepted must be non-empty`);
+        if (!scene.acceptance?.en || !scene.acceptance?.['zh-TW']) fail(`${label}: localized acceptance is required with an input contract`);
+      }
+    }
+  }
   if (!manifest.totals || manifest.totals.examples !== manifest.examples.length) {
     fail(`manifest totals.examples=${manifest.totals?.examples} but found ${manifest.examples.length}`);
   }

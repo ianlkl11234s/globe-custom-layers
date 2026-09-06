@@ -2,13 +2,13 @@
 
 **A Mapbox-first cookbook for developers and AI agents building custom globe effects, from glowing points to thousands of animated tracks.**
 
-**[Try the published demo](https://globe-custom-layers.zeabur.app/)** — the current six-scene atlas is deployed from `main`. Choose an element, adjust it, then open its recipe, source, or Agent prompt. Bring your own public Mapbox token, or explore the MapLibre preview without one.
+**[Try the published demo](https://globe-custom-layers.zeabur.app/)** — the current eight-scene atlas is deployed from `main`. Choose an element, adjust it, then open its recipe, source, or Agent prompt. Bring your own public Mapbox token, or explore the MapLibre preview without one.
 
 ![Current English atlas showing the native global-airport point layer](site/screenshots/atlas-en-light.png)
 
-<sup>Current website entry point: six globe elements, English by default, with a token-free MapLibre preview and complete Mapbox counterparts. This screenshot shows 1,174 OurAirports locations in the native point scene; colors are presentational, not traffic or category data. The historical Mapbox shader evidence remains with [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
+<sup>Current website entry point: eight globe elements, English by default, with a token-free MapLibre preview and complete Mapbox counterparts. This screenshot shows 1,174 OurAirports locations in the native point scene; colors are presentational, not traffic or category data. The historical Mapbox shader evidence remains with [`examples/01-points-on-globe`](examples/01-points-on-globe/).</sup>
 
-> Throughout these pages, *globe-hugging* means geometry that sits on the sphere's surface rather than floating beside it on a flat plane. The standalone examples target Mapbox. The site also has native MapLibre point/line/fill scenes and a 🔬 locally reproduced MapLibre 5.24 prelude-based Three.js preview for scenes 01/02/05; its direct ECEF/mainMatrix path, terrain/depth behaviour, and portability to the remaining standalone examples are unverified.
+> Throughout these pages, *globe-hugging* means geometry that sits on the sphere's surface rather than floating beside it on a flat plane. The standalone examples target Mapbox. The site also has native MapLibre point/line/fill scenes and a 🔬 locally reproduced MapLibre 5.24 preview for custom scenes 01/02/05/09/10; its direct ECEF/mainMatrix path and terrain/depth behaviour remain unverified.
 
 This is a cookbook, not a library. There is nothing to `npm install`. Every recipe is a page of docs plus a standalone runnable example you can read end to end in one sitting, copy, and adapt.
 
@@ -22,13 +22,13 @@ Two facts define the gap this repo fills:
 
 1. **Mapbox GL JS says this is not supported.** Their [globe guide](https://docs.mapbox.com/mapbox-gl-js/guides/globe/) states plainly: *"Globe does not yet support `CustomLayerInterface`."* It is nonetheless achievable — the render callback passes more arguments than the public typings advertise, and with them you can project your own geometry onto the globe. [Recipe 1.1](docs/01-hugging-the-globe/mapbox.md) is how.
 
-2. **MapLibre GL JS supports custom globe layers officially.** Its [simple custom-layer example](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-simple-custom-layer-on-a-globe/) explains projection transitions, horizon clipping, and subdivision; its [Three.js example](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-3d-model-to-globe-using-threejs/) demonstrates a static model. This repo's site has a 🔬 locally browser-reproduced prelude-based adapter for 01/02/05 that reuses the original Three scene geometry and fragment shaders; the direct ECEF/mainMatrix hypothesis remains unverified.
+2. **MapLibre GL JS supports custom globe layers officially.** Its [simple custom-layer example](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-simple-custom-layer-on-a-globe/) explains projection transitions, horizon clipping, and subdivision; its [Three.js example](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-3d-model-to-globe-using-threejs/) demonstrates a static model. This repo's site has a 🔬 locally browser-reproduced prelude-based adapter for 01/02/05 plus focused 09/10 adapters; the direct ECEF/mainMatrix hypothesis remains unverified.
 
 This cookbook records the additional work from production projects: Mapbox's undocumented globe render arguments, batched animation, picking, and the failures that standalone examples can reproduce. Performance measurements describe their stated scene and environment, not a general frame-rate guarantee.
 
 ## Explore a globe element
 
-The [demo website](site/README.md) is organized by what a globe application can show: a point layer illustrated by global airports, a line layer illustrated by real North Atlantic submarine cables, and an area layer illustrated by European countries shaded by 2023 GDP. Data supplies context; the reusable point, line, fill, glow, arc, and trajectory element is the subject. Each scene links to a token-free MapLibre preview, a complete Mapbox example, its recipe, source, and an Agent prompt. The MapLibre custom-layer port keeps the original Three.js geometry and fragment shaders, but its horizon/limb, blending and depth behaviour differ from Mapbox and are not pixel-identical. See the [implementation plan](docs/demo-implementation-plan.md) for current acceptance and publication status.
+The [demo website](site/README.md) is organized by what a globe application can show: point, line, area, glow, arc, trajectory, orbit, and vertical-boundary-wall components. Data supplies context; the reusable rendering component is the subject. In particular, Taiwan ADIZ is only the schematic fixture used to demonstrate the generic wall component. Each scene links to a token-free MapLibre preview, a complete Mapbox example, its recipe, source, and a generated Agent prompt with an explicit input and verification contract. The MapLibre implementations are not pixel-identical to Mapbox. See the [implementation plan](docs/demo-implementation-plan.md) for current acceptance and publication status.
 
 | Element | Demo context | Implementation |
 |---|---|---|
@@ -38,18 +38,24 @@ The [demo website](site/README.md) is organized by what a globe application can 
 | Glow field | Airport fixture | Three.js custom layer |
 | Great-circle arcs | Synthetic routes | Three.js custom layer |
 | Mass tracks | Synthetic moving data | Batched Three.js custom layer |
+| Satellite orbital rings | Three schematic orbit definitions | Three.js custom layer |
+| Vertical boundary walls | Taiwan ADIZ schematic fixture | Three.js custom layer |
 
 ## Use with an agent
 
 Give your agent access to this repository and a concrete task. Start with:
 
 ```text
-Read AGENTS.md, then use examples/manifest.json to choose an example.
-I want [effect] for [data shape and count], with [interaction/playback].
+Read AGENTS.md and docs/agent-guide.md, then use examples/manifest.json
+siteScenes to choose an example and preserve its inputContract.
+I want [component] in [target repo/map entrypoint] for [data shape/count],
+updated [frequency], with [interaction/playback].
 Check whether native Mapbox layers already satisfy the requirement.
-Copy a complete example into my project and retain its LICENSE.
+Copy every manifest requiredFile into my project and retain its LICENSE.
+Keep fixture-specific data separate from the reusable rendering component.
 Explain the recipe status and which data is synthetic. Pin dependencies.
-Verify installation, typecheck and build separately from browser behavior.
+Validate coordinates, units, missing/error states and lifecycle cleanup.
+Verify tests, typecheck and build separately from real WebGL/browser behavior.
 In the browser check globe/transition/Mercator, backside visibility, and
 the requested interactions. Report anything you could not verify.
 ```
@@ -117,7 +123,7 @@ Example dependencies are pinned to Mapbox **3.30.0** and Three.js **0.172.0**. E
 |---|---|---|
 | [Mapbox Agent Skills](https://github.com/mapbox/mapbox-agent-skills) | Broader Mapbox application guidance and Agent workflows | Focused custom globe rendering recipes and independent effect examples |
 | [globe.gl](https://github.com/vasturiano/globe.gl) | A Three.js globe visualization component with linked demos and source | Rendering within an existing Mapbox map and its projection transition |
-| [MapLibre custom globe examples](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-simple-custom-layer-on-a-globe/) | Official globe projection and clipping APIs | MapLibre 5.24 prelude adapter reproduced locally for site scenes 01/02/05; direct ECEF/mainMatrix and terrain/depth remain unverified |
+| [MapLibre custom globe examples](https://maplibre.org/maplibre-gl-js/docs/examples/add-a-simple-custom-layer-on-a-globe/) | Official globe projection and clipping APIs | MapLibre 5.24 custom scenes 01/02/05/09/10 reproduced locally; direct ECEF/mainMatrix and terrain/depth remain unverified |
 | [deck.gl map integration](https://deck.gl/docs/api-reference/mapbox/overview) | GPU data layers with documented engine/projection compatibility | Hand-authored shaders and arbitrary Three.js scene behavior |
 
 Check the linked project's current compatibility notes before choosing an engine. Supporting a standalone globe view is not the same as supporting Mapbox globe integration.

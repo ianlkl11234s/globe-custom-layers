@@ -1,6 +1,7 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { createAdizWallLayer } from "./adizWallLayer";
+import { TAIWAN_ADIZ_SCHEMATIC_FIXTURE } from "./adizBoundary";
+import { createVerticalBoundaryWallLayer } from "./verticalBoundaryWallLayer";
 import { getEmbedPreferences, getEmbeddedRuntimeToken, reportEmbedMapStatus } from "./embedBridge";
 
 function byId<T extends HTMLElement>(id: string): T {
@@ -26,7 +27,7 @@ void getEmbeddedRuntimeToken(import.meta.env.VITE_MAPBOX_TOKEN ?? "").then((toke
     if (status === 401 || status === 403) tokenWarning.classList.add("visible");
     reportEmbedMapStatus("error", status);
   });
-  const layer = createAdizWallLayer({ getHeightMeters: () => Number(height.value) * 1000 });
+  const layer = createVerticalBoundaryWallLayer(TAIWAN_ADIZ_SCHEMATIC_FIXTURE, { getDisplayHeightMeters: () => Number(height.value) * 1000 });
   map.on("load", () => { map.addLayer(layer); reportEmbedMapStatus("loaded"); });
   height.addEventListener("input", () => { updateHeight(); map.triggerRepaint(); });
 });
