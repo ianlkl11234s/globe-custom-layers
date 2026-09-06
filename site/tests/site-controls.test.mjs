@@ -36,6 +36,31 @@ test("static build bundles a Mapbox counterpart for every map element", async ()
   for (const name of ["00-native-vs-custom", "00-native-lines", "00-native-choropleth"]) assert.match(build, new RegExp(name));
 });
 
+test("site publishes a globe favicon and social sharing preview", async () => {
+  const html = await read("index.html");
+  const build = await read("scripts/build.mjs");
+  assert.match(html, /rel="icon"[^>]+assets\/favicon-32\.png/);
+  assert.match(html, /rel="apple-touch-icon"[^>]+assets\/apple-touch-icon\.png/);
+  assert.match(html, /property="og:image" content="https:\/\/globe-custom-layers\.zeabur\.app\/assets\/social-preview\.png"/);
+  assert.match(html, /property="og:image:width" content="1200"/);
+  assert.match(html, /property="og:image:height" content="630"/);
+  assert.match(html, /name="twitter:card" content="summary_large_image"/);
+  assert.match(build, /cp\(join\(siteRoot, "assets"\), join\(outputRoot, "assets"\), \{ recursive: true \}\)/);
+});
+
+test("site uses the self-hosted IBM Plex family for Latin, Traditional Chinese, and technical labels", async () => {
+  const html = await read("index.html");
+  const styles = await read("styles.css");
+  const build = await read("scripts/build.mjs");
+  assert.match(html, /fonts\/plex\.css/);
+  assert.doesNotMatch(styles, /fonts\.googleapis\.com|Newsreader|Noto Sans TC|DM Mono/);
+  assert.match(styles, /--sans:"IBM Plex Sans","IBM Plex Sans TC",sans-serif/);
+  assert.match(styles, /--display:"IBM Plex Sans","IBM Plex Sans TC",sans-serif/);
+  assert.match(styles, /--mono:"IBM Plex Mono","IBM Plex Sans TC",monospace/);
+  assert.match(styles, /html\[lang="zh-TW"\][\s\S]+--sans:"IBM Plex Sans TC","IBM Plex Sans",sans-serif/);
+  for (const face of ["IBMPlexSansTC-Regular", "IBMPlexSansTC-Medium", "IBMPlexSansTC-SemiBold", "IBMPlexSans-Regular", "IBMPlexSans-Medium", "IBMPlexSans-SemiBold", "IBMPlexMono-Regular", "IBMPlexMono-Medium"]) assert.match(build, new RegExp(face));
+});
+
 test("free globe keeps scene-specific native controls and visible glow swatches", async () => {
   const source = await read("freeGlobe.js");
   for (const id of ["free-basemap", "free-point-size", "free-point-opacity", "free-core-boost", "free-glow-palette"]) assert.match(source, new RegExp(id));

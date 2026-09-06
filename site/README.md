@@ -10,7 +10,7 @@ Every selected element has a **Mapbox full example** and a **MapLibre preview**.
 
 The interface opens in English and can switch to Traditional Chinese. The shell and selected custom examples support light/dark themes; the two new native Mapbox line/area examples currently keep Mapbox's light basemap in either shell theme. Parameter panels start collapsed in embedded views and expand only on request; changing the selected free scene collapses the panel again so it does not cover the globe. The light interface and all local light basemap presets use only white and neutral grays so the visualization carries the color. Native point, line, and area scenes expose geometry-specific controls. GDP color represents the documented total-GDP bands; airport point hues and cable color choices are presentation styles rather than measured categories. Glow points default to Plasma at 0.60 size, 0.65 opacity and 0.85 core boost; points and arcs expose five visible palette buttons. Light custom geometry uses normal alpha blending; dark mode retains additive glow.
 
-Both modes support the site's light/dark appearance. The interface offers Traditional Chinese and English, larger text, and a direct path from the effect to its GitHub source and an Agent task prompt. This remains a cookbook entry point, not a data service or an engine-independent rendering library.
+Both modes support the site's light/dark appearance. The interface offers Traditional Chinese and English, larger text, and a direct path from the effect to its GitHub source and an Agent task prompt. IBM Plex Sans TC, IBM Plex Sans, and IBM Plex Mono are pinned npm dependencies and emitted as self-hosted, Unicode-split WOFF2 assets; no third-party font request is made at runtime. This remains a cookbook entry point, not a data service or an engine-independent rendering library.
 
 ## Why MapLibre works here
 
@@ -32,7 +32,7 @@ These data files are bundled locally; browsing the free globe does not request M
 
 ## Fresh clone
 
-Install the pinned MapLibre dependency for the site and the six independently bundled example dependencies before building:
+Install the pinned MapLibre and IBM Plex dependencies for the site and the six independently bundled example dependencies before building:
 
 ```sh
 (cd site && npm ci)
@@ -78,7 +78,7 @@ The demo does not submit the token to an application backend. `sessionStorage` i
 
 ## Verification boundary
 
-The 15 site tests cover handshake origin/source checks, session-token retention and forgetting, plus the static DOM/data/style contracts for the local basemaps, native layers, and custom-effect controls. Typechecking and the build cover the selected iframe bundles, including their relative fixture paths. They do not prove real Mapbox tiles, a valid visitor token, actual GPU palette rendering, or visual globe/shader behavior. Those require browser inspection (and a deliberately supplied runtime token for Mapbox).
+The 17 site tests cover handshake origin/source checks, session-token retention and forgetting, plus the static DOM/data/style contracts for local basemaps, native layers, custom-effect controls, favicon/social metadata, and the self-hosted IBM Plex build. Typechecking and the build cover the selected iframe bundles, including their relative fixture paths. They do not prove real Mapbox tiles, a valid visitor token, actual GPU palette rendering, or visual globe/shader behavior. Those require browser inspection (and a deliberately supplied runtime token for Mapbox).
 
 The [implementation record](../docs/demo-implementation-plan.md) separates completed local/browser checks and the verified production shell from unverified real Mapbox tile access. The test-only Mapbox style interception is not shipped. Free MapLibre mode is a locally and publicly reproduced custom-layer port preview; it does not verify the direct ECEF/mainMatrix hypothesis, terrain/depth behaviour, or the remaining standalone examples.
 
