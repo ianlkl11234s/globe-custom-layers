@@ -4,3 +4,6 @@ dist/
 .env.local
 *.tsbuildinfo
 .DS_Store
+
+# Cloudflare Workers
+.wrangler/

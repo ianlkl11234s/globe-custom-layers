@@ -29,7 +29,7 @@ RUN npm ci --prefix site \
 # enter the build context image.
 COPY site/index.html site/styles.css site/app.js site/i18n.js site/bridgeState.js ./site/
 COPY site/freeGlobe.js site/nativeStyles.js site/mapboxMathCompat.ts site/maplibreCustom.ts site/specialScenes.ts ./site/
-COPY site/land.json site/airports.json ./site/
+COPY site/land.json site/airports.json site/_headers ./site/
 COPY examples/manifest.json ./examples/manifest.json
 COPY site/assets ./site/assets
 COPY site/data ./site/data
