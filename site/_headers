@@ -1,0 +1,7 @@
+# Cloudflare Workers 靜態資產的 header（nginx 原本沒設快取，維持不加；只補 charset）
+/*.json
+  Content-Type: application/json; charset=utf-8
+/*.geojson
+  Content-Type: application/geo+json; charset=utf-8
+/*.txt
+  Content-Type: text/plain; charset=utf-8

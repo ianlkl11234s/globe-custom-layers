@@ -1,0 +1,12 @@
+{
+  "name": "globe-custom-layers-deploy",
+  "private": true,
+  "description": "Cloudflare Workers 部署用；網站本體在 site/，各範例自成套件",
+  "scripts": {
+    "build:site": "npm ci --prefix site && npm ci --prefix examples/00-native-vs-custom && npm ci --prefix examples/00-native-lines && npm ci --prefix examples/00-native-choropleth && npm ci --prefix examples/01-points-on-globe && npm ci --prefix examples/02-arcs-on-globe && npm ci --prefix examples/05-mass-trajectories && npm ci --prefix examples/09-satellite-orbits && npm ci --prefix examples/10-adiz-walls && npm run build --prefix site",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.148.0"
+  }
+}

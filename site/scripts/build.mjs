@@ -47,6 +47,7 @@ try {
     cp(join(siteRoot, "app.js"), join(outputRoot, "app.js")),
     cp(join(siteRoot, "i18n.js"), join(outputRoot, "i18n.js")),
     cp(join(siteRoot, "bridgeState.js"), join(outputRoot, "bridgeState.js")),
+    cp(join(siteRoot, "_headers"), join(outputRoot, "_headers")),
     cp(join(siteRoot, "land.json"), join(outputRoot, "land.json")),
     cp(join(siteRoot, "airports.json"), join(outputRoot, "airports.json")),
     cp(join(siteRoot, "assets"), join(outputRoot, "assets"), { recursive: true }),
